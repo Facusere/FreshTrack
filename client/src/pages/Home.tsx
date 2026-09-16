@@ -33,6 +33,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { DateLabel, detectDateCandidates, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 
 type ProductStatus = "ok" | "soon" | "expired";
 type Product = {
@@ -46,10 +47,12 @@ type Product = {
   icon: string;
   location?: string;
   estimated?: boolean;
+  dateLabel?: DateLabel;
+  corrected?: boolean;
 };
 
 const initialProducts: Product[] = [
-  { id: 1, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true },
+  { id: 1, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true, dateLabel: "vencimiento" },
   { id: 2, name: "Espinaca fresca", category: "Frutas y verduras", expiry: "19 sep", days: 4, quantity: "1 atado", status: "soon", icon: "🥬" },
   { id: 3, name: "Pechuga de pollo", category: "Carnes", expiry: "21 sep", days: 6, quantity: "2 unidades", status: "ok", icon: "🍗" },
   { id: 4, name: "Pan de molde", category: "Panadería", expiry: "24 sep", days: 9, quantity: "1 paquete", status: "ok", icon: "🍞" },
@@ -126,10 +129,14 @@ function StatCard({ label, value, note, icon, tone, trend }: { label: string; va
 function ScanModal({ onClose, onComplete }: { onClose: () => void; onComplete: (products: Product[]) => void }) {
   const [stage, setStage] = useState<"choose" | "scanning" | "results">("choose");
   const [scanMode, setScanMode] = useState<"ticket" | "label">("ticket");
+  const sampleOcrText = "ELAB: 02/09/2026 · VENCE: 18/09/2026 · CONSUMIR PREFERENTEMENTE ANTES DE: 20/09/2026";
+  const detectedDates = detectDateCandidates(sampleOcrText, getLearningRule("Yogur natural", "Lácteos"));
+  const selectedExpiryLabel = detectedDates.find((candidate) => candidate.label === "vencimiento")?.label || "vencimiento";
+  const selectedPreferredLabel = detectedDates.find((candidate) => candidate.label === "consumo preferente")?.label || "consumo preferente";
   const scannedProducts: Product[] = [
-    { id: 101, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true },
-    { id: 102, name: "Bananas", category: "Frutas y verduras", expiry: "20 sep", days: 5, quantity: "1 kg", status: "ok", icon: "🍌", estimated: true },
-    { id: 103, name: "Arroz largo fino", category: "Almacén", expiry: "15 sep 27", days: 365, quantity: "1 paquete", status: "ok", icon: "🍚", estimated: true },
+    { id: 101, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true, dateLabel: selectedExpiryLabel },
+    { id: 102, name: "Bananas", category: "Frutas y verduras", expiry: "20 sep", days: 5, quantity: "1 kg", status: "ok", icon: "🍌", estimated: true, dateLabel: selectedPreferredLabel },
+    { id: 103, name: "Arroz largo fino", category: "Almacén", expiry: "15 sep 27", days: 365, quantity: "1 paquete", status: "ok", icon: "🍚", estimated: true, dateLabel: "vencimiento" },
   ];
 
   const startScan = () => {
@@ -176,7 +183,7 @@ function ScanModal({ onClose, onComplete }: { onClose: () => void; onComplete: (
         {stage === "results" && (
           <div className="p-5">
             <div className="flex items-start gap-3 rounded-2xl bg-[#e7f1e9] p-4"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#cae3cf] text-[#2d6a4f]"><Check size={18} /></div><div><p className="text-sm font-semibold text-[#1e4b38]">3 productos detectados</p><p className="mt-0.5 text-[11px] leading-4 text-[#6f8978]">Las fechas sin impresión se estimaron según categoría.</p></div></div>
-            <div className="mt-4 divide-y divide-[#eee9df] rounded-2xl border border-[#eee9df] px-3">{scannedProducts.map((product) => <div key={product.id} className="flex items-center gap-3 py-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f6f1e7] text-lg">{product.icon}</span><div className="min-w-0 flex-1"><p className="text-[12px] font-semibold text-[#294338]">{product.name}</p><p className="mt-0.5 text-[11px] text-[#90988f]">Vence {product.expiry} · {product.estimated ? "estimado" : "detectado"}</p></div><MiniStatus status={product.status} /></div>)}</div>
+            <div className="mt-4 divide-y divide-[#eee9df] rounded-2xl border border-[#eee9df] px-3">{scannedProducts.map((product) => <div key={product.id} className="flex items-center gap-3 py-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f6f1e7] text-lg">{product.icon}</span><div className="min-w-0 flex-1"><p className="text-[12px] font-semibold text-[#294338]">{product.name}</p><p className="mt-0.5 text-[11px] text-[#90988f]">{labelForDisplay(product.dateLabel || "desconocida")} · {product.expiry}</p><p className="mt-0.5 text-[10px] text-[#6d9076]">{product.estimated ? "estimado por vida útil" : "detectado junto a la fecha"}</p></div><MiniStatus status={product.status} /></div>)}</div>
             <div className="mt-5 flex gap-2"><button onClick={onClose} className="flex-1 rounded-xl border border-[#dfe3db] px-4 py-3 text-[12px] font-semibold text-[#657268] transition hover:bg-[#f6f3ed]">Revisar después</button><button onClick={() => { onComplete(scannedProducts); onClose(); }} className="flex-1 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#16392c] active:scale-[0.97]">Agregar a despensa</button></div>
           </div>
         )}
@@ -185,16 +192,18 @@ function ScanModal({ onClose, onComplete }: { onClose: () => void; onComplete: (
   );
 }
 
-function AddProductModal({ onClose, onAdd }: { onClose: () => void; onAdd: (product: Product) => void }) {
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("Almacén");
-  const [expiry, setExpiry] = useState("20 sep");
+function AddProductModal({ onClose, onAdd, initialProduct, onCorrection }: { onClose: () => void; onAdd: (product: Product) => void; initialProduct?: Product; onCorrection?: (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiry: string) => void }) {
+  const [name, setName] = useState(initialProduct?.name || "");
+  const [category, setCategory] = useState(initialProduct?.category || "Almacén");
+  const [expiry, setExpiry] = useState(initialProduct?.expiry || "20 sep");
+  const [dateLabel, setDateLabel] = useState<DateLabel>(initialProduct?.dateLabel || "vencimiento");
+  const isEditing = Boolean(initialProduct);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-[460px] rounded-[28px] border border-white/70 bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.26)] animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between"><div><p className="font-serif text-xl font-semibold text-[#17372b]">Agregar producto</p><p className="mt-0.5 text-[12px] text-[#8e978f]">Una carga rápida, sin vueltas.</p></div><button aria-label="Cerrar" onClick={onClose} className="rounded-full p-2 text-[#8e978f] hover:bg-[#f3efe7]"><X size={18} /></button></div>
-        <div className="mt-5 space-y-3"><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Producto</span><input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Queso cremoso" className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none transition placeholder:text-[#b2b9b1] focus:border-[#8eb89a] focus:ring-2 focus:ring-[#cfe5d2]" /></label><div className="grid grid-cols-2 gap-3"><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Categoría</span><select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]"><option>Almacén</option><option>Lácteos</option><option>Frutas y verduras</option><option>Carnes</option><option>Panadería</option></select></label><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Vencimiento</span><input value={expiry} onChange={(e) => setExpiry(e.target.value)} className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]" /></label></div></div>
-        <div className="mt-5 flex gap-2"><button onClick={onClose} className="flex-1 rounded-xl border border-[#dfe3db] px-4 py-3 text-[12px] font-semibold text-[#657268] hover:bg-[#f6f3ed]">Cancelar</button><button disabled={!name.trim()} onClick={() => { onAdd({ id: Date.now(), name: name.trim(), category, expiry, days: 5, quantity: "1 unidad", status: "ok", icon: "📦" }); onClose(); }} className="flex-1 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#16392c] disabled:cursor-not-allowed disabled:opacity-40">Guardar producto</button></div>
+        <div className="mt-5 space-y-3"><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Producto</span><input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Queso cremoso" className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none transition placeholder:text-[#b2b9b1] focus:border-[#8eb89a] focus:ring-2 focus:ring-[#cfe5d2]" /></label><div className="grid grid-cols-2 gap-3"><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Categoría</span><select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]"><option>Almacén</option><option>Lácteos</option><option>Frutas y verduras</option><option>Carnes</option><option>Panadería</option></select></label><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Fecha encontrada</span><input value={expiry} onChange={(e) => setExpiry(e.target.value)} className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]" /></label></div><label className="block"><span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">¿Qué tipo de fecha es?</span><select value={dateLabel} onChange={(e) => setDateLabel(e.target.value as DateLabel)} className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]"><option value="vencimiento">Fecha de vencimiento</option><option value="elaboración">Fecha de elaboración</option><option value="consumo preferente">Consumir preferentemente antes de</option></select></label>{isEditing && <p className="rounded-xl bg-[#eef6ec] px-3 py-2 text-[11px] leading-4 text-[#64816b]">Tu corrección se guardará como regla para futuras lecturas de {name}.</p>}</div>
+        <div className="mt-5 flex gap-2"><button onClick={onClose} className="flex-1 rounded-xl border border-[#dfe3db] px-4 py-3 text-[12px] font-semibold text-[#657268] hover:bg-[#f6f3ed]">Cancelar</button><button disabled={!name.trim()} onClick={() => { if (initialProduct && onCorrection) onCorrection(initialProduct, dateLabel, category, expiry); else onAdd({ id: Date.now(), name: name.trim(), category, expiry, days: 5, quantity: "1 unidad", status: "ok", icon: "📦", dateLabel }); onClose(); }} className="flex-1 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#16392c] disabled:cursor-not-allowed disabled:opacity-40">{isEditing ? "Guardar corrección" : "Guardar producto"}</button></div>
       </div>
     </div>
   );
@@ -208,6 +217,7 @@ export default function Home() {
   const [modal, setModal] = useState<"scan" | "add" | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const filteredProducts = useMemo(() => products.filter((product) => {
     const matchesFilter = filter === "all" || product.status === filter;
@@ -225,8 +235,17 @@ export default function Home() {
   };
 
   const addProduct = (newProduct: Product) => {
-    setProducts((current) => [newProduct, ...current]);
-    toast.success(`${newProduct.name} agregado a tu despensa`);
+    const learning = getLearningRule(newProduct.name, newProduct.category);
+    setProducts((current) => [{ ...newProduct, dateLabel: learning?.preferredLabel || newProduct.dateLabel, days: learning?.shelfLifeDays || newProduct.days }, ...current]);
+    toast.success(`${newProduct.name} agregado a tu despensa`, { description: learning ? "Aplicamos una regla aprendida de usos anteriores." : "La fecha queda lista para revisar." });
+  };
+
+  const correctProduct = (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiry: string) => {
+    saveLearningCorrection({ productKey: product.name, category: nextCategory, preferredLabel: nextLabel });
+    setProducts((current) => current.map((item) => item.id === product.id ? { ...item, category: nextCategory, expiry: nextExpiry, dateLabel: nextLabel, corrected: true } : item));
+    setSelectedProduct(null);
+    setEditingProduct(null);
+    toast.success("Corrección aprendida", { description: `La próxima lectura priorizará “${labelForDisplay(nextLabel)}” para ${product.name}.` });
   };
 
   const removeSelected = () => {
@@ -282,8 +301,8 @@ export default function Home() {
       </div>
 
       {modal === "scan" && <ScanModal onClose={() => setModal(null)} onComplete={addProducts} />}
-      {modal === "add" && <AddProductModal onClose={() => setModal(null)} onAdd={addProduct} />}
-      {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">Vencimiento</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{selectedProduct.days < 0 ? "Este producto ya venció" : `Faltan ${selectedProduct.days} días`}</p></div><div className="mt-4 flex gap-2"><button onClick={() => { setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Editar</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
+      {modal === "add" && <AddProductModal onClose={() => { setModal(null); setEditingProduct(null); }} onAdd={addProduct} initialProduct={editingProduct || undefined} onCorrection={correctProduct} />}
+      {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{selectedProduct.days < 0 ? "Este producto ya venció" : `Faltan ${selectedProduct.days} días`}</p>{selectedProduct.corrected && <p className="mt-2 text-[10px] font-semibold text-[#4e815b]">✓ Corrección aplicada a futuras detecciones</p>}</div><div className="mt-4 flex gap-2"><button onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Corregir</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
     </div>
   );
 }
