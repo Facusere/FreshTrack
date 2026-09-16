@@ -71,6 +71,14 @@ pnpm check
 pnpm build
 ```
 
+Ejecutá la suite de pruebas unitarias y de integración con:
+
+```bash
+pnpm test
+```
+
+Las pruebas de `client/src/tests/dateRecognition.test.ts` cubren la diferenciación de elaboración, vencimiento y consumo preferente, la proximidad de palabras clave, el aprendizaje incremental y el contexto desconocido. Las pruebas de `client/src/tests/inventoryConsumption.integration.test.ts` verifican el descuento de unidades, la eliminación de productos agotados, el manejo de ingredientes ausentes y la actualización conjunta del impacto mensual.
+
 El proyecto se ejecuta con Vite y está preparado para la previsualización gestionada por Manus.
 
 ## Criterios de diseño

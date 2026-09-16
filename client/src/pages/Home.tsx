@@ -38,6 +38,7 @@ import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeSta
 import { buildWeeklySummary, defaultNotificationPreferences, getCategoryLeadDays, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import { getRecipeDetails, RecipeSuggestion, searchRecipesByIngredients } from "@/lib/recipeApi";
 import { formatMoney, ImpactStats, loadImpactStats, recordImpact } from "@/lib/impactStats";
+import { consumeRecipeIngredients } from "@/lib/inventoryConsumption";
 
 type ProductStatus = "ok" | "soon" | "expired";
 type Product = {
@@ -273,21 +274,10 @@ export default function Home() {
 
   const markRecipeUsed = (recipe: RecipeSuggestion) => {
     const usedIngredients = recipe.matchedIngredients;
-    setProducts((current) => {
-      const remaining = [...current];
-      usedIngredients.forEach((ingredient) => {
-        const targetIndex = remaining.findIndex((product) => product.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(product.name.toLowerCase()));
-        if (targetIndex < 0) return;
-        const target = remaining[targetIndex];
-        const quantityMatch = target.quantity.match(/^(\d+)/);
-        const quantity = quantityMatch ? Number(quantityMatch[1]) : 1;
-        if (quantity > 1) remaining[targetIndex] = { ...target, quantity: target.quantity.replace(/^\d+/, String(quantity - 1)) };
-        else remaining.splice(targetIndex, 1);
-      });
-      return remaining;
-    });
+    const result = consumeRecipeIngredients(products, usedIngredients);
+    setProducts(result.remaining);
     setImpact(recordImpact({ kg: 0.4, money: 1200, meals: 1 }));
-    toast.success("¡Buen aprovechamiento!", { description: `${usedIngredients.join(", ")} se descontó de tu despensa.` });
+    toast.success("¡Buen aprovechamiento!", { description: `${result.consumed.join(", ") || usedIngredients.join(", ")} se descontó de tu despensa.` });
   };
 
   const addProducts = (newProducts: Product[]) => {
