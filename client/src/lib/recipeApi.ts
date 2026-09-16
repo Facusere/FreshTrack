@@ -7,9 +7,12 @@ export type RecipeSuggestion = {
   matchedIngredients: string[];
   source: "TheMealDB" | "FreshTrack";
   url?: string;
+  ingredients?: Array<{ name: string; measure: string }>;
+  instructions?: string;
 };
 
 type MealFilterResponse = { meals?: Array<{ idMeal: string; strMeal: string; strMealThumb: string }> | null };
+type MealDetail = { idMeal: string; strMeal: string; strMealThumb: string; strArea?: string; strCategory?: string; strInstructions?: string; [key: string]: string | undefined };
 
 const ingredientAliases: Record<string, string> = {
   "espinaca fresca": "spinach",
@@ -57,4 +60,15 @@ export async function searchRecipesByIngredients(ingredients: string[], signal?:
   } catch {
     return fallbackRecipes;
   }
+}
+
+export async function getRecipeDetails(recipe: RecipeSuggestion, signal?: AbortSignal): Promise<RecipeSuggestion> {
+  if (recipe.source === "FreshTrack") return recipe;
+  const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${recipe.id}`, { signal });
+  if (!response.ok) throw new Error("No se pudo cargar el detalle");
+  const data = await response.json() as { meals?: MealDetail[] | null };
+  const meal = data.meals?.[0];
+  if (!meal) return recipe;
+  const ingredients = Array.from({ length: 20 }, (_, index) => index + 1).map((index) => ({ name: meal[`strIngredient${index}`]?.trim() || "", measure: meal[`strMeasure${index}`]?.trim() || "" })).filter((item) => item.name);
+  return { ...recipe, area: meal.strArea, category: meal.strCategory, ingredients, instructions: meal.strInstructions };
 }
