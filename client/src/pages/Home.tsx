@@ -37,7 +37,7 @@ import { DateLabel, detectDateCandidates, getLearningRule, labelForDisplay, save
 import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeState, submitShelfLifeSuggestion } from "@/lib/shelfLifeCatalog";
 import { buildWeeklySummary, defaultNotificationPreferences, getCategoryLeadDays, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import { getRecipeDetails, RecipeSuggestion, searchRecipesByIngredients } from "@/lib/recipeApi";
-import { formatMoney, ImpactStats, loadImpactStats, recordImpact } from "@/lib/impactStats";
+import { formatMoney, ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
 import { consumeRecipeIngredients } from "@/lib/inventoryConsumption";
 
 type ProductStatus = "ok" | "soon" | "expired";
@@ -55,6 +55,17 @@ type Product = {
   dateLabel?: DateLabel;
   corrected?: boolean;
 };
+
+type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
+type ConsumptionRecord = { id: number; title: string; ingredients: string[]; before: Product[]; delta: { kg: number; money: number; meals: number }; createdAt: string };
+
+function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
+  if (filter === "all") return true;
+  const text = `${recipe.title} ${recipe.matchedIngredients.join(" ")} ${(recipe.ingredients || []).map((item) => item.name).join(" ")}`;
+  if (filter === "vegetarian") return !/(chicken|pollo|beef|carne|pork|cerdo|bacon|salmon|fish|pescado|tuna|atún|meat)/i.test(text);
+  if (filter === "glutenFree") return !/(bread|pan|pasta|flour|harina|wheat|trigo|noodle|fideos|couscous)/i.test(text);
+  return /(quick|salad|ensalada|omelette|tortilla|sandwich|wrap|pasta|salteado)/i.test(text);
+}
 
 const initialProducts: Product[] = [
   { id: 1, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true, dateLabel: "vencimiento" },
@@ -94,13 +105,16 @@ function MiniStatus({ status }: { status: ProductStatus }) {
 }
 
 function ProductRow({ product, onRemove, onEdit }: { product: Product; onRemove: (id: number) => void; onEdit: (product: Product) => void }) {
+  const stockMatch = product.quantity.match(/^(\d+(?:[.,]\d+)?|[½⅓⅔¼¾])/);
+  const lowStock = stockMatch ? Number(stockMatch[1].replace(",", ".")) <= 1 : /1\b|una?\b|un\b/i.test(product.quantity);
+  const alertTone = product.status === "expired" ? "border-l-4 border-l-[#d66f5b] bg-[#fff4f0]" : product.status === "soon" ? "border-l-4 border-l-[#e3aa36] bg-[#fffaf0]" : lowStock ? "border-l-4 border-l-[#78a986] bg-[#f4faf2]" : "";
   return (
-    <div className="group grid grid-cols-[minmax(0,1fr)_110px_92px_28px] items-center gap-3 border-b border-[#ece8df] py-3.5 last:border-b-0">
+    <div className={`group grid grid-cols-[minmax(0,1fr)_110px_92px_28px] items-center gap-3 border-b border-[#ece8df] py-3.5 pl-2 last:border-b-0 ${alertTone}`}>
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6f1e7] text-xl">{product.icon}</span>
         <div className="min-w-0">
           <p className="truncate text-[13px] font-semibold text-[#1c332b]">{product.name}</p>
-          <p className="mt-0.5 truncate text-[11px] text-[#8a928b]">{product.quantity} · {product.category}</p>
+          <p className="mt-0.5 truncate text-[11px] text-[#8a928b]">{product.quantity} · {product.category}</p>{product.status === "soon" && <span className="mt-1 inline-flex rounded-full bg-[#fbefcf] px-1.5 py-0.5 text-[9px] font-bold text-[#a67425]">Vence pronto</span>}{product.status === "expired" && <span className="mt-1 inline-flex rounded-full bg-[#f9e5df] px-1.5 py-0.5 text-[9px] font-bold text-[#a94c3c]">Revisar hoy</span>}{product.status !== "expired" && lowStock && <span className="mt-1 inline-flex rounded-full bg-[#e5f1e3] px-1.5 py-0.5 text-[9px] font-bold text-[#4f805b]">Queda poco</span>}
         </div>
       </div>
       <div className="text-left">
@@ -247,6 +261,8 @@ export default function Home() {
   const [recipeDetail, setRecipeDetail] = useState<RecipeSuggestion | null>(null);
   const [recipeDetailLoading, setRecipeDetailLoading] = useState(false);
   const [consumptionSuccess, setConsumptionSuccess] = useState<string[]>([]);
+  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>([]);
+  const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
 
   const filteredProducts = useMemo(() => products.filter((product) => {
     const matchesFilter = filter === "all" || product.status === filter;
@@ -259,6 +275,7 @@ export default function Home() {
   const okCount = products.filter((p) => p.status === "ok").length;
   const notificationGroups = groupNotifications(products.map(({ id, name, category, expiry, days, status }) => ({ id, name, category, expiry, days, status })), notificationPreferences);
   const expiringProducts = products.filter((product) => product.status === "soon" || product.status === "expired");
+  const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -275,12 +292,25 @@ export default function Home() {
 
   const markRecipeUsed = (recipe: RecipeSuggestion) => {
     const usedIngredients = recipe.matchedIngredients;
+    const before = products;
     const result = consumeRecipeIngredients(products, usedIngredients);
     setProducts(result.remaining);
-    setImpact(recordImpact({ kg: 0.4, money: 1200, meals: 1 }));
+    const delta = { kg: 0.4, money: 1200, meals: 1 };
+    setImpact(recordImpact(delta));
+    setConsumptionHistory((current) => [...current.slice(-4), { id: Date.now(), title: recipe.title, ingredients: result.consumed, before, delta, createdAt: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) }]);
     setConsumptionSuccess(result.consumed);
     window.setTimeout(() => setConsumptionSuccess([]), 2400);
     toast.success("¡Buen aprovechamiento!", { description: `${result.consumed.join(", ") || usedIngredients.join(", ")} se descontó de tu despensa.` });
+  };
+
+  const undoLastConsumption = () => {
+    const last = consumptionHistory.at(-1);
+    if (!last) return;
+    setProducts(last.before);
+    setImpact(reverseImpact(last.delta));
+    setConsumptionHistory((current) => current.slice(0, -1));
+    setConsumptionSuccess([]);
+    toast("Consumo deshecho", { description: "Los ingredientes volvieron a tu despensa." });
   };
 
   const addProducts = (newProducts: Product[]) => {
@@ -354,6 +384,8 @@ export default function Home() {
 
             <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4"><StatCard label="En tu despensa" value={`${products.length + 17}`} note="productos registrados" icon={<PackageOpen size={17} />} tone="bg-[#e6f0e6] text-[#4d835e]" /><StatCard label="Por vencer" value={`${soonCount + 7}`} note="en los próximos 7 días" icon={<Clock3 size={17} />} tone="bg-[#fbf0d2] text-[#b67d27]" trend="up" /><StatCard label="Ya vencidos" value={`${expiredCount}`} note="requieren atención" icon={<Zap size={17} />} tone="bg-[#f8e4dd] text-[#bf644f]" /><StatCard label="Desperdicio evitado" value={formatMoney(impact.moneySaved)} note={`${impact.kgSaved} kg este mes`} icon={<ArrowDownRight size={17} />} tone="bg-[#e5eee8] text-[#4d835e]" trend="down" /></section>
 
+            {consumptionHistory.length > 0 && <section className="mt-5 rounded-[24px] border border-[#dfe9dc] bg-[#fffdf9] p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Actividad reciente</p><h2 className="mt-1 font-serif text-[23px] font-semibold text-[#1b392e]">Últimos consumos</h2></div><button onClick={undoLastConsumption} className="rounded-xl border border-[#d9e5d5] bg-[#f4faf2] px-3 py-2 text-[11px] font-bold text-[#4f805b] transition hover:bg-[#e8f3e5]">Deshacer último</button></div><div className="mt-4 grid gap-2 sm:grid-cols-3">{consumptionHistory.slice().reverse().map((record) => <div key={record.id} className="rounded-2xl bg-[#f7faf4] p-3"><div className="flex items-start justify-between gap-2"><p className="text-[11px] font-bold text-[#425b4b]">{record.title}</p><span className="text-[9px] text-[#97a698]">{record.createdAt}</span></div><p className="mt-1 text-[10px] text-[#78907d]">{record.ingredients.join(", ") || "Sin coincidencias"}</p></div>)}</div></section>}
+
             <section className="mt-5 rounded-[24px] border border-[#dfe9dc] bg-[#edf6e9] p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5b8964]"><ArrowDownRight size={14} /> Impacto de este mes</p><h2 className="mt-2 font-serif text-[26px] font-semibold tracking-[-0.04em] text-[#1b392e]">Pequeños gestos, menos desperdicio.</h2><p className="mt-1 max-w-[500px] text-[11px] leading-5 text-[#708674]">Cada vez que aprovechás algo a tiempo, FreshTrack lo suma. Sin rankings ni presión: solo una señal amable de lo que estás logrando.</p></div><div className="rounded-2xl bg-white/75 px-4 py-3 text-right"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#86a18a]">Acciones</p><p className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-[#315542]">{impact.actions}</p><p className="text-[10px] text-[#829585]">este mes</p></div></div><div className="mt-5 grid grid-cols-3 gap-2"><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comida salvada</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.kgSaved} kg</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Valor recuperado</p><p className="mt-1 text-xl font-semibold text-[#315542]">{formatMoney(impact.moneySaved)}</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comidas posibles</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.mealsSaved}</p></div></div></section>
 
             <section className="mt-6 grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
@@ -364,7 +396,7 @@ export default function Home() {
 
             <section className="mt-5 grid gap-5 md:grid-cols-[1fr_1fr]">
               <div className="rounded-[24px] bg-[#17372b] p-5 text-white sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#9ebea0]"><Route size={13} /> Recorrida sugerida</p><h2 className="mt-2 font-serif text-[25px] font-semibold tracking-[-0.035em]">Tres cosas para resolver hoy.</h2></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#315844] text-[#d9e982]"><MapPin size={18} /></div></div><div className="mt-5 grid gap-2 sm:grid-cols-3">{[["1", "Leche entera", "Heladera"], ["2", "Tomates cherry", "Cajón verduras"], ["3", "Yogur natural", "Heladera"]].map(([number, name, place]) => <button key={name} onClick={() => toast(name, { description: `Ubicación: ${place}` })} className="group rounded-xl bg-[#204632] p-3 text-left transition hover:bg-[#2a5740]"><div className="flex items-center justify-between"><span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#d9e982] text-[10px] font-extrabold text-[#17372b]">{number}</span><ArrowUpRight size={14} className="text-[#75977d] transition group-hover:text-[#d9e982]" /></div><p className="mt-4 truncate text-[11px] font-semibold text-white">{name}</p><p className="mt-1 truncate text-[10px] text-[#8fb096]">{place}</p></button>)}</div><button onClick={() => setActiveNav("Recorrida")} className="mt-5 flex items-center gap-1 text-[11px] font-bold text-[#d9e982] hover:text-white">Ver recorrido completo <ChevronRight size={14} /></button></div>
-              <div className="rounded-[24px] border border-[#ebe8df] bg-[#f1eadc] p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a28153]"><Utensils size={13} /> Ideas para aprovechar</p><h2 className="mt-2 max-w-[300px] font-serif text-[25px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#503c26]">Recetas con lo que vence primero.</h2></div><div className="text-4xl">🥬</div></div><p className="mt-3 text-[11px] leading-5 text-[#806c53]">{recipesLoading ? "Buscando opciones que aprovechen tu despensa…" : `Encontramos ${recipes.length || 3} ideas para usar antes de que se pierdan.`}</p><div className="mt-4 grid gap-2">{recipes.slice(0, 3).map((recipe) => <div key={recipe.id} data-testid="recipe-card" role="button" tabIndex={0} aria-label={`Ver detalle de ${recipe.title}`} onClick={() => openRecipeDetail(recipe)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }} className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white/60 p-2 transition hover:bg-white"><img src={recipe.image} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" /><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p><p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p><p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p></div><button onClick={(event) => { event.stopPropagation(); markRecipeUsed(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button></div>)}</div><p className="mt-3 text-[9px] text-[#aa967b]">Fuente: TheMealDB · sugerencias orientativas</p></div>
+              <div className="rounded-[24px] border border-[#ebe8df] bg-[#f1eadc] p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a28153]"><Utensils size={13} /> Ideas para aprovechar</p><h2 className="mt-2 max-w-[300px] font-serif text-[25px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#503c26]">Recetas con lo que vence primero.</h2></div><div className="text-4xl">🥬</div></div><p className="mt-3 text-[11px] leading-5 text-[#806c53]">{recipesLoading ? "Buscando opciones que aprovechen tu despensa…" : `Encontramos ${visibleRecipes.length || recipes.length || 3} ideas para usar antes de que se pierdan.`}</p><div className="mt-3 flex flex-wrap gap-1.5">{([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => <button key={value} onClick={() => setRecipeFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${recipeFilter === value ? "bg-[#fffdf9] text-[#765a35] shadow-sm" : "bg-[#eadfc9]/70 text-[#a28b6b] hover:bg-[#fffdf9]"}`}>{label}</button>)}</div><div className="mt-3 grid gap-2">{visibleRecipes.slice(0, 3).map((recipe) => <div key={recipe.id} data-testid="recipe-card" role="button" tabIndex={0} aria-label={`Ver detalle de ${recipe.title}`} onClick={() => openRecipeDetail(recipe)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }} className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white/60 p-2 transition hover:bg-white"><img src={recipe.image} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" /><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p><p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p><p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p></div><button onClick={(event) => { event.stopPropagation(); markRecipeUsed(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button></div>)}</div><p className="mt-3 text-[9px] text-[#aa967b]">Fuente: TheMealDB · sugerencias orientativas</p></div>
             </section>
 
             <footer className="flex flex-col gap-2 pb-2 pt-8 text-[10px] text-[#a0a79f] sm:flex-row sm:items-center sm:justify-between"><p>FreshTrack · Menos desperdicio, más tranquilidad.</p><p className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#75a879]" /> Datos guardados localmente · Última sincronización hace 2 min</p></footer>

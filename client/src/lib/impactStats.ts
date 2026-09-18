@@ -28,4 +28,11 @@ export function recordImpact(input: { kg?: number; money?: number; meals?: numbe
   return next;
 }
 
+export function reverseImpact(input: { kg: number; money: number; meals: number }) {
+  const stats = loadImpactStats();
+  const next = { ...stats, kgSaved: Math.max(0, Number((stats.kgSaved - input.kg).toFixed(1))), moneySaved: Math.max(0, stats.moneySaved - input.money), mealsSaved: Math.max(0, stats.mealsSaved - input.meals), actions: Math.max(0, stats.actions - 1) };
+  saveImpactStats(next);
+  return next;
+}
+
 export function formatMoney(value: number) { return `$${value.toLocaleString("es-AR")}`; }

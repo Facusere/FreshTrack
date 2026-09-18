@@ -10,6 +10,10 @@ El sistema de notificaciones agrupa productos que vencen el mismo día, permite 
 
 La sección de recetas consulta TheMealDB usando productos próximos a vencer. Cada sugerencia muestra ingredientes relevantes, permite abrir un modal con los ingredientes completos y el paso a paso, y permite marcar la receta como aprovechada. Al confirmar, los ingredientes asociados se descuentan automáticamente del inventario local. Si la API no responde, se muestran recetas de fallback para conservar la experiencia.
 
+Las sugerencias incluyen filtros rápidos para opciones vegetarianas, sin TACC y de preparación rápida. Estos filtros son heurísticos sobre el título, los ingredientes disponibles y, cuando ya se cargó, el detalle de la receta; deben presentarse como orientación y no como certificación nutricional.
+
+Cada consumo confirmado se conserva en un historial reciente de la sesión. El botón “Deshacer último” restaura exactamente el inventario previo y revierte las métricas de impacto asociadas a esa acción. En la despensa, los productos vencidos, próximos a vencer o con una sola unidad reciben color, borde lateral y una etiqueta de atención para facilitar la priorización.
+
 El panel de impacto registra mensualmente los kilogramos de comida salvada, el dinero recuperado, las comidas posibles y la cantidad de acciones de aprovechamiento. Las métricas se guardan en `localStorage` y se actualizan al confirmar una receta.
 
 ## Estructura principal
