@@ -91,3 +91,13 @@
   .group.grid { grid-template-columns: minmax(0, 1fr) 78px 28px; }
   .group.grid > :nth-child(3) { display: none; }
 }
+
+@keyframes freshtrack-success {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes freshtrack-pop {
+  0% { transform: scale(.7); opacity: .4; }
+  65% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}

@@ -77,7 +77,7 @@ Ejecutá la suite de pruebas unitarias y de integración con:
 pnpm test
 ```
 
-Las pruebas de `client/src/tests/dateRecognition.test.ts` cubren la diferenciación de elaboración, vencimiento y consumo preferente, la proximidad de palabras clave, el aprendizaje incremental y el contexto desconocido. Las pruebas de `client/src/tests/inventoryConsumption.integration.test.ts` verifican el descuento de unidades, la eliminación de productos agotados, el manejo de ingredientes ausentes y la actualización conjunta del impacto mensual.
+Las pruebas de `client/src/tests/dateRecognition.test.ts` cubren la diferenciación de elaboración, vencimiento y consumo preferente, la proximidad de palabras clave, el aprendizaje incremental y el contexto desconocido. Las pruebas de `client/src/tests/inventoryConsumption.integration.test.ts` verifican el descuento de unidades, la eliminación de productos agotados, el manejo de ingredientes ausentes y la actualización conjunta del impacto mensual. La prueba end-to-end `e2e/freshtrack.spec.ts` simula la apertura de una receta, la carga de sus detalles, la confirmación de “Aproveché”, la notificación visual y la actualización del inventario. Ejecutala con `pnpm test:e2e`.
 
 El proyecto se ejecuta con Vite y está preparado para la previsualización gestionada por Manus.
 

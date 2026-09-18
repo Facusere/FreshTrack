@@ -33,6 +33,21 @@ describe("inventory consumption integration", () => {
     expect(result.remaining).toHaveLength(1);
   });
 
+  it("understands fractional quantities and ingredient synonyms", () => {
+    const result = consumeRecipeIngredients([
+      { id: 1, name: "Aguacate", quantity: "1/2 kg" },
+      { id: 2, name: "Patatas", quantity: "2 unidades" },
+    ], ["palta", "papas"]);
+    expect(result.consumed).toEqual(["Aguacate", "Patatas"]);
+    expect(result.remaining).toEqual([{ id: 2, name: "Patatas", quantity: "1 unidades" }]);
+  });
+
+  it("subtracts a requested fraction without deleting the whole stock", () => {
+    const result = consumeRecipeIngredients([{ id: 1, name: "Palta", quantity: "1/2 kg" }], ["1/4 kg aguacate"]);
+    expect(result.consumed).toEqual(["Palta"]);
+    expect(result.remaining).toEqual([{ id: 1, name: "Palta", quantity: "1/4 kg" }]);
+  });
+
   it("updates monthly impact after a successful pantry action", () => {
     Object.assign(globalThis, { localStorage: localStorageStub });
     const before = recordImpact({ kg: 0, money: 0, meals: 0 });
