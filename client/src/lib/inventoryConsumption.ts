@@ -20,13 +20,25 @@ const synonymGroups = [
   ["palta", "aguacate", "avocado"],
   ["leche", "leche entera", "milk"],
   ["yogur", "yogurt", "yogur natural", "natural yogurt"],
-  ["aceite", "oil"],
+  ["aceite", "aceite de oliva", "oil", "olive oil"],
+  ["arroz", "arroz largo fino", "rice"],
+  ["pasta", "fideos", "pasta seca", "noodles", "spaghetti"],
+  ["huevo", "huevos", "egg", "eggs"],
+  ["queso", "cheese"],
+  ["pan", "pan de molde", "bread"],
+  ["harina", "flour"],
+  ["zanahoria", "zanahorias", "carrot", "carrots"],
+  ["ajo", "garlic"],
+  ["manteca", "mantequilla", "butter"],
+  ["carne", "carne picada", "beef", "ground beef"],
+  ["pescado", "merluza", "salmón", "fish", "salmon", "tuna", "atun", "atún"],
+  ["limon", "limón", "lemon", "lime"],
 ];
 
 const normalize = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
 
 function canonicalIngredient(value: string) {
-  const normalized = normalize(value);
+  const normalized = normalize(value).replace(/^(?:de|del|de la|de los|de las)\s+/i, "").trim();
   return synonymGroups.find((group) => group.some((alias) => normalized === alias || normalized.includes(alias) || alias.includes(normalized)))?.[0] || normalized;
 }
 
@@ -50,17 +62,21 @@ function formatAmount(amount: number) {
 }
 
 function parseIngredientRequest(value: string) {
-  const match = value.trim().match(/^([\d.,]+\s+[\d]+\/[\d]+|[\d]+\/[\d]+|[\d.,]+|[½⅓⅔¼¾⅕⅖⅗⅘])\s*([a-zA-ZáéíóúñÁÉÍÓÚÑ]+)?\s+(.+)$/);
-  if (!match) return { amount: 1, name: value };
-  return { amount: parseAmount(match[1]), name: match[3] };
+  const cleaned = value.trim();
+  const match = cleaned.match(/^([\d.,]+\s+[\d]+\/[\d]+|[\d]+\/[\d]+|[\d.,]+|[½⅓⅔¼¾⅕⅖⅗⅘])\s*([a-zA-ZáéíóúñÁÉÍÓÚÑ]+)?\s*(.*)$/);
+  if (!match) return { amount: 1, name: cleaned };
+  const rawName = (match[3] || match[2] || cleaned).replace(/^(?:de|del|de la|de los|de las)\s+/i, "").trim();
+  return { amount: parseAmount(match[1]), name: rawName || cleaned };
 }
 
 function consumeOneQuantity(quantity: string, requestedAmount = 1) {
-  const match = quantity.match(/^\s*([\d.,]+(?:\s+[\d]+\/[\d]+)?|[\d]+\/[\d]+|[½⅓⅔¼¾⅕⅖⅗⅘])(?=\s|$)/);
-  const amount = match ? parseAmount(match[1]) : 1;
-  const rest = match ? quantity.slice(match[0].length).trimStart() : quantity.trim();
+  const match = quantity.match(/^\s*([\d.,]+\s+\d+\/\d+|\d+\/\d+|[\d.,]+|[½⅓⅔¼¾⅕⅖⅗⅘])(?:\s*(.*))?$/);
+  if (!match) return null;
+  const amount = parseAmount(match[1]);
+  const rest = (match[2] || "").trim();
+  const hasSpace = /^\s*[\d.,\/½⅓⅔¼¾⅕⅖⅗⅘]+\s+/.test(quantity);
   const remaining = amount - requestedAmount;
-  return remaining <= 0.001 ? null : `${formatAmount(remaining)}${rest ? ` ${rest}` : ""}`;
+  return remaining <= 0.001 ? null : `${formatAmount(remaining)}${rest ? (hasSpace ? ` ${rest}` : ` ${rest}`) : ""}`;
 }
 
 export function consumeRecipeIngredients<T extends InventoryItem>(items: T[], ingredients: string[]): ConsumptionResult<T> {

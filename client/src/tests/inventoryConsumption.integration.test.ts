@@ -48,6 +48,19 @@ describe("inventory consumption integration", () => {
     expect(result.remaining).toEqual([{ id: 1, name: "Palta", quantity: "1/4 kg" }]);
   });
 
+  it("handles tight unit strings without spaces and ingredient prepositions", () => {
+    const inventory = [
+      { id: 1, name: "Arroz largo fino", quantity: "2kg" },
+      { id: 2, name: "Queso cremoso", quantity: "500g" },
+    ];
+    const result = consumeRecipeIngredients(inventory, ["1 taza de arroz", "queso"]);
+    expect(result.consumed).toEqual(["Arroz largo fino", "Queso cremoso"]);
+    expect(result.remaining).toEqual([
+      { id: 1, name: "Arroz largo fino", quantity: "1 kg" },
+      { id: 2, name: "Queso cremoso", quantity: "499 g" },
+    ]);
+  });
+
   it("updates monthly impact after a successful pantry action", () => {
     Object.assign(globalThis, { localStorage: localStorageStub });
     const before = recordImpact({ kg: 0, money: 0, meals: 0 });
@@ -58,3 +71,4 @@ describe("inventory consumption integration", () => {
     expect(after.mealsSaved).toBe(before.mealsSaved + 1);
   });
 });
+
