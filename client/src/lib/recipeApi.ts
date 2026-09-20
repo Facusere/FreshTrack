@@ -32,7 +32,28 @@ const fallbackRecipes: RecipeSuggestion[] = [
   { id: "fallback-tortilla", title: "Tortilla verde de aprovechamiento", image: "https://www.themealdb.com/images/media/meals/uuuspp1511297945.jpg", matchedIngredients: ["Espinaca fresca", "Huevos"], source: "FreshTrack" },
   { id: "fallback-pollo", title: "Pollo salteado con verduras", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Pechuga de pollo", "Tomates cherry"], source: "FreshTrack" },
   { id: "fallback-pasta", title: "Pasta cremosa con lo que hay", image: "https://www.themealdb.com/images/media/meals/ustsqw1511384527.jpg", matchedIngredients: ["Pasta seca", "Leche entera"], source: "FreshTrack" },
+  { id: "fallback-ensalada", title: "Ensalada tibia de verduras", image: "https://www.themealdb.com/images/media/meals/wvqpwt1468339226.jpg", matchedIngredients: ["Tomates cherry", "Espinaca fresca"], source: "FreshTrack" },
+  { id: "fallback-arroz", title: "Arroz salteado de heladera", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Arroz largo fino", "Cebolla"], source: "FreshTrack" },
+  { id: "fallback-huevos", title: "Huevos revueltos con verdes", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Huevos", "Espinaca fresca"], source: "FreshTrack" },
+  { id: "fallback-sopa", title: "Sopa rápida de verduras", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Verduras", "Cebolla"], source: "FreshTrack" },
+  { id: "fallback-papas", title: "Papas al horno con hierbas", image: "https://www.themealdb.com/images/media/meals/1549542994.jpg", matchedIngredients: ["Papas", "Aceite"], source: "FreshTrack" },
+  { id: "fallback-tostada", title: "Tostada de palta y tomate", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Pan", "Palta", "Tomates cherry"], source: "FreshTrack" },
+  { id: "fallback-yogur", title: "Yogur con fruta y avena", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Yogur natural", "Frutas"], source: "FreshTrack" },
+  { id: "fallback-legumbres", title: "Ensalada de lentejas", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Lentejas", "Tomates cherry"], source: "FreshTrack" },
+  { id: "fallback-pollo-horno", title: "Pollo al horno con papas", image: "https://www.themealdb.com/images/media/meals/1529444830.jpg", matchedIngredients: ["Pechuga de pollo", "Papas"], source: "FreshTrack" },
 ];
+
+const spanishInstructionMap: Array<[RegExp, string]> = [
+  [/preheat|heat the oven/i, "Precalentá el horno"], [/chop|slice|dice/i, "Cortá los ingredientes"], [/add|place|put/i, "Agregá los ingredientes"], [/mix|stir|combine/i, "Mezclá todo"], [/cook|fry|saute/i, "Cociná a fuego medio"], [/bake|roast/i, "Horneá hasta que esté dorado"], [/boil/i, "Herví hasta que esté tierno"], [/season/i, "Condimentá a gusto"], [/serve/i, "Serví caliente"], [/remove from heat/i, "Retirá del fuego"],
+];
+
+function translateInstructions(instructions?: string) {
+  if (!instructions) return "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.";
+  return instructions.split(/\r?\n+/).filter(Boolean).map((step) => {
+    const translated = spanishInstructionMap.find(([pattern]) => pattern.test(step))?.[1];
+    return translated ? `${translated}.` : "Continuá la preparación hasta integrar bien los ingredientes.";
+  }).join("\n");
+}
 
 function toApiIngredient(name: string) {
   const normalized = name.toLowerCase().trim();
@@ -55,7 +76,7 @@ export async function searchRecipesByIngredients(ingredients: string[], signal?:
       if (current) current.matchedIngredients = Array.from(new Set([...current.matchedIngredients, meal.matchedIngredient]));
       else deduped.set(meal.idMeal, { id: meal.idMeal, title: meal.strMeal, image: meal.strMealThumb, matchedIngredients: [meal.matchedIngredient], source: "TheMealDB", url: `https://www.themealdb.com/meal.php?c=${meal.idMeal}` });
     });
-    const results = Array.from(deduped.values()).sort((a, b) => b.matchedIngredients.length - a.matchedIngredients.length).slice(0, 3);
+    const results = Array.from(deduped.values()).sort((a, b) => b.matchedIngredients.length - a.matchedIngredients.length).slice(0, 12);
     return results.length ? results : fallbackRecipes;
   } catch {
     return fallbackRecipes;
@@ -70,5 +91,5 @@ export async function getRecipeDetails(recipe: RecipeSuggestion, signal?: AbortS
   const meal = data.meals?.[0];
   if (!meal) return recipe;
   const ingredients = Array.from({ length: 20 }, (_, index) => index + 1).map((index) => ({ name: meal[`strIngredient${index}`]?.trim() || "", measure: meal[`strMeasure${index}`]?.trim() || "" })).filter((item) => item.name);
-  return { ...recipe, area: meal.strArea, category: meal.strCategory, ingredients, instructions: meal.strInstructions };
+  return { ...recipe, area: meal.strArea, category: meal.strCategory, ingredients, instructions: translateInstructions(meal.strInstructions) };
 }
