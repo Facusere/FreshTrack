@@ -155,9 +155,44 @@ FreshTrack guarda el estado de forma local y privada en el navegador:
 
 ---
 
+## Despliegue en Vercel
+
+FreshTrack está 100% optimizado para desplegarse en **Vercel** como una Progressive Web App (PWA) de alto rendimiento.
+
+### Configuración Automática (`vercel.json`)
+El repositorio incluye el archivo `vercel.json` con:
+- **Output Directory**: `dist/public` (carpeta de compilación de Vite).
+- **Build Command**: `vite build` (compila la aplicación cliente sin sobrecostes).
+- **SPA Rewrites**: Redirige todas las rutas (`/(.*)`) a `/index.html` para evitar errores 404 al recargar el navegador.
+- **PWA Headers**: Cabeceras `Service-Worker-Allowed: /` y `Cache-Control: no-cache` para el archivo `/sw.js` y `application/manifest+json` para `/manifest.json`.
+
+### Pasos para Desplegar:
+
+1. **Subir cambios a GitHub / GitLab / Bitbucket**:
+   ```bash
+   git add .
+   git commit -m "feat: vercel deployment ready"
+   git push origin main
+   ```
+
+2. **Importar en Vercel**:
+   - Ingresa a [vercel.com](https://vercel.com) y haz clic en **"Add New..." > "Project"**.
+   - Conecta tu repositorio de GitHub.
+   - Vercel detectará automáticamente la configuración gracias a `vercel.json`:
+     - **Framework Preset**: Vite
+     - **Build Command**: `vite build`
+     - **Output Directory**: `dist/public`
+   - Haz clic en **"Deploy"**.
+
+3. **¡Listo!**:
+   - Tu aplicación estará activa en un subdominio `.vercel.app` con HTTPS automático, lista para instalarse como PWA en celulares Android e iOS.
+
+---
+
 ## Criterios de Diseño y Accesibilidad
 
 - **Paleta visual**: Tonos inspirados en la naturaleza (`#17372b` verde bosque profundo, `#d9e982` lima suave, `#fffdf9` crema cálido) para transmitir orden y calma.
 - **Feedback interactivo**: Confirmaciones táctiles con toasts de Sonner en cada acción (escaneo, compras, correcciones).
 - **Diseño responsive**: Barra lateral colapsable en menú inferior para celulares y tablets, optimizado para gestos táctiles.
 - **Respaldo offline**: Gracias al Service Worker y al almacenamiento local, las funciones principales continúan operativas sin conexión a Internet.
+
