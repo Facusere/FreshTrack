@@ -47,6 +47,26 @@ const spanishInstructionMap: Array<[RegExp, string]> = [
   [/preheat|heat the oven/i, "Precalentá el horno"], [/chop|slice|dice/i, "Cortá los ingredientes"], [/add|place|put/i, "Agregá los ingredientes"], [/mix|stir|combine/i, "Mezclá todo"], [/cook|fry|saute/i, "Cociná a fuego medio"], [/bake|roast/i, "Horneá hasta que esté dorado"], [/boil/i, "Herví hasta que esté tierno"], [/season/i, "Condimentá a gusto"], [/serve/i, "Serví caliente"], [/remove from heat/i, "Retirá del fuego"],
 ];
 
+const spanishFoodWords: Record<string, string> = {
+  spinach: "espinaca", tomato: "tomate", tomatoes: "tomates", onion: "cebolla", onions: "cebollas", chicken: "pollo", beef: "carne vacuna", pork: "cerdo", salmon: "salmón", fish: "pescado", tuna: "atún", potato: "papa", potatoes: "papas", egg: "huevo", eggs: "huevos", milk: "leche", cream: "crema", cheese: "queso", butter: "manteca", bread: "pan", flour: "harina", rice: "arroz", pasta: "pasta", oil: "aceite", salt: "sal", pepper: "pimienta", water: "agua", curry: "curry", powder: "en polvo", fresh: "fresco", salad: "ensalada", soup: "sopa", beans: "porotos", lentils: "lentejas", avocado: "palta", oats: "avena", fruit: "fruta", vegetables: "verduras", vegetable: "verdura",
+};
+
+const knownTitleTranslations: Record<string, string> = {
+  "curried spinach from botswana": "Espinaca al curry de Botswana",
+  "potato gratin with chicken": "Gratín de papas con pollo",
+  "salmon avocado salad": "Ensalada de salmón y palta",
+  "algerian bouzgene berber bread with roasted pepper sauce": "Pan bereber argelino con salsa de morrones asados",
+  "arepa pabellón": "Arepa pabellón",
+};
+
+function translateFoodText(value: string) {
+  return value.split(/(\s+)/).map((part) => spanishFoodWords[part.toLowerCase()] || part).join("");
+}
+
+function translateRecipeTitle(value: string) {
+  return knownTitleTranslations[value.toLowerCase()] || translateFoodText(value);
+}
+
 function translateInstructions(instructions?: string) {
   if (!instructions) return "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.";
   return instructions.split(/\r?\n+/).filter(Boolean).map((step) => {
@@ -74,7 +94,7 @@ export async function searchRecipesByIngredients(ingredients: string[], signal?:
     responses.flat().forEach((meal) => {
       const current = deduped.get(meal.idMeal);
       if (current) current.matchedIngredients = Array.from(new Set([...current.matchedIngredients, meal.matchedIngredient]));
-      else deduped.set(meal.idMeal, { id: meal.idMeal, title: meal.strMeal, image: meal.strMealThumb, matchedIngredients: [meal.matchedIngredient], source: "TheMealDB", url: `https://www.themealdb.com/meal.php?c=${meal.idMeal}` });
+      else deduped.set(meal.idMeal, { id: meal.idMeal, title: translateRecipeTitle(meal.strMeal), image: meal.strMealThumb, matchedIngredients: [meal.matchedIngredient], source: "TheMealDB", url: `https://www.themealdb.com/meal.php?c=${meal.idMeal}` });
     });
     const results = Array.from(deduped.values()).sort((a, b) => b.matchedIngredients.length - a.matchedIngredients.length).slice(0, 12);
     return results.length ? results : fallbackRecipes;
@@ -90,6 +110,6 @@ export async function getRecipeDetails(recipe: RecipeSuggestion, signal?: AbortS
   const data = await response.json() as { meals?: MealDetail[] | null };
   const meal = data.meals?.[0];
   if (!meal) return recipe;
-  const ingredients = Array.from({ length: 20 }, (_, index) => index + 1).map((index) => ({ name: meal[`strIngredient${index}`]?.trim() || "", measure: meal[`strMeasure${index}`]?.trim() || "" })).filter((item) => item.name);
-  return { ...recipe, area: meal.strArea, category: meal.strCategory, ingredients, instructions: translateInstructions(meal.strInstructions) };
+  const ingredients = Array.from({ length: 20 }, (_, index) => index + 1).map((index) => ({ name: translateFoodText(meal[`strIngredient${index}`]?.trim() || ""), measure: meal[`strMeasure${index}`]?.trim() || "" })).filter((item) => item.name);
+  return { ...recipe, title: translateRecipeTitle(meal.strMeal), area: meal.strArea, category: meal.strCategory, ingredients, instructions: translateInstructions(meal.strInstructions) };
 }

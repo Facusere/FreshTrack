@@ -269,6 +269,7 @@ export default function Home() {
   const [consumptionSuccess, setConsumptionSuccess] = useState<string[]>([]);
   const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>(() => loadStored(CONSUMPTION_HISTORY_KEY, []));
   const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
+  const [recipeLimit, setRecipeLimit] = useState(3);
 
   const filteredProducts = useMemo(() => products.filter((product) => {
     const matchesFilter = filter === "all" || product.status === filter;
@@ -282,6 +283,7 @@ export default function Home() {
   const notificationGroups = groupNotifications(products.map(({ id, name, category, expiry, days, status }) => ({ id, name, category, expiry, days, status })), notificationPreferences);
   const expiringProducts = products.filter((product) => product.status === "soon" || product.status === "expired");
   const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
+  const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   useEffect(() => { localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products)); }, [products]);
   useEffect(() => { localStorage.setItem(CONSUMPTION_HISTORY_KEY, JSON.stringify(consumptionHistory)); }, [consumptionHistory]);
@@ -292,6 +294,8 @@ export default function Home() {
     searchRecipesByIngredients(expiringProducts.map((product) => product.name), controller.signal).then(setRecipes).finally(() => setRecipesLoading(false));
     return () => controller.abort();
   }, [products]);
+
+  useEffect(() => { setRecipeLimit(3); }, [recipeFilter, products]);
 
   const openRecipeDetail = async (recipe: RecipeSuggestion) => {
     setRecipeDetailLoading(true);
@@ -316,13 +320,18 @@ export default function Home() {
     const recordIndex = consumptionHistory.findIndex((record) => record.id === recordId);
     if (recordIndex < 0) return;
     const record = consumptionHistory[recordIndex];
-    const toReverse = consumptionHistory.slice(recordIndex);
-    setProducts(record.before);
-    toReverse.forEach((item) => reverseImpact(item.delta));
-    setImpact(loadImpactStats());
-    setConsumptionHistory((current) => current.slice(0, recordIndex));
+    const laterRecords = consumptionHistory.slice(recordIndex + 1);
+    let rebuiltProducts = record.before;
+    const rebuiltLater = laterRecords.map((item) => {
+      const before = rebuiltProducts;
+      rebuiltProducts = consumeRecipeIngredients(rebuiltProducts, item.ingredients).remaining;
+      return { ...item, before };
+    });
+    setProducts(rebuiltProducts);
+    setImpact(reverseImpact(record.delta));
+    setConsumptionHistory((current) => [...current.slice(0, recordIndex), ...rebuiltLater]);
     setConsumptionSuccess([]);
-    toast("Consumo deshecho", { description: `${toReverse.length} acción${toReverse.length === 1 ? "" : "es"} revertida${toReverse.length === 1 ? "" : "s"}.` });
+    toast("Consumo deshecho", { description: `Se revirtió “${record.title}” sin afectar los consumos posteriores.` });
   };
 
   const addProducts = (newProducts: Product[]) => {
@@ -415,7 +424,7 @@ export default function Home() {
 
             <section id="module-route" className="scroll-mt-24 mt-5 grid gap-5 md:grid-cols-[1fr_1fr]">
               <div className="rounded-[24px] bg-[#17372b] p-5 text-white sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#9ebea0]"><Route size={13} /> Recorrida sugerida</p><h2 className="mt-2 font-serif text-[25px] font-semibold tracking-[-0.035em]">Tres cosas para resolver hoy.</h2></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#315844] text-[#d9e982]"><MapPin size={18} /></div></div><div className="mt-5 grid gap-2 sm:grid-cols-3">{[["1", "Leche entera", "Heladera"], ["2", "Tomates cherry", "Cajón verduras"], ["3", "Yogur natural", "Heladera"]].map(([number, name, place]) => <button key={name} onClick={() => toast(name, { description: `Ubicación: ${place}` })} className="group rounded-xl bg-[#204632] p-3 text-left transition hover:bg-[#2a5740]"><div className="flex items-center justify-between"><span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#d9e982] text-[10px] font-extrabold text-[#17372b]">{number}</span><ArrowUpRight size={14} className="text-[#75977d] transition group-hover:text-[#d9e982]" /></div><p className="mt-4 truncate text-[11px] font-semibold text-white">{name}</p><p className="mt-1 truncate text-[10px] text-[#8fb096]">{place}</p></button>)}</div><button onClick={() => setActiveNav("Recorrida")} className="mt-5 flex items-center gap-1 text-[11px] font-bold text-[#d9e982] hover:text-white">Ver recorrido completo <ChevronRight size={14} /></button></div>
-              <div className="rounded-[24px] border border-[#ebe8df] bg-[#f1eadc] p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a28153]"><Utensils size={13} /> Ideas para aprovechar</p><h2 className="mt-2 max-w-[300px] font-serif text-[25px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#503c26]">Recetas con lo que vence primero.</h2></div><div className="text-4xl">🥬</div></div><p className="mt-3 text-[11px] leading-5 text-[#806c53]">{recipesLoading ? "Buscando opciones que aprovechen tu despensa…" : `Encontramos ${visibleRecipes.length || recipes.length || 3} ideas para usar antes de que se pierdan.`}</p><div className="mt-3 flex flex-wrap gap-1.5">{([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => <button key={value} onClick={() => setRecipeFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${recipeFilter === value ? "bg-[#fffdf9] text-[#765a35] shadow-sm" : "bg-[#eadfc9]/70 text-[#a28b6b] hover:bg-[#fffdf9]"}`}>{label}</button>)}</div><div className="mt-3 grid gap-2">{visibleRecipes.slice(0, 3).map((recipe) => <div key={recipe.id} data-testid="recipe-card" role="button" tabIndex={0} aria-label={`Ver detalle de ${recipe.title}`} onClick={() => openRecipeDetail(recipe)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }} className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white/60 p-2 transition hover:bg-white"><img src={recipe.image} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" /><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p><p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p><p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p></div><button onClick={(event) => { event.stopPropagation(); markRecipeUsed(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button></div>)}</div><p className="mt-3 text-[9px] text-[#aa967b]">Fuente: TheMealDB · sugerencias orientativas</p></div>
+              <div className="rounded-[24px] border border-[#ebe8df] bg-[#f1eadc] p-5 sm:p-6"><div className="flex items-start justify-between"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a28153]"><Utensils size={13} /> Ideas para aprovechar</p><h2 className="mt-2 max-w-[300px] font-serif text-[25px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#503c26]">Recetas con lo que vence primero.</h2></div><div className="text-4xl">🥬</div></div><p className="mt-3 text-[11px] leading-5 text-[#806c53]">{recipesLoading ? "Buscando opciones que aprovechen tu despensa…" : `Encontramos ${visibleRecipes.length || recipes.length || 3} ideas para usar antes de que se pierdan.`}</p><div className="mt-3 flex flex-wrap gap-1.5">{([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => <button key={value} onClick={() => setRecipeFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${recipeFilter === value ? "bg-[#fffdf9] text-[#765a35] shadow-sm" : "bg-[#eadfc9]/70 text-[#a28b6b] hover:bg-[#fffdf9]"}`}>{label}</button>)}</div><div className="mt-3 grid gap-2">{shownRecipes.map((recipe) => <div key={recipe.id} data-testid="recipe-card" role="button" tabIndex={0} aria-label={`Ver detalle de ${recipe.title}`} onClick={() => openRecipeDetail(recipe)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }} className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white/60 p-2 transition hover:bg-white"><img src={recipe.image} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" /><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p><p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p><p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p></div><button onClick={(event) => { event.stopPropagation(); markRecipeUsed(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button></div>)}</div>{recipeLimit < visibleRecipes.length && <button onClick={() => setRecipeLimit((limit) => Math.min(limit + 3, visibleRecipes.length))} className="mt-4 w-full rounded-xl border border-[#d7c6a6] bg-[#fffdf9]/70 px-3 py-2.5 text-[11px] font-bold text-[#765a35] transition hover:bg-white">Cargar más ({visibleRecipes.length - recipeLimit} disponibles)</button>}<p className="mt-3 text-[9px] text-[#aa967b]">Fuente: TheMealDB · sugerencias orientativas</p></div>
             </section>
 
             <footer className="flex flex-col gap-2 pb-2 pt-8 text-[10px] text-[#a0a79f] sm:flex-row sm:items-center sm:justify-between"><p>FreshTrack · Menos desperdicio, más tranquilidad.</p><p className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#75a879]" /> Datos guardados localmente · Última sincronización hace 2 min</p></footer>

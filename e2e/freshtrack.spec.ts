@@ -9,7 +9,10 @@ test("abre una receta, confirma aprovechamiento y actualiza la despensa", async 
   await page.goto(baseURL, { waitUntil: "networkidle" });
 
   await expect(page.getByText("Recetas con lo que vence primero.")).toBeVisible();
-  await expect(page.getByText("Curried Spinach from Botswana")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText("Espinaca al curry de Botswana")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("button", { name: /Cargar más/ })).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: /Cargar más/ }).click();
+  await expect(page.locator('[data-testid="recipe-card"]')).toHaveCount(6);
   await page.getByTestId("recipe-card").first().dispatchEvent("click");
 
   await expect(page.locator("p").filter({ hasText: /^Ingredientes$/ })).toBeVisible({ timeout: 15000 });
