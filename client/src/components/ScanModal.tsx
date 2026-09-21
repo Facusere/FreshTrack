@@ -3,8 +3,6 @@ import {
   Camera,
   Check,
   ChevronRight,
-  FileText,
-  Image as ImageIcon,
   LoaderCircle,
   Plus,
   ReceiptText,
@@ -75,7 +73,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
   // Camera state
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [cameraActive, setCameraActive] = useState(false);
   const [cameraFacingMode, setCameraFacingMode] = useState<"environment" | "user">("environment");
   const [cameraError, setCameraError] = useState<string | null>(null);
 
@@ -99,7 +96,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
-    setCameraActive(false);
   };
 
   // Start camera helper
@@ -125,7 +121,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
-        setCameraActive(true);
       }
     } catch (err: any) {
       console.warn("Camera access denied or unavailable:", err);
@@ -134,7 +129,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
           ? "Acceso a la cámara denegado. Podés subir una foto o usar un ticket de prueba."
           : "No se pudo iniciar la cámara en este dispositivo."
       );
-      setCameraActive(false);
     }
   };
 
@@ -526,7 +520,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                 <p className="text-[11px] text-[#7a887d]">
                   Probá el motor OCR inmediatamente con estos ejemplos representativos:
                 </p>
-                {SAMPLE_TICKETS.map((sample, idx) => (
+                {SAMPLE_TICKETS.map((sample) => (
                   <button
                     key={sample.name}
                     onClick={() => runSampleTicket(sample.text)}

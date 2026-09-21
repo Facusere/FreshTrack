@@ -1,5 +1,5 @@
 // Smart Shopping List and Restocking System for FreshTrack
-import { estimateShelfLife, ShelfLifeState } from "./shelfLifeCatalog";
+import { estimateShelfLife } from "./shelfLifeCatalog";
 
 export type ShoppingItemReason = "frecuente" | "stock_bajo" | "manual" | "vencido";
 
@@ -97,7 +97,6 @@ export function generateSmartSuggestions(
   currentList: ShoppingItem[]
 ): ShoppingItem[] {
   const existingListNames = new Set(currentList.map((item) => normalize(item.name)));
-  const pantryNames = new Set(pantry.map((item) => normalize(item.name)));
   const suggestions: ShoppingItem[] = [];
 
   // 1. Frequently consumed items from history that are not in current pantry or shopping list

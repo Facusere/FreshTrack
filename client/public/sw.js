@@ -36,8 +36,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Bypass API calls or dev collector
-  if (event.request.url.includes("/api/") || event.request.url.includes("/__manus__")) {
+  // Bypass API calls
+  if (event.request.url.includes("/api/")) {
     return;
   }
 

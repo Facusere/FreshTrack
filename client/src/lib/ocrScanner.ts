@@ -1,7 +1,7 @@
 // In-Browser OCR Scanner with Tesseract.js and Intelligent Receipt & Expiry Parsing
 import Tesseract from "tesseract.js";
 import { DateLabel, detectDateCandidates } from "./dateRecognition";
-import { estimateShelfLife, shelfLifeCatalog } from "./shelfLifeCatalog";
+import { shelfLifeCatalog } from "./shelfLifeCatalog";
 import { formatExpiryDate } from "./shoppingList";
 
 export type ScannedProductResult = {

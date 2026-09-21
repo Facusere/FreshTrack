@@ -1,13 +1,9 @@
 import { useMemo, useState } from "react";
 import {
-  AlertCircle,
-  ArrowRight,
   Check,
-  CheckCircle2,
   PackageCheck,
   PackageOpen,
   Plus,
-  RotateCcw,
   ShoppingCart,
   Sparkles,
   Trash2,

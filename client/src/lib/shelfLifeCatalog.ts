@@ -64,7 +64,7 @@ const VALIDATION_THRESHOLD = 3;
 
 export function getCatalogSize() { return shelfLifeCatalog.length; }
 
-export function findShelfLife(productName: string, state: ShelfLifeState = "cerrado", category?: string): ShelfLifeEntry | undefined {
+export function findShelfLife(productName: string, category?: string): ShelfLifeEntry | undefined {
   const normalized = slug(productName);
   const community = loadValidatedShelfLife();
   const fromCommunity = community.find((entry) => slug(entry.name) === normalized);
@@ -73,7 +73,7 @@ export function findShelfLife(productName: string, state: ShelfLifeState = "cerr
 }
 
 export function estimateShelfLife(productName: string, state: ShelfLifeState = "cerrado", category?: string) {
-  const entry = findShelfLife(productName, state, category);
+  const entry = findShelfLife(productName, category);
   if (!entry) return undefined;
   return { ...entry, days: state === "abierto" ? entry.openDays : entry.closedDays, state };
 }

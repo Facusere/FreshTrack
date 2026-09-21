@@ -7,22 +7,18 @@ import {
   BarChart3,
   Bell,
   CalendarDays,
-  Camera,
   Check,
   ChevronRight,
   CircleHelp,
   Clock3,
-  FileText,
   Home as HomeIcon,
   Leaf,
-  LoaderCircle,
   MapPin,
   Menu,
   MoreHorizontal,
   PackageOpen,
   Pencil,
   Plus,
-  ReceiptText,
   Route,
   ScanLine,
   Search,
@@ -31,15 +27,14 @@ import {
   SlidersHorizontal,
   Smartphone,
   Sparkles,
-  Store,
   Trash2,
   Utensils,
   X,
   Zap,
 } from "lucide-react";
-import { DateLabel, detectDateCandidates, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
+import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeState, submitShelfLifeSuggestion } from "@/lib/shelfLifeCatalog";
-import { buildWeeklySummary, defaultNotificationPreferences, getCategoryLeadDays, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
+import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import { getRecipeDetails, RecipeSuggestion, searchRecipesByIngredients } from "@/lib/recipeApi";
 import { formatMoney, ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
 import { consumeRecipeIngredients } from "@/lib/inventoryConsumption";
@@ -97,12 +92,6 @@ const initialProducts: Product[] = [
   { id: 7, name: "Pasta seca", category: "Almacén", expiry: "12 ago 27", days: 331, quantity: "2 paquetes", status: "ok", icon: "🍝" },
 ];
 
-const navItems = [
-  { label: "Resumen", icon: HomeIcon },
-  { label: "Mi despensa", icon: PackageOpen, count: "24" },
-  { label: "Recorrida", icon: Route, count: "3" },
-  { label: "Reportes", icon: BarChart3 },
-];
 
 const statusCopy: Record<ProductStatus, { label: string; color: string; dot: string }> = {
   ok: { label: "En fecha", color: "text-[#43715b] bg-[#e7f1e9]", dot: "bg-[#5d9b72]" },
@@ -170,7 +159,7 @@ function MiniStatus({ status }: { status: ProductStatus }) {
   );
 }
 
-function ProductRow({ product, onRemove, onEdit }: { product: Product; onRemove: (id: number) => void; onEdit: (product: Product) => void }) {
+function ProductRow({ product, onEdit }: { product: Product; onEdit: (product: Product) => void }) {
   const stockMatch = product.quantity.match(/^(\d+(?:[.,]\d+)?|[½⅓⅔¼¾])/);
   const lowStock = stockMatch ? Number(stockMatch[1].replace(",", ".")) <= 1 : /1\b|una?\b|un\b/i.test(product.quantity);
   const alertTone = product.status === "expired" ? "border-l-4 border-l-[#d66f5b] bg-[#fff4f0]" : product.status === "soon" ? "border-l-4 border-l-[#e3aa36] bg-[#fffaf0]" : lowStock ? "border-l-4 border-l-[#78a986] bg-[#f4faf2]" : "";
@@ -1048,7 +1037,7 @@ export default function Home() {
                     </div>
                     <div className="mt-1">
                       {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 5)).map((product) => (
-                        <ProductRow key={product.id} product={product} onRemove={() => setSelectedProduct(product)} onEdit={setSelectedProduct} />
+                        <ProductRow key={product.id} product={product} onEdit={setSelectedProduct} />
                       ))}
                       {filteredProducts.length > 5 && (
                         <button
@@ -1210,8 +1199,4 @@ export default function Home() {
       {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{selectedProduct.days < 0 ? "Este producto ya venció" : `Faltan ${selectedProduct.days} días`}</p>{selectedProduct.corrected && <p className="mt-2 text-[10px] font-semibold text-[#4e815b]">✓ Corrección aplicada a futuras detecciones</p>}</div><div className="mt-4 flex gap-2"><button onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Corregir</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
     </div>
   );
-}
-
-function TrendingDownIcon() {
-  return <ArrowDownRight size={17} />;
 }
