@@ -3,7 +3,8 @@ import { StoredProduct } from "@/types/product";
 
 export const PRODUCTS_STORAGE_KEY = "freshtrack-products-v3";
 export const OLD_PRODUCTS_STORAGE_KEY = "freshtrack-products-v2";
-export const CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v2";
+export const CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v3";
+export const OLD_CONSUMPTION_HISTORY_V2_KEY = "freshtrack-consumption-history-v2";
 export const OLD_CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v1";
 export const LAST_SCAN_STORAGE_KEY = "freshtrack-last-scan-v1";
 
@@ -164,4 +165,17 @@ export function loadStoredProducts(today: Date = new Date()): StoredProduct[] | 
 export function saveStoredProducts(products: StoredProduct[]): boolean {
   const valid = products.filter(isValidStoredProduct);
   return saveJSON(PRODUCTS_STORAGE_KEY, valid);
+}
+
+export function loadConsumptionHistory<T>(fallback: T[] = []): T[] {
+  if (typeof window !== "undefined" && window.localStorage) {
+    // Purge outdated v1 and v2 history
+    localStorage.removeItem(OLD_CONSUMPTION_HISTORY_KEY);
+    localStorage.removeItem(OLD_CONSUMPTION_HISTORY_V2_KEY);
+  }
+  return loadJSON<T[]>(CONSUMPTION_HISTORY_KEY, fallback);
+}
+
+export function saveConsumptionHistory<T>(records: T[]): boolean {
+  return saveJSON(CONSUMPTION_HISTORY_KEY, records);
 }

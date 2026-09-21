@@ -37,7 +37,16 @@ import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeSta
 import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import { getRecipeDetails, RecipeSuggestion, searchRecipesByIngredients } from "@/lib/recipeApi";
 import { formatMoney, ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
-import { consumeRecipeIngredients } from "@/lib/inventoryConsumption";
+import {
+  ConsumptionPlan,
+  ConsumptionRecord,
+  SelectedDeduction,
+  planRecipeConsumption,
+  applyConsumptionPlan,
+  undoConsumptionHistory,
+} from "@/lib/inventoryConsumption";
+import { isQuantityLow } from "@/lib/quantity";
+import { ConsumptionConfirmDialog } from "@/components/ConsumptionConfirmDialog";
 import { ScanModal } from "@/components/ScanModal";
 import { ShoppingListModule } from "@/components/ShoppingListModule";
 import {
@@ -52,10 +61,16 @@ import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shopping
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
 import { addDaysISO, daysUntil, formatRelativeDays, formatTimeAgo, SOON_THRESHOLD_DAYS, useToday } from "@/lib/dates";
-import { loadStoredProducts, saveStoredProducts, loadJSON, saveJSON, CONSUMPTION_HISTORY_KEY, loadLastScan, LastScanInfo } from "@/lib/storage";
+import {
+  loadStoredProducts,
+  saveStoredProducts,
+  loadConsumptionHistory,
+  saveConsumptionHistory,
+  loadLastScan,
+  LastScanInfo,
+} from "@/lib/storage";
 
 type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
-type ConsumptionRecord = { id: number; title: string; ingredients: string[]; before: StoredProduct[]; delta: { kg: number; money: number; meals: number }; createdAt: string };
 
 function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
   if (filter === "all") return true;
@@ -144,8 +159,7 @@ function MiniStatus({ status }: { status: ProductStatus }) {
 }
 
 function ProductRow({ product, onEdit }: { product: Product; onEdit: (product: Product) => void }) {
-  const stockMatch = product.quantity.match(/^(\d+(?:[.,]\d+)?|[½⅓⅔¼¾])/);
-  const lowStock = stockMatch ? Number(stockMatch[1].replace(",", ".")) <= 1 : /1\b|una?\b|un\b/i.test(product.quantity);
+  const lowStock = isQuantityLow(product.quantity);
   const alertTone = product.status === "expired" ? "border-l-4 border-l-[#d66f5b] bg-[#fff4f0]" : product.status === "soon" ? "border-l-4 border-l-[#e3aa36] bg-[#fffaf0]" : lowStock ? "border-l-4 border-l-[#78a986] bg-[#f4faf2]" : "";
   return (
     <div className={`group grid grid-cols-[minmax(0,1fr)_110px_92px_28px] items-center gap-3 border-b border-[#ece8df] py-3.5 pl-2 last:border-b-0 ${alertTone}`}>
@@ -689,7 +703,13 @@ export default function Home() {
   const [recipeDetail, setRecipeDetail] = useState<RecipeSuggestion | null>(null);
   const [recipeDetailLoading, setRecipeDetailLoading] = useState(false);
   const [consumptionSuccess, setConsumptionSuccess] = useState<string[]>([]);
-  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>(() => loadJSON(CONSUMPTION_HISTORY_KEY, []));
+  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>(() => loadConsumptionHistory());
+  const [consumptionPlanToConfirm, setConsumptionPlanToConfirm] = useState<{ recipe: RecipeSuggestion; plan: ConsumptionPlan } | null>(null);
+
+  useEffect(() => {
+    saveConsumptionHistory(consumptionHistory);
+  }, [consumptionHistory]);
+
   const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
   const [recipeLimit, setRecipeLimit] = useState(3);
   const [showAllPantry, setShowAllPantry] = useState(false);
@@ -776,7 +796,6 @@ export default function Home() {
   const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   useEffect(() => { saveStoredProducts(storedProducts); }, [storedProducts]);
-  useEffect(() => { saveJSON(CONSUMPTION_HISTORY_KEY, consumptionHistory); }, [consumptionHistory]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -793,35 +812,78 @@ export default function Home() {
     finally { setRecipeDetailLoading(false); }
   };
 
-  const markRecipeUsed = (recipe: RecipeSuggestion) => {
-    const usedIngredients = recipe.matchedIngredients;
+  const initiateRecipeConsumption = async (recipe: RecipeSuggestion) => {
+    let fullRecipe = recipe;
+    if (!recipe.ingredients || recipe.ingredients.length === 0) {
+      try {
+        fullRecipe = await getRecipeDetails(recipe);
+      } catch {
+        fullRecipe = recipe;
+      }
+    }
+
+    const recipeIngredients =
+      fullRecipe.ingredients && fullRecipe.ingredients.length > 0
+        ? fullRecipe.ingredients.map((ing) => ({ name: ing.name, measure: ing.measure }))
+        : fullRecipe.matchedIngredients.map((name) => ({ name, measure: "1 unidad" }));
+
+    const plan = planRecipeConsumption(storedProducts, recipeIngredients);
+    setConsumptionPlanToConfirm({ recipe: fullRecipe, plan });
+  };
+
+  const handleConfirmConsumption = (selectedDeductions: SelectedDeduction[]) => {
+    if (!consumptionPlanToConfirm) return;
+    const recipe = consumptionPlanToConfirm.recipe;
     const before = storedProducts;
-    const result = consumeRecipeIngredients(storedProducts, usedIngredients);
+
+    const result = applyConsumptionPlan(storedProducts, selectedDeductions);
     setStoredProducts(result.remaining);
+
     const delta = { kg: 0.4, money: 1200, meals: 1 };
     setImpact(recordImpact(delta));
-    setConsumptionHistory((current) => [...current.slice(-4), { id: Date.now(), title: recipe.title, ingredients: result.consumed, before, delta, createdAt: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) }]);
-    setConsumptionSuccess(result.consumed);
+
+    const appliedSummary = result.applied.map((a) => {
+      const item = before.find((it) => it.id === a.itemId);
+      return item ? `${item.name} (${a.deducted})` : a.deducted;
+    });
+
+    const newRecord: ConsumptionRecord = {
+      id: Date.now(),
+      title: recipe.title,
+      ingredients: appliedSummary,
+      before,
+      applied: result.applied,
+      delta,
+      createdAt: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setConsumptionHistory((current) => [...current.slice(-4), newRecord]);
+    setConsumptionSuccess(appliedSummary);
     window.setTimeout(() => setConsumptionSuccess([]), 2400);
-    toast.success("¡Buen aprovechamiento!", { description: `${result.consumed.join(", ") || usedIngredients.join(", ")} se descontó de tu despensa.` });
+
+    toast.success("¡Buen aprovechamiento!", {
+      description: `${appliedSummary.join(", ") || "Ingredientes"} se descontó de tu despensa.`,
+    });
+
+    if (result.depletedItemNames.length > 0) {
+      toast("Productos terminados", {
+        description: `${result.depletedItemNames.join(", ")} se terminó y salió de tu despensa.`,
+      });
+    }
+
+    setConsumptionPlanToConfirm(null);
   };
 
   const undoConsumption = (recordId: number) => {
-    const recordIndex = consumptionHistory.findIndex((record) => record.id === recordId);
-    if (recordIndex < 0) return;
-    const record = consumptionHistory[recordIndex];
-    const laterRecords = consumptionHistory.slice(recordIndex + 1);
-    let rebuiltProducts = record.before;
-    const rebuiltLater = laterRecords.map((item) => {
-      const before = rebuiltProducts;
-      rebuiltProducts = consumeRecipeIngredients(rebuiltProducts, item.ingredients).remaining;
-      return { ...item, before };
-    });
+    const { rebuiltProducts, rebuiltHistory } = undoConsumptionHistory(consumptionHistory, recordId);
+    const undoneRecord = consumptionHistory.find((r) => r.id === recordId);
+    if (!undoneRecord) return;
+
     setStoredProducts(rebuiltProducts);
-    setImpact(reverseImpact(record.delta));
-    setConsumptionHistory((current) => [...current.slice(0, recordIndex), ...rebuiltLater]);
+    setImpact(reverseImpact(undoneRecord.delta));
+    setConsumptionHistory(rebuiltHistory);
     setConsumptionSuccess([]);
-    toast("Consumo deshecho", { description: `Se revirtió “${record.title}” sin afectar los consumos posteriores.` });
+    toast("Consumo deshecho", { description: `Se revirtió “${undoneRecord.title}” sin afectar los consumos posteriores.` });
   };
 
   const addProducts = (newProducts: StoredProduct[]) => {
@@ -1242,7 +1304,7 @@ export default function Home() {
                         <p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p>
                         <p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p>
                       </div>
-                      <button onClick={(event) => { event.stopPropagation(); markRecipeUsed(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button>
+                      <button onClick={(event) => { event.stopPropagation(); initiateRecipeConsumption(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button>
                     </div>
                   ))}
                 </div>
@@ -1266,8 +1328,17 @@ export default function Home() {
         />
       )}
       {modal === "add" && <AddProductModal onClose={() => { setModal(null); setEditingProduct(null); }} onAdd={addProduct} initialProduct={editingProduct || undefined} onCorrection={correctProduct} onSuggest={suggestShelfLife} today={today} />}
-      {recipeDetail && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center"><div className="max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-[28px] bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.26)]"><div className="relative h-40 overflow-hidden rounded-t-[28px] bg-[#e8dfcf]"><img src={recipeDetail.image} alt="" className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#17372b]/75 to-transparent" /><button aria-label="Cerrar receta" onClick={() => setRecipeDetail(null)} className="absolute right-4 top-4 rounded-full bg-white/80 p-2 text-[#315542] backdrop-blur-sm"><X size={17} /></button><div className="absolute bottom-4 left-5 right-5"><p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p><p className="mt-1 text-[10px] text-[#dcebdd]">{recipeDetail.area || "Receta sugerida"}{recipeDetail.category ? ` · ${recipeDetail.category}` : ""}</p></div></div>{recipeDetailLoading ? <div className="p-6 text-center text-sm text-[#718273]">Cargando ingredientes y pasos…</div> : <div className="p-5 sm:p-6"><div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Ingredientes</p><div className="mt-3 space-y-2">{(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-[#f0ede6] pb-2 text-[11px]"><span className="font-semibold text-[#425b4b]">{ingredient.name}</span><span className="text-right text-[#9a8b75]">{ingredient.measure}</span></div>)}</div></div><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Paso a paso</p><div className="mt-3 space-y-3">{(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e6f0e6] text-[10px] font-bold text-[#4d835e]">{index + 1}</span><p className="text-[11px] leading-5 text-[#6e7d70]">{step}</p></div>)}</div></div></div><button data-testid="consume-recipe" onClick={() => { markRecipeUsed(recipeDetail); setRecipeDetail(null); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white hover:bg-[#16392c]"><Check size={15} /> Aproveché esta receta</button></div>}</div></div>}
+      {recipeDetail && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center"><div className="max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-[28px] bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.26)]"><div className="relative h-40 overflow-hidden rounded-t-[28px] bg-[#e8dfcf]"><img src={recipeDetail.image} alt="" className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#17372b]/75 to-transparent" /><button aria-label="Cerrar receta" onClick={() => setRecipeDetail(null)} className="absolute right-4 top-4 rounded-full bg-white/80 p-2 text-[#315542] backdrop-blur-sm"><X size={17} /></button><div className="absolute bottom-4 left-5 right-5"><p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p><p className="mt-1 text-[10px] text-[#dcebdd]">{recipeDetail.area || "Receta sugerida"}{recipeDetail.category ? ` · ${recipeDetail.category}` : ""}</p></div></div>{recipeDetailLoading ? <div className="p-6 text-center text-sm text-[#718273]">Cargando ingredientes y pasos…</div> : <div className="p-5 sm:p-6"><div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Ingredientes</p><div className="mt-3 space-y-2">{(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-[#f0ede6] pb-2 text-[11px]"><span className="font-semibold text-[#425b4b]">{ingredient.name}</span><span className="text-right text-[#9a8b75]">{ingredient.measure}</span></div>)}</div></div><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Paso a paso</p><div className="mt-3 space-y-3">{(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e6f0e6] text-[10px] font-bold text-[#4d835e]">{index + 1}</span><p className="text-[11px] leading-5 text-[#6e7d70]">{step}</p></div>)}</div></div></div><button data-testid="consume-recipe" onClick={() => { initiateRecipeConsumption(recipeDetail); setRecipeDetail(null); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white hover:bg-[#16392c]"><Check size={15} /> Aproveché esta receta</button></div>}</div></div>}
       {notificationModal && <NotificationSettingsModal onClose={() => setNotificationModal(false)} products={products} preferences={notificationPreferences} onSave={savePreferences} />}
+      {consumptionPlanToConfirm && (
+        <ConsumptionConfirmDialog
+          isOpen={true}
+          onClose={() => setConsumptionPlanToConfirm(null)}
+          recipeTitle={consumptionPlanToConfirm.recipe.title}
+          plan={consumptionPlanToConfirm.plan}
+          onConfirm={handleConfirmConsumption}
+        />
+      )}
       {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{formatRelativeDays(selectedProduct.days)}</p>{selectedProduct.corrected && <p className="mt-2 text-[10px] font-semibold text-[#4e815b]">✓ Corrección aplicada a futuras detecciones</p>}</div><div className="mt-4 flex gap-2"><button onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Corregir</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
     </div>
   );

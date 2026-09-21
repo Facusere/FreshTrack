@@ -19,10 +19,10 @@ describe("inventory consumption integration", () => {
       { id: 2, name: "Tomates cherry", quantity: "1 bandeja" },
       { id: 3, name: "Leche entera", quantity: "2 litros" },
     ];
-    const result = consumeRecipeIngredients(inventory, ["Espinaca fresca", "Tomates cherry"]);
+    const result = consumeRecipeIngredients(inventory, ["1 atado espinaca fresca", "1 bandeja tomates cherry"]);
     expect(result.consumed).toEqual(["Espinaca fresca", "Tomates cherry"]);
     expect(result.remaining).toEqual([
-      { id: 1, name: "Espinaca fresca", quantity: "1 atados" },
+      { id: 1, name: "Espinaca fresca", quantity: "1 atado" },
       { id: 3, name: "Leche entera", quantity: "2 litros" },
     ]);
   });
@@ -37,15 +37,18 @@ describe("inventory consumption integration", () => {
     const result = consumeRecipeIngredients([
       { id: 1, name: "Aguacate", quantity: "1/2 kg" },
       { id: 2, name: "Patatas", quantity: "2 unidades" },
-    ], ["palta", "papas"]);
+    ], ["250 g palta", "1 papa"]);
     expect(result.consumed).toEqual(["Aguacate", "Patatas"]);
-    expect(result.remaining).toEqual([{ id: 2, name: "Patatas", quantity: "1 unidades" }]);
+    expect(result.remaining).toEqual([
+      { id: 1, name: "Aguacate", quantity: "250 g" },
+      { id: 2, name: "Patatas", quantity: "1 unidad" },
+    ]);
   });
 
   it("subtracts a requested fraction without deleting the whole stock", () => {
     const result = consumeRecipeIngredients([{ id: 1, name: "Palta", quantity: "1/2 kg" }], ["1/4 kg aguacate"]);
     expect(result.consumed).toEqual(["Palta"]);
-    expect(result.remaining).toEqual([{ id: 1, name: "Palta", quantity: "1/4 kg" }]);
+    expect(result.remaining).toEqual([{ id: 1, name: "Palta", quantity: "250 g" }]);
   });
 
   it("handles tight unit strings without spaces and ingredient prepositions", () => {
@@ -53,11 +56,11 @@ describe("inventory consumption integration", () => {
       { id: 1, name: "Arroz largo fino", quantity: "2kg" },
       { id: 2, name: "Queso cremoso", quantity: "500g" },
     ];
-    const result = consumeRecipeIngredients(inventory, ["1 taza de arroz", "queso"]);
+    const result = consumeRecipeIngredients(inventory, ["1 kg de arroz", "200 g de queso"]);
     expect(result.consumed).toEqual(["Arroz largo fino", "Queso cremoso"]);
     expect(result.remaining).toEqual([
       { id: 1, name: "Arroz largo fino", quantity: "1 kg" },
-      { id: 2, name: "Queso cremoso", quantity: "499 g" },
+      { id: 2, name: "Queso cremoso", quantity: "300 g" },
     ]);
   });
 

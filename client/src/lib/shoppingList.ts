@@ -1,6 +1,7 @@
 // Smart Shopping List and Restocking System for FreshTrack
 import { estimateShelfLife } from "./shelfLifeCatalog";
 import { addDaysISO } from "./dates";
+import { isQuantityLow } from "./quantity";
 import { Product, StoredProduct } from "@/types/product";
 
 export type ShoppingItemReason = "frecuente" | "stock_bajo" | "manual" | "vencido";
@@ -158,15 +159,7 @@ export function generateSmartSuggestions(
   return suggestions;
 }
 
-export function isQuantityLow(qty: string): boolean {
-  if (!qty) return true;
-  const match = qty.match(/^(\d+(?:[.,]\d+)?|[½⅓⅔¼¾])/);
-  if (match) {
-    const num = Number(match[1].replace(",", "."));
-    if (!isNaN(num) && num <= 1) return true;
-  }
-  return /1\b|una?\b|un\b|queda poco|últim/i.test(qty);
-}
+export { isQuantityLow } from "./quantity";
 
 function capitalize(s: string) {
   if (!s) return s;

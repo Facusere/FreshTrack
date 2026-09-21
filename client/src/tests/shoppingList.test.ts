@@ -25,9 +25,11 @@ describe("shoppingList - Smart Suggestions & Restocking", () => {
 
   it("detects low quantities properly", () => {
     expect(isQuantityLow("1 unidad")).toBe(true);
-    expect(isQuantityLow("1 kg")).toBe(true);
-    expect(isQuantityLow("0.5 litros")).toBe(true);
-    expect(isQuantityLow("1/2 kg")).toBe(true);
+    expect(isQuantityLow("1 kg")).toBe(false);
+    expect(isQuantityLow("1,5 kg")).toBe(false);
+    expect(isQuantityLow("0.5 litros")).toBe(false); // 500 ml is not low
+    expect(isQuantityLow("50 g")).toBe(true);
+    expect(isQuantityLow("50 ml")).toBe(true);
     expect(isQuantityLow("queda poco")).toBe(true);
     expect(isQuantityLow("3 unidades")).toBe(false);
     expect(isQuantityLow("2 litros")).toBe(false);
@@ -39,9 +41,9 @@ describe("shoppingList - Smart Suggestions & Restocking", () => {
       { id: 2, title: "Receta 2", ingredients: ["Leche entera"], createdAt: "2026-09-14" },
     ];
 
-    // Leche is in pantry but low stock (1 litro)
+    // Leche is in pantry but low stock (50 ml)
     const pantry: PantryItemReference[] = [
-      { id: 10, name: "Leche entera", category: "Lácteos", quantity: "1 litro", expiryDate: "2026-09-22", icon: "🥛", days: 2, status: "soon", expiry: "22 sep" },
+      { id: 10, name: "Leche entera", category: "Lácteos", quantity: "50 ml", expiryDate: "2026-09-22", icon: "🥛", days: 2, status: "soon", expiry: "22 sep" },
       { id: 11, name: "Arroz", category: "Almacén seco", quantity: "4 paquetes", expiryDate: "2027-01-01", icon: "🌾", days: 100, status: "ok", expiry: "1 ene 27" },
     ];
 
