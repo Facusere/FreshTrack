@@ -41,8 +41,8 @@ describe("shoppingList - Smart Suggestions & Restocking", () => {
 
     // Leche is in pantry but low stock (1 litro)
     const pantry: PantryItemReference[] = [
-      { id: 10, name: "Leche entera", category: "Lácteos", quantity: "1 litro", days: 2, status: "soon" },
-      { id: 11, name: "Arroz", category: "Almacén seco", quantity: "4 paquetes", days: 100, status: "ok" },
+      { id: 10, name: "Leche entera", category: "Lácteos", quantity: "1 litro", expiryDate: "2026-09-22", icon: "🥛", days: 2, status: "soon", expiry: "22 sep" },
+      { id: 11, name: "Arroz", category: "Almacén seco", quantity: "4 paquetes", expiryDate: "2027-01-01", icon: "🌾", days: 100, status: "ok", expiry: "1 ene 27" },
     ];
 
     const currentList: ShoppingItem[] = [];
@@ -94,7 +94,7 @@ describe("shoppingList - Smart Suggestions & Restocking", () => {
     expect(result.createdProducts[0].quantity).toBe("2 litros");
     expect(result.createdProducts[0].icon).toBe("🥛");
     expect(result.createdProducts[0].estimated).toBe(true);
-    expect(result.createdProducts[0].days).toBeGreaterThan(0);
+    expect(result.createdProducts[0].expiryDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
     // Remaining shopping list should only keep uncompleted items
     expect(result.remainingShoppingList).toHaveLength(1);

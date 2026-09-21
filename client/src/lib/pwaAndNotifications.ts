@@ -87,6 +87,8 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
+import { todayISO } from "./dates";
+
 const LAST_NOTIFICATION_DATE_KEY = "freshtrack-last-notification-date";
 
 export type ExpiringProductAlert = {
@@ -103,7 +105,8 @@ export type ExpiringProductAlert = {
  */
 export async function notifyExpiringProducts(
   products: ExpiringProductAlert[],
-  force = false
+  force = false,
+  today: Date = new Date()
 ): Promise<{ sent: boolean; message?: string }> {
   if (typeof window === "undefined" || !("Notification" in window)) {
     return { sent: false, message: "Las notificaciones no están soportadas en este navegador." };
@@ -113,7 +116,7 @@ export async function notifyExpiringProducts(
     return { sent: false, message: "Permiso de notificaciones no concedido." };
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = todayISO(today);
   const lastNotified = localStorage.getItem(LAST_NOTIFICATION_DATE_KEY);
 
   if (!force && lastNotified === todayStr) {

@@ -1,5 +1,8 @@
+import { formatExpiryDisplay } from "./dates";
+import { Product } from "@/types/product";
+
 export type AlertLeadDays = 1 | 3 | 7;
-export type ProductStatus = "ok" | "soon" | "expired";
+
 export type NotificationPreferences = {
   enabled: boolean;
   weeklySummary: boolean;
@@ -7,19 +10,10 @@ export type NotificationPreferences = {
   categoryLeadDays: Record<string, AlertLeadDays>;
 };
 
-export type NotificationItem = {
-  id: number;
-  name: string;
-  category: string;
-  expiry: string;
-  days: number;
-  status: ProductStatus;
-};
-
 export type NotificationGroup = {
   dateKey: string;
   dateLabel: string;
-  products: NotificationItem[];
+  products: Product[];
   title: string;
 };
 
@@ -59,24 +53,39 @@ export function saveNotificationPreferences(preferences: NotificationPreferences
   localStorage.setItem(PREFS_KEY, JSON.stringify(preferences));
 }
 
-export function groupNotifications(items: NotificationItem[], preferences = defaultNotificationPreferences): NotificationGroup[] {
+export function groupNotifications(
+  items: Product[],
+  preferences = defaultNotificationPreferences,
+  today: Date = new Date()
+): NotificationGroup[] {
   if (!preferences.enabled) return [];
   const actionable = items.filter((item) => item.status === "expired" || item.days <= (preferences.categoryLeadDays[item.category] || 3));
-  const grouped = new Map<string, NotificationItem[]>();
+  const grouped = new Map<string, Product[]>();
+
   actionable.forEach((item) => {
-    const dateKey = item.expiry;
+    const dateKey = item.expiryDate;
     grouped.set(dateKey, [...(grouped.get(dateKey) || []), item]);
   });
-  return Array.from(grouped.entries()).sort((a, b) => Math.min(...a[1].map((item) => item.days)) - Math.min(...b[1].map((item) => item.days))).map(([dateKey, products]) => ({
-    dateKey,
-    dateLabel: dateKey,
-    products,
-    title: products.length === 1 ? `${products[0].name} vence ${dateKey}` : `${products.length} productos vencen ${dateKey}`,
-  }));
+
+  return Array.from(grouped.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([dateKey, products]) => {
+      const dateLabel = formatExpiryDisplay(dateKey, today);
+      return {
+        dateKey,
+        dateLabel,
+        products,
+        title: products.length === 1 ? `${products[0].name} vence ${dateLabel}` : `${products.length} productos vencen ${dateLabel}`,
+      };
+    });
 }
 
-export function buildWeeklySummary(items: NotificationItem[], preferences = defaultNotificationPreferences) {
-  const groups = groupNotifications(items, preferences);
+export function buildWeeklySummary(
+  items: Product[],
+  preferences = defaultNotificationPreferences,
+  today: Date = new Date()
+) {
+  const groups = groupNotifications(items, preferences, today);
   const products = groups.flatMap((group) => group.products);
   return {
     groups,

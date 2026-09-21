@@ -1,5 +1,7 @@
 // Smart Shopping List and Restocking System for FreshTrack
 import { estimateShelfLife } from "./shelfLifeCatalog";
+import { addDaysISO } from "./dates";
+import { Product, StoredProduct } from "@/types/product";
 
 export type ShoppingItemReason = "frecuente" | "stock_bajo" | "manual" | "vencido";
 
@@ -21,15 +23,7 @@ export type ConsumptionHistoryEntry = {
   createdAt: string;
 };
 
-export type PantryItemReference = {
-  id: number;
-  name: string;
-  category: string;
-  quantity: string;
-  days: number;
-  status: "ok" | "soon" | "expired";
-  icon?: string;
-};
+export type PantryItemReference = Product;
 
 const SHOPPING_LIST_STORAGE_KEY = "freshtrack-shopping-list-v1";
 
@@ -92,7 +86,7 @@ export function calculateIngredientFrequencies(
  * 3. Expired items that need replacement.
  */
 export function generateSmartSuggestions(
-  pantry: PantryItemReference[],
+  pantry: Product[],
   history: ConsumptionHistoryEntry[],
   currentList: ShoppingItem[]
 ): ShoppingItem[] {
@@ -105,7 +99,6 @@ export function generateSmartSuggestions(
     .sort((a, b) => b[1].count - a[1].count);
 
   for (const [key, { count, rawName }] of sortedFrequent) {
-    // If it was consumed at least once and is NOT currently well-stocked in the pantry or on the shopping list
     if (existingListNames.has(key)) continue;
 
     const inPantry = pantry.find((p) => normalize(p.name) === key);
@@ -181,64 +174,32 @@ function capitalize(s: string) {
 }
 
 /**
- * Helper to calculate formatted expiry string (e.g. "27 sep" or "12 ago 27")
- */
-export function formatExpiryDate(daysFromNow: number): string {
-  const target = new Date();
-  target.setDate(target.getDate() + Math.max(1, daysFromNow));
-  const monthNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  const day = target.getDate();
-  const month = monthNames[target.getMonth()];
-  const currentYear = new Date().getFullYear();
-  const targetYear = target.getFullYear();
-
-  if (targetYear > currentYear) {
-    const shortYear = String(targetYear).slice(2);
-    return `${day} ${month} ${shortYear}`;
-  }
-  return `${day} ${month}`;
-}
-
-/**
- * Converts purchased/checked items from the shopping list into pantry products,
- * automatically estimating shelf life and dates.
+ * Converts purchased/checked items from the shopping list into stored pantry products,
+ * automatically estimating shelf life and setting ISO expiryDate.
  */
 export function migratePurchasedItemsToPantry(
   currentShoppingList: ShoppingItem[],
-  detectIconFn: (name: string, category: string) => string
+  detectIconFn: (name: string, category: string) => string,
+  today: Date = new Date()
 ): {
-  createdProducts: Array<{
-    id: number;
-    name: string;
-    category: string;
-    expiry: string;
-    days: number;
-    quantity: string;
-    status: "ok" | "soon" | "expired";
-    icon: string;
-    estimated: boolean;
-    dateLabel: "vencimiento";
-  }>;
+  createdProducts: StoredProduct[];
   remainingShoppingList: ShoppingItem[];
 } {
   const completed = currentShoppingList.filter((item) => item.completed);
   const remainingShoppingList = currentShoppingList.filter((item) => !item.completed);
 
-  const createdProducts = completed.map((item) => {
+  const createdProducts: StoredProduct[] = completed.map((item) => {
     const estimate = estimateShelfLife(item.name, "cerrado", item.category);
     const shelfDays = estimate?.days || 7;
-    const expiry = formatExpiryDate(shelfDays);
-    const status: "ok" | "soon" | "expired" = shelfDays < 0 ? "expired" : shelfDays <= 3 ? "soon" : "ok";
+    const expiryDate = addDaysISO(shelfDays, today);
     const icon = detectIconFn(item.name, item.category);
 
     return {
       id: Date.now() + Math.floor(Math.random() * 10000),
       name: item.name,
       category: item.category,
-      expiry,
-      days: shelfDays,
+      expiryDate,
       quantity: item.quantity || "1 unidad",
-      status,
       icon,
       estimated: true,
       dateLabel: "vencimiento" as const,

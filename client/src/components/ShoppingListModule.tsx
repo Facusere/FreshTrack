@@ -13,37 +13,20 @@ import {
   ConsumptionHistoryEntry,
   generateSmartSuggestions,
   migratePurchasedItemsToPantry,
-  PantryItemReference,
   ShoppingItem,
   ShoppingItemReason,
 } from "@/lib/shoppingList";
+import { ALL_CATEGORIES } from "@/lib/categories";
+import { Product, StoredProduct } from "@/types/product";
 
 interface ShoppingListModuleProps {
   shoppingList: ShoppingItem[];
   setShoppingList: React.Dispatch<React.SetStateAction<ShoppingItem[]>>;
-  pantryProducts: PantryItemReference[];
+  pantryProducts: Product[];
   consumptionHistory: ConsumptionHistoryEntry[];
-  onAddProductsToPantry: (products: any[]) => void;
+  onAddProductsToPantry: (products: StoredProduct[]) => void;
   detectIconFn: (name: string, category: string) => string;
 }
-
-const CATEGORIES = [
-  "Almacén seco",
-  "Lácteos",
-  "Fiambres y embutidos",
-  "Carnes",
-  "Pescados y mariscos",
-  "Verduras frescas",
-  "Frutas frescas",
-  "Panadería",
-  "Enlatados y conservas",
-  "Congelados",
-  "Salsas y aderezos",
-  "Snacks y galletitas",
-  "Bebidas",
-  "Café, té y desayuno",
-  "Refrigerados preparados",
-];
 
 const reasonBadges: Record<ShoppingItemReason, { label: string; bg: string; text: string }> = {
   frecuente: { label: "Frecuente", bg: "bg-[#e5f1e8]", text: "text-[#2e6443]" },
@@ -245,7 +228,7 @@ export function ShoppingListModule({
           onChange={(e) => setItemCategory(e.target.value)}
           className="rounded-xl border border-[#e5dfd2] bg-white px-2.5 py-2 text-[12px] text-[#263e32] outline-none"
         >
-          {CATEGORIES.map((cat) => (
+          {ALL_CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
             </option>

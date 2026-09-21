@@ -2,16 +2,15 @@
 import Tesseract from "tesseract.js";
 import { DateLabel, detectDateCandidates } from "./dateRecognition";
 import { shelfLifeCatalog } from "./shelfLifeCatalog";
-import { formatExpiryDate } from "./shoppingList";
+import { addDaysISO, parseDateCandidateToISO } from "./dates";
+export { parseDateCandidateToISO };
 
 export type ScannedProductResult = {
   id: number;
   name: string;
   category: string;
-  expiry: string;
-  days: number;
+  expiryDate: string; // ISO format (YYYY-MM-DD)
   quantity: string;
-  status: "ok" | "soon" | "expired";
   icon: string;
   estimated: boolean;
   dateLabel: DateLabel;
@@ -31,47 +30,12 @@ const normalize = (value: string) =>
     .trim();
 
 /**
- * Parses date string (e.g. "18/09/2026", "18/09/26", "18-09-2026") into days from today and display string
- */
-export function parseDateCandidateToExpiry(dateStr: string): { days: number; expiry: string } {
-  try {
-    const parts = dateStr.split(/[\/\-]/);
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      let year = parseInt(parts[2], 10);
-      if (year < 100) year += 2000;
-
-      const targetDate = new Date(year, month, day);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      targetDate.setHours(0, 0, 0, 0);
-
-      const diffMs = targetDate.getTime() - today.getTime();
-      const days = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-      const monthNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-      const displayMonth = monthNames[targetDate.getMonth()];
-      const currentYear = new Date().getFullYear();
-      const expiry =
-        targetDate.getFullYear() > currentYear
-          ? `${day} ${displayMonth} ${String(targetDate.getFullYear()).slice(2)}`
-          : `${day} ${displayMonth}`;
-
-      return { days, expiry };
-    }
-  } catch {
-    // fallback
-  }
-  return { days: 5, expiry: "5 días" };
-}
-
-/**
  * Extracts candidate products and expiry dates from raw OCR text.
  */
 export function parseReceiptAndLabelText(
   rawText: string,
-  detectIconFn: (name: string, category: string) => string
+  detectIconFn: (name: string, category: string) => string,
+  today: Date = new Date()
 ): ScannedProductResult[] {
   const lines = rawText
     .split(/\r?\n/)
@@ -120,8 +84,7 @@ export function parseReceiptAndLabelText(
       }
 
       // Check if this line or adjacent lines (+/- 3 lines) has an explicit expiry date
-      let lineExpiry = "";
-      let lineDays = matchedItem.closedDays;
+      let expiryDate = "";
       let isEstimated = true;
       let dateLabel: DateLabel = "vencimiento";
 
@@ -136,37 +99,37 @@ export function parseReceiptAndLabelText(
       });
 
       if (nearbyExpiry) {
-        const parsed = parseDateCandidateToExpiry(nearbyExpiry.value);
-        lineDays = parsed.days;
-        lineExpiry = parsed.expiry;
-        isEstimated = false;
-        dateLabel = nearbyExpiry.label;
+        const parsedISO = parseDateCandidateToISO(nearbyExpiry.value);
+        if (parsedISO) {
+          expiryDate = parsedISO;
+          isEstimated = false;
+          dateLabel = nearbyExpiry.label;
+        }
       } else if (explicitExpiry && lines.length <= 12) {
         // Short text or label context (e.g. focused on a container or box)
-        const parsed = parseDateCandidateToExpiry(explicitExpiry.value);
-        lineDays = parsed.days;
-        lineExpiry = parsed.expiry;
-        isEstimated = false;
-        dateLabel = explicitExpiry.label;
-      } else {
-        // Supermarket receipt without item expiry: estimate using shelf life catalog
-        lineExpiry = formatExpiryDate(matchedItem.closedDays);
-        lineDays = matchedItem.closedDays;
+        const parsedISO = parseDateCandidateToISO(explicitExpiry.value);
+        if (parsedISO) {
+          expiryDate = parsedISO;
+          isEstimated = false;
+          dateLabel = explicitExpiry.label;
+        }
+      }
+
+      // If not parsed from text, fall back to shelf life catalog estimation
+      if (!expiryDate) {
+        expiryDate = addDaysISO(matchedItem.closedDays, today);
         isEstimated = true;
         dateLabel = "vencimiento";
       }
 
-      const status = lineDays < 0 ? "expired" : lineDays <= 3 ? "soon" : "ok";
       const icon = detectIconFn(matchedItem.name, matchedItem.category);
 
       results.push({
         id: Date.now() + results.length + Math.floor(Math.random() * 1000),
         name: matchedItem.name,
         category: matchedItem.category,
-        expiry: lineExpiry,
-        days: lineDays,
+        expiryDate,
         quantity,
-        status,
         icon,
         estimated: isEstimated,
         dateLabel,
@@ -214,14 +177,23 @@ export async function performBrowserOCR(
 /**
  * Built-in realistic sample receipts for instant testing or environments without camera access.
  */
-export const SAMPLE_TICKETS = [
-  {
-    name: "Ticket Supermercado COTO",
-    mode: "ticket" as const,
-    text: `SUPERMERCADOS COTO S.A.
+export function buildSampleTickets(today: Date = new Date()) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const formatDateDMY = (d: Date) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+  const todayStr = formatDateDMY(today);
+  const elabDate = formatDateDMY(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 15));
+  const venceDate = formatDateDMY(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2));
+  const prefDate = formatDateDMY(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 4));
+
+  return [
+    {
+      name: "Ticket Supermercado COTO",
+      mode: "ticket" as const,
+      text: `SUPERMERCADOS COTO S.A.
 CUIT: 30-54808315-6
 SUCURSAL 104 - BELGRANO
-FECHA: 20/09/2026 HORA: 17:42
+FECHA: ${todayStr} HORA: 17:42
 --------------------------------
 1  LECHE ENTERA 1L          $1.250
 1  YOGUR NATURAL            $1.100
@@ -234,23 +206,23 @@ TOTAL                       $7.200
 EFECTIVO                   $10.000
 VUELTO                      $2.800
 GRACIAS POR SU COMPRA`,
-  },
-  {
-    name: "Etiqueta Lácteo / Yogur",
-    mode: "label" as const,
-    text: `YOGUR NATURAL CON PROBIOTICOS
+    },
+    {
+      name: "Etiqueta Lácteo / Yogur",
+      mode: "label" as const,
+      text: `YOGUR NATURAL CON PROBIOTICOS
 LOTE: L-4892A
-ELAB: 05/09/2026
-VENCE: 22/09/2026
-CONSUMIR PREFERENTEMENTE ANTES DE: 24/09/2026
+ELAB: ${elabDate}
+VENCE: ${venceDate}
+CONSUMIR PREFERENTEMENTE ANTES DE: ${prefDate}
 MANTENER REFRIGERADO ENTRE 2°C Y 8°C`,
-  },
-  {
-    name: "Ticket Carnicería & Verdulería",
-    mode: "ticket" as const,
-    text: `GRANJA & VERDULERIA LA HUERTA
+    },
+    {
+      name: "Ticket Carnicería & Verdulería",
+      mode: "ticket" as const,
+      text: `GRANJA & VERDULERIA LA HUERTA
 TICKET CONSUMIDOR FINAL
-FECHA: 20/09/2026
+FECHA: ${todayStr}
 --------------------------------
 PECHUGA DE POLLO 2U          $4.500
 TOMATE CHERRY 1 BANDEJA      $1.800
@@ -258,5 +230,8 @@ BANANA 1KG                   $1.600
 MANZANA ROJA 1KG             $1.900
 TOTAL                        $9.800
 PAGO CON TARJETA DEBITO`,
-  },
-];
+    },
+  ];
+}
+
+export const SAMPLE_TICKETS = buildSampleTickets();

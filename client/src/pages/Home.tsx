@@ -49,30 +49,13 @@ import {
 } from "@/lib/pwaAndNotifications";
 import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shoppingList";
 
-type ProductStatus = "ok" | "soon" | "expired";
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  expiry: string;
-  days: number;
-  quantity: string;
-  status: ProductStatus;
-  icon: string;
-  location?: string;
-  estimated?: boolean;
-  dateLabel?: DateLabel;
-  corrected?: boolean;
-};
+import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
+import { ALL_CATEGORIES } from "@/lib/categories";
+import { addDaysISO, daysUntil, formatRelativeDays, useToday } from "@/lib/dates";
+import { loadStoredProducts, saveStoredProducts, loadJSON, saveJSON, CONSUMPTION_HISTORY_KEY } from "@/lib/storage";
 
 type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
-type ConsumptionRecord = { id: number; title: string; ingredients: string[]; before: Product[]; delta: { kg: number; money: number; meals: number }; createdAt: string };
-const PRODUCTS_STORAGE_KEY = "freshtrack-products-v2";
-const CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v1";
-
-function loadStored<T>(key: string, fallback: T): T {
-  try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; }
-}
+type ConsumptionRecord = { id: number; title: string; ingredients: string[]; before: StoredProduct[]; delta: { kg: number; money: number; meals: number }; createdAt: string };
 
 function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
   if (filter === "all") return true;
@@ -82,16 +65,17 @@ function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
   return /(quick|salad|ensalada|omelette|tortilla|sandwich|wrap|pasta|salteado)/i.test(text);
 }
 
-const initialProducts: Product[] = [
-  { id: 1, name: "Yogur natural", category: "Lácteos", expiry: "18 sep", days: 3, quantity: "4 unidades", status: "soon", icon: "🥣", estimated: true, dateLabel: "vencimiento" },
-  { id: 2, name: "Espinaca fresca", category: "Frutas y verduras", expiry: "19 sep", days: 4, quantity: "1 atado", status: "soon", icon: "🥬" },
-  { id: 3, name: "Pechuga de pollo", category: "Carnes", expiry: "21 sep", days: 6, quantity: "2 unidades", status: "ok", icon: "🍗" },
-  { id: 4, name: "Pan de molde", category: "Panadería", expiry: "24 sep", days: 9, quantity: "1 paquete", status: "ok", icon: "🍞" },
-  { id: 5, name: "Tomates cherry", category: "Frutas y verduras", expiry: "16 sep", days: 1, quantity: "1 bandeja", status: "soon", icon: "🍅" },
-  { id: 6, name: "Leche entera", category: "Lácteos", expiry: "14 sep", days: -1, quantity: "2 litros", status: "expired", icon: "🥛" },
-  { id: 7, name: "Pasta seca", category: "Almacén", expiry: "12 ago 27", days: 331, quantity: "2 paquetes", status: "ok", icon: "🍝" },
-];
-
+export function buildDemoProducts(today: Date = new Date()): StoredProduct[] {
+  return [
+    { id: 1, name: "Yogur natural", category: "Lácteos", expiryDate: addDaysISO(3, today), quantity: "4 unidades", icon: "🥣", estimated: true, dateLabel: "vencimiento" },
+    { id: 2, name: "Espinaca fresca", category: "Verduras frescas", expiryDate: addDaysISO(4, today), quantity: "1 atado", icon: "🥬" },
+    { id: 3, name: "Pechuga de pollo", category: "Carnes", expiryDate: addDaysISO(6, today), quantity: "2 unidades", icon: "🍗" },
+    { id: 4, name: "Pan de molde", category: "Panadería", expiryDate: addDaysISO(9, today), quantity: "1 paquete", icon: "🍞" },
+    { id: 5, name: "Tomates cherry", category: "Verduras frescas", expiryDate: addDaysISO(1, today), quantity: "1 bandeja", icon: "🍅" },
+    { id: 6, name: "Leche entera", category: "Lácteos", expiryDate: addDaysISO(-1, today), quantity: "2 litros", icon: "🥛" },
+    { id: 7, name: "Pasta seca", category: "Almacén seco", expiryDate: addDaysISO(331, today), quantity: "2 paquetes", icon: "🍝" },
+  ];
+}
 
 const statusCopy: Record<ProductStatus, { label: string; color: string; dot: string }> = {
   ok: { label: "En fecha", color: "text-[#43715b] bg-[#e7f1e9]", dot: "bg-[#5d9b72]" },
@@ -174,7 +158,7 @@ function ProductRow({ product, onEdit }: { product: Product; onEdit: (product: P
       </div>
       <div className="text-left">
         <p className="text-[12px] font-semibold text-[#34473e]">{product.expiry}</p>
-        <p className="mt-0.5 text-[11px] text-[#9aa098]">{product.days < 0 ? "hace 1 día" : `en ${product.days} días`}</p>
+        <p className="mt-0.5 text-[11px] text-[#9aa098]">{formatRelativeDays(product.days)}</p>
       </div>
       <MiniStatus status={product.status} />
       <div className="relative flex justify-end">
@@ -213,17 +197,7 @@ function NotificationSettingsModal({
 }) {
   const [draft, setDraft] = useState(preferences);
   const [permission, setPermission] = useState(getNotificationPermission());
-  const summary = buildWeeklySummary(
-    products.map(({ id, name, category, expiry, days, status }) => ({
-      id,
-      name,
-      category,
-      expiry,
-      days,
-      status,
-    })),
-    draft
-  );
+  const summary = buildWeeklySummary(products, draft);
   const categories = Object.keys(defaultNotificationPreferences.categoryLeadDays);
 
   const handleRequestPermission = async () => {
@@ -440,7 +414,7 @@ function WeekCalendar({ products }: { products: Product[] }) {
               dayProducts.map((product) => (
                 <button
                   key={product.id}
-                  onClick={() => toast(product.name, { description: `${product.category} · ${product.days < 0 ? "vencido" : `vence en ${product.days} días`}` })}
+                  onClick={() => toast(product.name, { description: `${product.category} · ${formatRelativeDays(product.days)}` })}
                   className="w-full rounded-xl bg-[#f7f4ed] p-2 text-left transition hover:bg-[#eaf2e7]"
                 >
                   <span className="text-base">{product.icon}</span>
@@ -458,44 +432,34 @@ function WeekCalendar({ products }: { products: Product[] }) {
   );
 }
 
-const allCategories = [
-  "Almacén seco",
-  "Lácteos",
-  "Fiambres y embutidos",
-  "Carnes",
-  "Pescados y mariscos",
-  "Verduras frescas",
-  "Frutas frescas",
-  "Panadería",
-  "Enlatados y conservas",
-  "Congelados",
-  "Salsas y aderezos",
-  "Snacks y galletitas",
-  "Bebidas",
-  "Café, té y desayuno",
-  "Refrigerados preparados",
-];
-
 function AddProductModal({
   onClose,
   onAdd,
   initialProduct,
   onCorrection,
   onSuggest,
+  today = new Date(),
 }: {
   onClose: () => void;
-  onAdd: (product: Product) => void;
+  onAdd: (product: StoredProduct) => void;
   initialProduct?: Product;
-  onCorrection?: (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiry: string) => void;
+  onCorrection?: (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiryDate: string) => void;
   onSuggest?: (productName: string, category: string, state: ShelfLifeState, days: number) => void;
+  today?: Date;
 }) {
   const [name, setName] = useState(initialProduct?.name || "");
   const [category, setCategory] = useState(initialProduct?.category || "Almacén seco");
   const [quantity, setQuantity] = useState(initialProduct?.quantity || "1 unidad");
-  const [expiry, setExpiry] = useState(initialProduct?.expiry || "20 sep");
+  const [expiryDate, setExpiryDate] = useState(() => initialProduct?.expiryDate || addDaysISO(7, today));
+  const [isCustomExpiry, setIsCustomExpiry] = useState(false);
   const [dateLabel, setDateLabel] = useState<DateLabel>(initialProduct?.dateLabel || "vencimiento");
   const [shelfState, setShelfState] = useState<ShelfLifeState>("cerrado");
-  const [shelfDays, setShelfDays] = useState(() => estimateShelfLife(initialProduct?.name || "", "cerrado", initialProduct?.category)?.days || 7);
+  const [shelfDays, setShelfDays] = useState(() => {
+    if (initialProduct?.expiryDate) {
+      return Math.max(1, daysUntil(initialProduct.expiryDate, today));
+    }
+    return estimateShelfLife(initialProduct?.name || "", "cerrado", initialProduct?.category)?.days || 7;
+  });
   const isEditing = Boolean(initialProduct);
 
   useEffect(() => {
@@ -509,38 +473,64 @@ function AddProductModal({
   const handleNameChange = (val: string) => {
     setName(val);
     const estimate = estimateShelfLife(val, shelfState, category);
-    if (estimate) setShelfDays(estimate.days);
+    if (estimate) {
+      setShelfDays(estimate.days);
+      if (!isCustomExpiry && !isEditing) {
+        setExpiryDate(addDaysISO(estimate.days, today));
+      }
+    }
   };
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
     const estimate = estimateShelfLife(name, shelfState, val);
-    if (estimate) setShelfDays(estimate.days);
+    if (estimate) {
+      setShelfDays(estimate.days);
+      if (!isCustomExpiry && !isEditing) {
+        setExpiryDate(addDaysISO(estimate.days, today));
+      }
+    }
   };
 
   const handleShelfStateChange = (val: ShelfLifeState) => {
     setShelfState(val);
     const estimate = estimateShelfLife(name, val, category);
-    if (estimate) setShelfDays(estimate.days);
+    if (estimate) {
+      setShelfDays(estimate.days);
+      if (!isCustomExpiry && !isEditing) {
+        setExpiryDate(addDaysISO(estimate.days, today));
+      }
+    }
+  };
+
+  const handleShelfDaysChange = (days: number) => {
+    const validDays = Number(days) || 1;
+    setShelfDays(validDays);
+    setExpiryDate(addDaysISO(validDays, today));
+    setIsCustomExpiry(false);
+  };
+
+  const handleExpiryDateChange = (val: string) => {
+    setExpiryDate(val);
+    setIsCustomExpiry(true);
+    const diff = daysUntil(val, today);
+    setShelfDays(Math.max(1, diff));
   };
 
   const handleSave = () => {
     if (!name.trim()) return;
     if (initialProduct && onCorrection) {
-      onCorrection(initialProduct, dateLabel, category, expiry);
+      onCorrection(initialProduct, dateLabel, category, expiryDate);
     } else {
-      const calcDays = Number(shelfDays) || 5;
-      const status: ProductStatus = calcDays < 0 ? "expired" : calcDays <= 3 ? "soon" : "ok";
       onAdd({
         id: Date.now(),
         name: name.trim(),
         category,
-        expiry,
-        days: calcDays,
+        expiryDate,
         quantity: quantity.trim() || "1 unidad",
-        status,
         icon: detectProductIcon(name, category),
         dateLabel,
+        location: inferLocation(category),
       });
     }
     onClose();
@@ -579,7 +569,7 @@ function AddProductModal({
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full appearance-none rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]"
               >
-                {allCategories.map((cat) => (
+                {ALL_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
@@ -598,10 +588,11 @@ function AddProductModal({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Fecha encontrada</span>
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.1em] text-[#829087]">Fecha de vencimiento</span>
               <input
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
+                type="date"
+                value={expiryDate}
+                onChange={(e) => handleExpiryDateChange(e.target.value)}
                 className="w-full rounded-xl border border-[#e3e6de] bg-[#fbfaf6] px-3.5 py-3 text-sm text-[#213e32] outline-none focus:border-[#8eb89a]"
               />
             </label>
@@ -640,7 +631,7 @@ function AddProductModal({
                 type="number"
                 min="1"
                 value={shelfDays}
-                onChange={(e) => setShelfDays(Number(e.target.value))}
+                onChange={(e) => handleShelfDaysChange(Number(e.target.value))}
                 className="w-20 rounded-lg border border-[#d6e3d4] bg-white px-2.5 py-2 text-sm font-semibold text-[#294338] outline-none focus:border-[#8eb89a]"
               />
               <span className="text-[11px] text-[#78907d]">días estimados</span>
@@ -677,7 +668,9 @@ function AddProductModal({
 }
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>(() => loadStored(PRODUCTS_STORAGE_KEY, initialProducts));
+  const today = useToday();
+  const [storedProducts, setStoredProducts] = useState<StoredProduct[]>(() => loadStoredProducts(new Date()) ?? buildDemoProducts(new Date()));
+  const products = useMemo(() => storedProducts.map((p) => deriveProduct(p, today)), [storedProducts, today]);
   const [activeNav, setActiveNav] = useState("Resumen");
   const [filter, setFilter] = useState<"all" | ProductStatus>("all");
   const [search, setSearch] = useState("");
@@ -696,7 +689,7 @@ export default function Home() {
   const [recipeDetail, setRecipeDetail] = useState<RecipeSuggestion | null>(null);
   const [recipeDetailLoading, setRecipeDetailLoading] = useState(false);
   const [consumptionSuccess, setConsumptionSuccess] = useState<string[]>([]);
-  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>(() => loadStored(CONSUMPTION_HISTORY_KEY, []));
+  const [consumptionHistory, setConsumptionHistory] = useState<ConsumptionRecord[]>(() => loadJSON(CONSUMPTION_HISTORY_KEY, []));
   const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
   const [recipeLimit, setRecipeLimit] = useState(3);
   const [showAllPantry, setShowAllPantry] = useState(false);
@@ -777,13 +770,13 @@ export default function Home() {
     { label: "Reportes", icon: BarChart3 },
   ];
 
-  const notificationGroups = groupNotifications(products.map(({ id, name, category, expiry, days, status }) => ({ id, name, category, expiry, days, status })), notificationPreferences);
+  const notificationGroups = groupNotifications(products, notificationPreferences);
   const expiringProducts = products.filter((product) => product.status === "soon" || product.status === "expired");
   const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
   const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
-  useEffect(() => { localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem(CONSUMPTION_HISTORY_KEY, JSON.stringify(consumptionHistory)); }, [consumptionHistory]);
+  useEffect(() => { saveStoredProducts(storedProducts); }, [storedProducts]);
+  useEffect(() => { saveJSON(CONSUMPTION_HISTORY_KEY, consumptionHistory); }, [consumptionHistory]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -802,9 +795,9 @@ export default function Home() {
 
   const markRecipeUsed = (recipe: RecipeSuggestion) => {
     const usedIngredients = recipe.matchedIngredients;
-    const before = products;
-    const result = consumeRecipeIngredients(products, usedIngredients);
-    setProducts(result.remaining);
+    const before = storedProducts;
+    const result = consumeRecipeIngredients(storedProducts, usedIngredients);
+    setStoredProducts(result.remaining);
     const delta = { kg: 0.4, money: 1200, meals: 1 };
     setImpact(recordImpact(delta));
     setConsumptionHistory((current) => [...current.slice(-4), { id: Date.now(), title: recipe.title, ingredients: result.consumed, before, delta, createdAt: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) }]);
@@ -824,21 +817,31 @@ export default function Home() {
       rebuiltProducts = consumeRecipeIngredients(rebuiltProducts, item.ingredients).remaining;
       return { ...item, before };
     });
-    setProducts(rebuiltProducts);
+    setStoredProducts(rebuiltProducts);
     setImpact(reverseImpact(record.delta));
     setConsumptionHistory((current) => [...current.slice(0, recordIndex), ...rebuiltLater]);
     setConsumptionSuccess([]);
     toast("Consumo deshecho", { description: `Se revirtió “${record.title}” sin afectar los consumos posteriores.` });
   };
 
-  const addProducts = (newProducts: Product[]) => {
-    setProducts((current) => [...newProducts, ...current]);
+  const addProducts = (newProducts: StoredProduct[]) => {
+    setStoredProducts((current) => [...newProducts, ...current]);
     toast.success(`${newProducts.length} productos agregados`, { description: "Las fechas estimadas quedaron listas para revisar." });
   };
 
-  const addProduct = (newProduct: Product) => {
+  const addProduct = (newProduct: StoredProduct) => {
     const learning = getLearningRule(newProduct.name, newProduct.category);
-    setProducts((current) => [{ ...newProduct, dateLabel: learning?.preferredLabel || newProduct.dateLabel, days: learning?.shelfLifeDays || newProduct.days }, ...current]);
+    const expiryDate = learning?.shelfLifeDays
+      ? addDaysISO(learning.shelfLifeDays, today)
+      : newProduct.expiryDate;
+    setStoredProducts((current) => [
+      {
+        ...newProduct,
+        expiryDate,
+        dateLabel: learning?.preferredLabel || newProduct.dateLabel,
+      },
+      ...current,
+    ]);
     toast.success(`${newProduct.name} agregado a tu despensa`, { description: learning ? "Aplicamos una regla aprendida de usos anteriores." : "La fecha queda lista para revisar." });
   };
 
@@ -851,9 +854,9 @@ export default function Home() {
     toast.success(result.validated ? "Vida útil validada por la comunidad" : "Sugerencia guardada", { description: result.validated ? `Se aplicará a futuras estimaciones (${result.userIds.length} coincidencias).` : `Necesita ${result.votesNeeded} coincidencias más para aplicarse.` });
   };
 
-  const correctProduct = (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiry: string) => {
+  const correctProduct = (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiryDate: string) => {
     saveLearningCorrection({ productKey: product.name, category: nextCategory, preferredLabel: nextLabel });
-    setProducts((current) => current.map((item) => item.id === product.id ? { ...item, category: nextCategory, expiry: nextExpiry, dateLabel: nextLabel, corrected: true } : item));
+    setStoredProducts((current) => current.map((item) => item.id === product.id ? { ...item, category: nextCategory, expiryDate: nextExpiryDate, dateLabel: nextLabel, corrected: true } : item));
     setSelectedProduct(null);
     setEditingProduct(null);
     toast.success("Corrección aprendida", { description: `La próxima lectura priorizará “${labelForDisplay(nextLabel)}” para ${product.name}.` });
@@ -867,7 +870,7 @@ export default function Home() {
 
   const removeSelected = () => {
     if (!selectedProduct) return;
-    setProducts((current) => current.filter((product) => product.id !== selectedProduct.id));
+    setStoredProducts((current) => current.filter((product) => product.id !== selectedProduct.id));
     toast(`${selectedProduct.name} eliminado`, { icon: <Trash2 size={15} /> });
     setSelectedProduct(null);
   };
@@ -998,7 +1001,7 @@ export default function Home() {
                             aria-label="Filtrar por categoría"
                           >
                             <option value="all">Todas las categorías</option>
-                            {allCategories.map((cat) => (
+                            {ALL_CATEGORIES.map((cat) => (
                               <option key={cat} value={cat}>
                                 {cat}
                               </option>
@@ -1126,7 +1129,7 @@ export default function Home() {
                         key={item.name}
                         onClick={() => {
                           setSelectedProduct(item.product);
-                          toast(item.name, { description: `Ubicación: ${item.place} · ${item.product.days < 0 ? "Vencido" : `Vence en ${item.product.days} días`}` });
+                          toast(item.name, { description: `Ubicación: ${item.place} · ${formatRelativeDays(item.product.days)}` });
                         }}
                         className="group rounded-xl bg-[#204632] p-3 text-left transition hover:bg-[#2a5740]"
                       >
@@ -1193,10 +1196,10 @@ export default function Home() {
           detectIconFn={detectProductIcon}
         />
       )}
-      {modal === "add" && <AddProductModal onClose={() => { setModal(null); setEditingProduct(null); }} onAdd={addProduct} initialProduct={editingProduct || undefined} onCorrection={correctProduct} onSuggest={suggestShelfLife} />}
+      {modal === "add" && <AddProductModal onClose={() => { setModal(null); setEditingProduct(null); }} onAdd={addProduct} initialProduct={editingProduct || undefined} onCorrection={correctProduct} onSuggest={suggestShelfLife} today={today} />}
       {recipeDetail && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center"><div className="max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-[28px] bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.26)]"><div className="relative h-40 overflow-hidden rounded-t-[28px] bg-[#e8dfcf]"><img src={recipeDetail.image} alt="" className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#17372b]/75 to-transparent" /><button aria-label="Cerrar receta" onClick={() => setRecipeDetail(null)} className="absolute right-4 top-4 rounded-full bg-white/80 p-2 text-[#315542] backdrop-blur-sm"><X size={17} /></button><div className="absolute bottom-4 left-5 right-5"><p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p><p className="mt-1 text-[10px] text-[#dcebdd]">{recipeDetail.area || "Receta sugerida"}{recipeDetail.category ? ` · ${recipeDetail.category}` : ""}</p></div></div>{recipeDetailLoading ? <div className="p-6 text-center text-sm text-[#718273]">Cargando ingredientes y pasos…</div> : <div className="p-5 sm:p-6"><div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Ingredientes</p><div className="mt-3 space-y-2">{(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-[#f0ede6] pb-2 text-[11px]"><span className="font-semibold text-[#425b4b]">{ingredient.name}</span><span className="text-right text-[#9a8b75]">{ingredient.measure}</span></div>)}</div></div><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Paso a paso</p><div className="mt-3 space-y-3">{(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e6f0e6] text-[10px] font-bold text-[#4d835e]">{index + 1}</span><p className="text-[11px] leading-5 text-[#6e7d70]">{step}</p></div>)}</div></div></div><button data-testid="consume-recipe" onClick={() => { markRecipeUsed(recipeDetail); setRecipeDetail(null); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white hover:bg-[#16392c]"><Check size={15} /> Aproveché esta receta</button></div>}</div></div>}
       {notificationModal && <NotificationSettingsModal onClose={() => setNotificationModal(false)} products={products} preferences={notificationPreferences} onSave={savePreferences} />}
-      {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{selectedProduct.days < 0 ? "Este producto ya venció" : `Faltan ${selectedProduct.days} días`}</p>{selectedProduct.corrected && <p className="mt-2 text-[10px] font-semibold text-[#4e815b]">✓ Corrección aplicada a futuras detecciones</p>}</div><div className="mt-4 flex gap-2"><button onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Corregir</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
+      {selectedProduct && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/30 p-3 backdrop-blur-sm sm:items-center"><div className="w-full max-w-[370px] rounded-[26px] bg-[#fffdf9] p-5 shadow-[0_30px_80px_rgba(13,33,25,0.2)]"><div className="flex items-start gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6f1e7] text-2xl">{selectedProduct.icon}</span><div className="min-w-0 flex-1"><p className="font-serif text-xl font-semibold text-[#17372b]">{selectedProduct.name}</p><p className="mt-1 text-[11px] text-[#90998f]">{selectedProduct.category} · {selectedProduct.quantity}</p></div><button onClick={() => setSelectedProduct(null)} className="text-[#9ba49c] hover:text-[#17372b]"><X size={17} /></button></div><div className="mt-5 rounded-2xl bg-[#f7f4ed] p-3.5"><div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-[#7f8980]">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span><MiniStatus status={selectedProduct.status} /></div><p className="mt-2 text-lg font-semibold text-[#294338]">{selectedProduct.expiry}</p><p className="mt-1 text-[11px] text-[#8d978f]">{formatRelativeDays(selectedProduct.days)}</p>{selectedProduct.corrected && <p className="mt-2 text-[10px] font-semibold text-[#4e815b]">✓ Corrección aplicada a futuras detecciones</p>}</div><div className="mt-4 flex gap-2"><button onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#dfe3db] px-3 py-2.5 text-[11px] font-bold text-[#657268] hover:bg-[#f6f3ed]"><Pencil size={14} /> Corregir</button><button onClick={removeSelected} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#f9e5df] px-3 py-2.5 text-[11px] font-bold text-[#a94c3c] hover:bg-[#f4d8d0]"><Trash2 size={14} /> Eliminar</button></div></div></div>}
     </div>
   );
 }

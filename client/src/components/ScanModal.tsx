@@ -15,55 +15,25 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DateLabel, labelForDisplay } from "@/lib/dateRecognition";
+import { labelForDisplay } from "@/lib/dateRecognition";
 import {
   parseReceiptAndLabelText,
   performBrowserOCR,
   SAMPLE_TICKETS,
   ScannedProductResult,
 } from "@/lib/ocrScanner";
-
-type ProductStatus = "ok" | "soon" | "expired";
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  expiry: string;
-  days: number;
-  quantity: string;
-  status: ProductStatus;
-  icon: string;
-  location?: string;
-  estimated?: boolean;
-  dateLabel?: DateLabel;
-  corrected?: boolean;
-};
+import { StoredProduct } from "@/types/product";
+import { ALL_CATEGORIES } from "@/lib/categories";
+import { addDaysISO } from "@/lib/dates";
+import { estimateShelfLife } from "@/lib/shelfLifeCatalog";
 
 interface ScanModalProps {
   onClose: () => void;
-  onComplete: (products: Product[]) => void;
+  onComplete: (products: StoredProduct[]) => void;
   detectIconFn: (name: string, category: string) => string;
 }
 
 type ScanInputMethod = "camera" | "upload" | "sample";
-
-const AVAILABLE_CATEGORIES = [
-  "Almacén seco",
-  "Lácteos",
-  "Fiambres y embutidos",
-  "Carnes",
-  "Pescados y mariscos",
-  "Verduras frescas",
-  "Frutas frescas",
-  "Panadería",
-  "Enlatados y conservas",
-  "Congelados",
-  "Salsas y aderezos",
-  "Snacks y galletitas",
-  "Bebidas",
-  "Café, té y desayuno",
-  "Refrigerados preparados",
-];
 
 export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps) {
   const [stage, setStage] = useState<"choose" | "scanning" | "results">("choose");
@@ -228,10 +198,8 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
           id: Date.now(),
           name: "Producto escaneado",
           category: "Almacén seco",
-          expiry: "25 sep",
-          days: 7,
+          expiryDate: addDaysISO(7),
           quantity: "1 unidad",
-          status: "ok",
           icon: "📦",
           estimated: true,
           dateLabel: "vencimiento",
@@ -257,6 +225,12 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         if (field === "name" || field === "category") {
           updated.icon = detectIconFn(updated.name, updated.category);
         }
+        if (field === "category" && item.estimated) {
+          const estimate = estimateShelfLife(updated.name, "cerrado", value);
+          if (estimate) {
+            updated.expiryDate = addDaysISO(estimate.days);
+          }
+        }
         return updated;
       })
     );
@@ -273,10 +247,8 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         id: Date.now(),
         name: "Nuevo producto",
         category: "Almacén seco",
-        expiry: "25 sep",
-        days: 7,
+        expiryDate: addDaysISO(7),
         quantity: "1 unidad",
-        status: "ok",
         icon: "📦",
         estimated: true,
         dateLabel: "vencimiento",
@@ -290,14 +262,12 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       onClose();
       return;
     }
-    const finalProducts: Product[] = detectedProducts.map((p) => ({
+    const finalProducts: StoredProduct[] = detectedProducts.map((p) => ({
       id: p.id,
       name: p.name,
       category: p.category,
-      expiry: p.expiry,
-      days: p.days,
+      expiryDate: p.expiryDate,
       quantity: p.quantity,
-      status: p.status,
       icon: p.icon,
       estimated: p.estimated,
       dateLabel: p.dateLabel,
@@ -633,7 +603,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                             onChange={(e) => handleUpdateProduct(product.id, "category", e.target.value)}
                             className="mt-0.5 w-full rounded-lg border border-[#e8e4db] bg-white px-1.5 py-1 text-[11px] text-[#4d5c52] outline-none"
                           >
-                            {AVAILABLE_CATEGORIES.map((cat) => (
+                            {ALL_CATEGORIES.map((cat) => (
                               <option key={cat} value={cat}>
                                 {cat}
                               </option>
@@ -642,11 +612,18 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1 text-[10px]">
-                        <span className="text-[#78887b]">
-                          {labelForDisplay(product.dateLabel || "desconocida")}:{" "}
-                          <strong className="text-[#2c473a]">{product.expiry}</strong>
-                        </span>
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[10px]">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[#78887b]">
+                            {labelForDisplay(product.dateLabel || "desconocida")}:
+                          </span>
+                          <input
+                            type="date"
+                            value={product.expiryDate}
+                            onChange={(e) => handleUpdateProduct(product.id, "expiryDate", e.target.value)}
+                            className="rounded-lg border border-[#e8e4db] bg-white px-2 py-0.5 text-[11px] font-semibold text-[#2c473a] outline-none focus:border-[#4c845d]"
+                          />
+                        </div>
                         <span
                           className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
                             product.estimated
