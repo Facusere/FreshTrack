@@ -35,7 +35,7 @@ import {
   Zap,
 } from "lucide-react";
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
-import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeState, submitShelfLifeSuggestion } from "@/lib/shelfLifeCatalog";
+import { estimateShelfLife, getCatalogSize, ShelfLifeState, saveShelfLifeCorrection } from "@/lib/shelfLifeCatalog";
 import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import {
   getRecipeDetails,
@@ -516,6 +516,10 @@ function AddProductModal({
   });
   const isEditing = Boolean(initialProduct);
 
+  const shelfEstimate = useMemo(() => {
+    return name.trim() ? estimateShelfLife(name, shelfState, category) : undefined;
+  }, [name, shelfState, category]);
+
   const handleNameChange = (val: string) => {
     setName(val);
     const estimate = estimateShelfLife(val, shelfState, category);
@@ -651,9 +655,9 @@ function AddProductModal({
           <div className="rounded-2xl border border-line bg-brand-subtle/40 p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-brand-text">Vida útil colaborativa</p>
-                <p className="mt-0.5 text-xs text-content-muted">
-                  Cambia si el envase está abierto · se valida con {getValidationThreshold()} coincidencias.
+                <p className="text-xs font-bold text-brand-text">Vida útil estimada</p>
+                <p className="mt-0.5 text-xs text-content-body font-medium">
+                  {shelfEstimate?.label || (shelfState === "abierto" ? "Calculado para envase abierto." : "Calculado según guías de conservación.")}
                 </p>
               </div>
               <select
@@ -675,13 +679,13 @@ function AddProductModal({
                 onChange={(e) => handleShelfDaysChange(Number(e.target.value))}
                 className="w-20 rounded-lg border border-line bg-surface px-2.5 py-2 text-sm font-semibold text-content-body outline-none focus:border-brand-focus"
               />
-              <span className="text-xs text-content-muted">días estimados</span>
+              <span className="text-xs text-content-body">días estimados</span>
               <button
                 type="button"
                 onClick={() => onSuggest?.(name, category, shelfState, shelfDays)}
                 className="ml-auto min-h-[44px] rounded-lg bg-brand-subtle px-3 py-2 text-xs font-bold text-brand-text hover:bg-brand-border/40"
               >
-                Sugerir corrección
+                Recordar mi ajuste
               </button>
             </div>
           </div>
@@ -963,13 +967,17 @@ export default function Home() {
     toast.success(`${newProduct.name} agregado a tu despensa`, { description: learning ? "Aplicamos una regla aprendida de usos anteriores." : "La fecha queda lista para revisar." });
   };
 
-  const suggestShelfLife = (productName: string, category: string, state: ShelfLifeState, days: number) => {
+  const suggestShelfLife = (productName: string, _category: string, state: ShelfLifeState, days: number) => {
     if (!productName.trim() || !Number.isFinite(days) || days < 1) {
       toast.error("Completá un producto y una cantidad válida de días");
       return;
     }
-    const result = submitShelfLifeSuggestion({ productId: `suggestion-${productName.toLowerCase()}`, productName: productName.trim(), category, state, days });
-    toast.success(result.validated ? "Vida útil validada por la comunidad" : "Sugerencia guardada", { description: result.validated ? `Se aplicará a futuras estimaciones (${result.userIds.length} coincidencias).` : `Necesita ${result.votesNeeded} coincidencias más para aplicarse.` });
+    const openDays = state === "abierto" ? days : Math.max(1, Math.round(days / 2));
+    const closedDays = state === "cerrado" ? days : days * 2;
+    saveShelfLifeCorrection(productName.trim(), closedDays, openDays);
+    toast.success("Ajuste guardado", {
+      description: `Usaremos ${days} días la próxima vez que agregues “${productName.trim()}”.`,
+    });
   };
 
   const correctProduct = (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiryDate: string) => {

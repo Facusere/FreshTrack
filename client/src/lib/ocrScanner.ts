@@ -158,14 +158,21 @@ export function parseReceiptAndLabelText(
     // Try finding matching catalog item
     let matchedItem = shelfLifeCatalog.find((item) => {
       const normCatalog = normalize(item.name);
-      return normLine.includes(normCatalog) || normCatalog.includes(normLine);
+      if (normLine.includes(normCatalog) || normCatalog.includes(normLine)) return true;
+      return item.aliases?.some((a) => {
+        const normA = normalize(a);
+        return normLine.includes(normA) || normA.includes(normLine);
+      });
     });
 
     // Fallback: search individual catalog words (min 4 letters)
     if (!matchedItem) {
       const words = normLine.split(/[\s,.;:-]+/).filter((w) => w.length >= 4);
       for (const word of words) {
-        matchedItem = shelfLifeCatalog.find((item) => normalize(item.name).includes(word));
+        matchedItem = shelfLifeCatalog.find((item) => {
+          if (normalize(item.name).includes(word)) return true;
+          return item.aliases?.some((a) => normalize(a).includes(word));
+        });
         if (matchedItem) break;
       }
     }
