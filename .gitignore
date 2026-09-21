@@ -102,5 +102,6 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
-
-
+# Test outputs
+test-results/
+playwright-report/

@@ -109,19 +109,19 @@ export function ConsumptionConfirmDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[560px] p-6">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-[#3c7350]">
+          <div className="flex items-center gap-2 text-brand">
             <Utensils size={18} />
             <DialogTitle>Descontar ingredientes</DialogTitle>
           </div>
           <DialogDescription>
             Revisá qué ingredientes vas a descontar de tu despensa para{" "}
-            <span className="font-semibold text-[#1c332b]">“{recipeTitle}”</span>.
+            <span className="font-semibold text-content-heading">“{recipeTitle}”</span>.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-2 space-y-3 max-h-[55vh] overflow-y-auto pr-1">
           {plan.lines.length === 0 ? (
-            <p className="py-6 text-center text-xs text-[#78907d]">
+            <p className="py-6 text-center text-xs text-content-muted">
               No encontramos ingredientes coincidentes en tu despensa para descontar.
             </p>
           ) : (
@@ -137,8 +137,8 @@ export function ConsumptionConfirmDialog({
                   key={line.itemId}
                   className={`rounded-2xl border p-3 transition ${
                     state.selected
-                      ? "border-[#bad6bd] bg-[#f7fbf6]"
-                      : "border-[#e6e4dc] bg-[#faf9f5] opacity-75"
+                      ? "border-brand-border bg-brand-subtle/40"
+                      : "border-line bg-surface-muted opacity-75"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -147,27 +147,27 @@ export function ConsumptionConfirmDialog({
                       id={`line-${line.itemId}`}
                       checked={state.selected}
                       onChange={() => handleToggle(line.itemId)}
-                      className="mt-1 h-4 w-4 rounded border-[#bad6bd] text-[#2c6448] focus:ring-[#8eb89a]"
+                      className="mt-1 h-4 w-4 rounded border-brand-border text-brand focus:ring-brand-focus"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center justify-between gap-1">
                         <label
                           htmlFor={`line-${line.itemId}`}
-                          className="cursor-pointer text-xs font-bold text-[#1f493a]"
+                          className="cursor-pointer text-xs font-bold text-brand"
                         >
                           {line.itemName}
                         </label>
-                        <span className="text-[11px] text-[#78907d]">
+                        <span className="text-xs text-content-muted">
                           Tenés: {line.itemQuantityText}
                         </span>
                       </div>
 
-                      <p className="mt-0.5 text-[11px] text-[#8e988f]">
+                      <p className="mt-0.5 text-xs text-content-muted">
                         Receta pide: {line.ingredientName}
                       </p>
 
                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <label className="flex items-center gap-1.5 text-xs text-[#4f6b57]">
+                        <label className="flex items-center gap-1.5 text-xs text-content-body">
                           <span>Descontar:</span>
                           <input
                             type="text"
@@ -177,18 +177,18 @@ export function ConsumptionConfirmDialog({
                             }
                             placeholder="Ej. 200 g"
                             disabled={!state.selected}
-                            className="w-28 rounded-lg border border-[#d6e3d4] bg-white px-2 py-1 text-xs font-semibold text-[#1c332b] outline-none disabled:bg-[#f2efe9]"
+                            className="w-28 rounded-lg border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-content-heading outline-none disabled:bg-surface-elevated"
                           />
                         </label>
 
                         {willDeplete && state.selected && (
-                          <span className="rounded-full bg-[#f9e5df] px-2 py-0.5 text-[10px] font-bold text-[#a94c3c]">
+                          <span className="rounded-full bg-status-expired-bg px-2 py-0.5 text-xs font-bold text-status-expired-text">
                             Se termina
                           </span>
                         )}
 
                         {line.confidence === "manual" && !state.selected && (
-                          <span className="text-[11px] italic text-[#a67425]">
+                          <span className="text-xs italic text-status-soon-text">
                             Indicá cuánto usaste
                           </span>
                         )}
@@ -201,12 +201,12 @@ export function ConsumptionConfirmDialog({
           )}
 
           {plan.unmatched.length > 0 && (
-            <div className="rounded-xl border border-[#ecd9b8] bg-[#fbf5ea] p-2.5 text-[11px] text-[#765a35]">
+            <div className="rounded-xl border border-recipe-border bg-recipe-bg p-2.5 text-xs text-recipe-text">
               <div className="flex items-center gap-1.5 font-bold">
                 <AlertCircle size={13} />
                 <span>No están en tu despensa (no se descuentan):</span>
               </div>
-              <p className="mt-1 text-[#8b6f4e]">{plan.unmatched.join(", ")}</p>
+              <p className="mt-1 text-recipe-badge-text">{plan.unmatched.join(", ")}</p>
             </div>
           )}
         </div>
@@ -215,14 +215,14 @@ export function ConsumptionConfirmDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-[#dfe3db] px-4 py-2.5 text-xs font-semibold text-[#657268] hover:bg-[#f6f3ed]"
+            className="min-h-[44px] rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-content-body hover:bg-surface-elevated"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1f493a] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#16392c]"
+            className="min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-brand-hover"
           >
             <Check size={14} /> Confirmar y descontar
           </button>

@@ -32,6 +32,54 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* Semantic Design Tokens */
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-overlay: var(--surface-overlay);
+
+  --color-content: var(--content);
+  --color-content-heading: var(--content-heading);
+  --color-content-body: var(--content-body);
+  --color-content-muted: var(--content-muted);
+  --color-content-subtle: var(--content-subtle);
+
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
+  --color-line-strong: var(--line-strong);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-border: var(--brand-border);
+  --color-brand-text: var(--brand-text);
+  --color-brand-focus: var(--brand-focus);
+
+  --color-status-ok-bg: var(--status-ok-bg);
+  --color-status-ok-border: var(--status-ok-border);
+  --color-status-ok-text: var(--status-ok-text);
+  --color-status-ok-dot: var(--status-ok-dot);
+
+  --color-status-soon-bg: var(--status-soon-bg);
+  --color-status-soon-border: var(--status-soon-border);
+  --color-status-soon-text: var(--status-soon-text);
+  --color-status-soon-dot: var(--status-soon-dot);
+
+  --color-status-expired-bg: var(--status-expired-bg);
+  --color-status-expired-border: var(--status-expired-border);
+  --color-status-expired-text: var(--status-expired-text);
+  --color-status-expired-dot: var(--status-expired-dot);
+
+  --color-accent-lime: var(--accent-lime);
+  --color-accent-lime-fg: var(--accent-lime-fg);
+
+  --color-recipe-bg: var(--recipe-bg);
+  --color-recipe-border: var(--recipe-border);
+  --color-recipe-text: var(--recipe-text);
+  --color-recipe-badge-bg: var(--recipe-badge-bg);
+  --color-recipe-badge-text: var(--recipe-badge-text);
 }
 
 :root {
@@ -60,15 +108,63 @@
   --chart-3: oklch(0.65 0.15 35);
   --chart-4: oklch(0.45 0.08 155);
   --chart-5: oklch(0.78 0.08 130);
+
+  /* Semantic Design Tokens (Hex values for WCAG AA compliance) */
+  --surface: #fffdf9;
+  --surface-subtle: #f7f5ef;
+  --surface-muted: #faf9f5;
+  --surface-elevated: #f3efe7;
+  --surface-overlay: rgba(20, 44, 35, 0.45);
+
+  --content: #17372b;
+  --content-heading: #1c332b;
+  --content-body: #2d453b;
+  --content-muted: #415348;
+  --content-subtle: #4d6054;
+
+  --line: #ece8df;
+  --line-subtle: #f0ede6;
+  --line-strong: #c9d2c8;
+
+  --brand: #1f493a;
+  --brand-hover: #16392c;
+  --brand-subtle: #e8f1e7;
+  --brand-border: #bad6bd;
+  --brand-text: #1b4334;
+  --brand-focus: #8eb89a;
+
+  --status-ok-bg: #e7f1e9;
+  --status-ok-border: #bad6bd;
+  --status-ok-text: #24543d;
+  --status-ok-dot: #40916c;
+
+  --status-soon-bg: #fbf0d2;
+  --status-soon-border: #ead7b8;
+  --status-soon-text: #7a4e0a;
+  --status-soon-dot: #d99b26;
+
+  --status-expired-bg: #f9e5df;
+  --status-expired-border: #eed4cd;
+  --status-expired-text: #8e2d20;
+  --status-expired-dot: #c44a39;
+
+  --accent-lime: #d9e982;
+  --accent-lime-fg: #17372b;
+
+  --recipe-bg: #fbf5eb;
+  --recipe-border: #eddac2;
+  --recipe-text: #664614;
+  --recipe-badge-bg: #ead7b8;
+  --recipe-badge-text: #5a3d12;
 }
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  html { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; background: #f7f5ef; }
+  html { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; background: var(--surface-subtle); }
   body { @apply bg-background text-foreground; margin: 0; min-width: 320px; }
   button, input, select { font-family: inherit; }
   button:not(:disabled), [role="button"]:not([aria-disabled="true"]), a[href], select:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled) { @apply cursor-pointer; }
-  ::selection { background: #d9e982; color: #17372b; }
+  ::selection { background: var(--accent-lime); color: var(--accent-lime-fg); }
 }
 
 @layer utilities {

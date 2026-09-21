@@ -27,6 +27,12 @@ import { ALL_CATEGORIES } from "@/lib/categories";
 import { addDaysISO } from "@/lib/dates";
 import { saveLastScan } from "@/lib/storage";
 import { estimateShelfLife } from "@/lib/shelfLifeCatalog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ScanModalProps {
   onClose: () => void;
@@ -67,6 +73,23 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCameraStream();
+    };
+  }, []);
+
+  const handleRequestClose = () => {
+    if (stage === "scanning") {
+      const confirmClose = window.confirm(
+        "El escaneo está en curso. ¿Seguro que querés cancelar?"
+      );
+      if (!confirmClose) return;
+    }
+    stopCameraStream();
+    onClose();
   };
 
   // Start camera helper
@@ -280,30 +303,43 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/45 p-3 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/75 bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.28)] animate-in fade-in zoom-in-95 duration-200">
+    <Dialog open onOpenChange={(open) => { if (!open) handleRequestClose(); }}>
+      <DialogContent
+        hideCloseButton
+        aria-describedby="scan-modal-desc"
+        onPointerDownOutside={(e) => {
+          if (stage === "scanning") {
+            e.preventDefault();
+            handleRequestClose();
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          if (stage === "scanning") {
+            e.preventDefault();
+            handleRequestClose();
+          }
+        }}
+        className="max-w-[560px] p-0 overflow-hidden"
+      >
         {/* Hidden canvas used for camera snapshot capture */}
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#eee9df] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
-            <p className="font-serif text-xl font-semibold text-[#17372b]">
+            <DialogTitle className="font-serif text-xl font-semibold text-content">
               {stage === "results" ? "Revisar compra detectada" : "Escaneo OCR inteligente"}
-            </p>
-            <p className="mt-0.5 text-[12px] text-[#8e978f]">
+            </DialogTitle>
+            <DialogDescription id="scan-modal-desc" className="mt-0.5 text-xs text-content-muted">
               {stage === "results"
                 ? "Verificá cantidades y fechas antes de guardar"
                 : "Lectura de tickets y etiquetas en tu navegador"}
-            </p>
+            </DialogDescription>
           </div>
           <button
-            aria-label="Cerrar"
-            onClick={() => {
-              stopCameraStream();
-              onClose();
-            }}
-            className="rounded-full p-2 text-[#8e978f] transition hover:bg-[#f3efe7] hover:text-[#17372b]"
+            aria-label="Cerrar modal de escaneo"
+            onClick={handleRequestClose}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-content-muted transition hover:bg-surface-elevated hover:text-content"
           >
             <X size={18} />
           </button>
@@ -313,19 +349,19 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         {stage === "choose" && (
           <div className="p-5">
             {/* Mode: Ticket vs Label */}
-            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#f4f0e7] p-1">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-surface-elevated p-1">
               <button
                 onClick={() => setScanMode("ticket")}
-                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-semibold transition ${
-                  scanMode === "ticket" ? "bg-white text-[#1f493a] shadow-sm" : "text-[#929990]"
+                className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+                  scanMode === "ticket" ? "bg-white text-brand shadow-sm" : "text-content-muted"
                 }`}
               >
                 <ReceiptText size={15} /> Ticket de compra
               </button>
               <button
                 onClick={() => setScanMode("label")}
-                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[12px] font-semibold transition ${
-                  scanMode === "label" ? "bg-white text-[#1f493a] shadow-sm" : "text-[#929990]"
+                className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+                  scanMode === "label" ? "bg-white text-brand shadow-sm" : "text-content-muted"
                 }`}
               >
                 <ScanLine size={15} /> Etiqueta / Vto
@@ -333,36 +369,36 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
             </div>
 
             {/* Input Method Selector */}
-            <div className="mt-4 flex items-center justify-center gap-2 border-b border-[#eee9df] pb-3 text-[11px] font-semibold">
+            <div className="mt-4 flex items-center justify-center gap-2 border-b border-line pb-3 text-xs font-semibold">
               <button
                 onClick={() => setInputMethod("camera")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
+                className={`min-h-[44px] flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
                   inputMethod === "camera"
-                    ? "bg-[#e8f1e7] text-[#2c5c3e] font-bold"
-                    : "text-[#7b8e80] hover:bg-[#f6f2e9]"
+                    ? "bg-brand-subtle text-brand font-bold"
+                    : "text-content-muted hover:bg-surface-elevated"
                 }`}
               >
                 <Camera size={14} /> Cámara en vivo
               </button>
               <button
                 onClick={() => setInputMethod("upload")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
+                className={`min-h-[44px] flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
                   inputMethod === "upload"
-                    ? "bg-[#e8f1e7] text-[#2c5c3e] font-bold"
-                    : "text-[#7b8e80] hover:bg-[#f6f2e9]"
+                    ? "bg-brand-subtle text-brand font-bold"
+                    : "text-content-muted hover:bg-surface-elevated"
                 }`}
               >
                 <Upload size={14} /> Subir foto
               </button>
               <button
                 onClick={() => setInputMethod("sample")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
+                className={`min-h-[44px] flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition ${
                   inputMethod === "sample"
-                    ? "bg-[#e8f1e7] text-[#2c5c3e] font-bold"
-                    : "text-[#7b8e80] hover:bg-[#f6f2e9]"
+                    ? "bg-brand-subtle text-brand font-bold"
+                    : "text-content-muted hover:bg-surface-elevated"
                 }`}
               >
-                <Sparkles size={14} className="text-[#d79f38]" /> Tickets muestra
+                <Sparkles size={14} className="text-status-soon-dot" /> Tickets muestra
               </button>
             </div>
 
@@ -370,19 +406,19 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
             {inputMethod === "camera" && (
               <div className="mt-4">
                 {cameraError ? (
-                  <div className="rounded-2xl border border-[#f2d4cd] bg-[#fff6f4] p-5 text-center">
-                    <p className="text-sm font-semibold text-[#a94c3c]">Aviso sobre la cámara</p>
-                    <p className="mt-1 text-[12px] leading-5 text-[#88625b]">{cameraError}</p>
+                  <div className="rounded-2xl border border-status-expired-border bg-status-expired-bg/40 p-5 text-center">
+                    <p className="text-sm font-semibold text-status-expired-text">Aviso sobre la cámara</p>
+                    <p className="mt-1 text-xs leading-5 text-content-body">{cameraError}</p>
                     <div className="mt-4 flex justify-center gap-2">
                       <button
                         onClick={() => startCamera()}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#d6dfd5] bg-white px-3 py-2 text-[11px] font-semibold text-[#305943]"
+                        className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-white px-3 py-2 text-xs font-semibold text-brand"
                       >
                         <RefreshCw size={13} /> Reintentar
                       </button>
                       <button
                         onClick={() => setInputMethod("upload")}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#1f493a] px-3 py-2 text-[11px] font-semibold text-white"
+                        className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl bg-brand px-3 py-2 text-xs font-semibold text-white"
                       >
                         <Upload size={13} /> Subir imagen
                       </button>
@@ -401,22 +437,23 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     {/* Viewfinder overlay */}
                     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-between p-4">
                       <div className="flex w-full items-center justify-between">
-                        <span className="rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
+                        <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
                           {scanMode === "ticket" ? "Alineá el ticket en el centro" : "Enfocá la fecha de vencimiento"}
                         </span>
                         <button
                           type="button"
                           onClick={toggleCameraFacing}
-                          className="pointer-events-auto rounded-full bg-black/60 p-2 text-white backdrop-blur-sm transition hover:bg-black/80"
+                          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition hover:bg-black/80"
+                          aria-label="Cambiar cámara frontal o trasera"
                           title="Cambiar cámara frontal/trasera"
                         >
                           <SwitchCamera size={16} />
                         </button>
                       </div>
 
-                      <div className="h-36 w-64 rounded-xl border-2 border-dashed border-[#d9e982]/80 bg-[#d9e982]/5" />
+                      <div className="h-36 w-64 rounded-xl border-2 border-dashed border-accent-lime/80 bg-accent-lime/5" />
 
-                      <span className="rounded-full bg-black/50 px-2 py-0.5 text-[9px] text-white/80">
+                      <span className="rounded-full bg-black/50 px-2 py-0.5 text-xs text-white/80">
                         MediaDevices API activa
                       </span>
                     </div>
@@ -425,7 +462,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="absolute bottom-3 left-0 right-0 flex justify-center px-4">
                       <button
                         onClick={captureAndScan}
-                        className="flex items-center gap-2 rounded-xl bg-[#1f493a] px-5 py-2.5 text-[12px] font-bold text-white shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition hover:bg-[#285f4b] active:scale-95"
+                        className="min-h-[44px] flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-xs font-bold text-white shadow-lg transition hover:bg-brand-hover active:scale-95"
                       >
                         <ScanLine size={16} /> Capturar y leer con OCR
                       </button>
@@ -447,7 +484,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                 />
 
                 {selectedImagePreview ? (
-                  <div className="rounded-[22px] border border-[#e5ded2] bg-[#fbf9f5] p-4 text-center">
+                  <div className="rounded-[22px] border border-line bg-surface-muted p-4 text-center">
                     <img
                       src={selectedImagePreview}
                       alt="Vista previa"
@@ -456,13 +493,13 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="mt-4 flex justify-center gap-2">
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="rounded-xl border border-[#d6dfd5] bg-white px-3 py-2 text-[11px] font-semibold text-[#506356]"
+                        className="min-h-[44px] rounded-xl border border-line-strong bg-white px-3 py-2 text-xs font-semibold text-content-body"
                       >
                         Cambiar imagen
                       </button>
                       <button
                         onClick={processUploadedImage}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#1f493a] px-4 py-2 text-[11px] font-bold text-white shadow-sm hover:bg-[#16392c]"
+                        className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-hover"
                       >
                         <ScanLine size={14} /> Procesar con Tesseract OCR
                       </button>
@@ -471,14 +508,14 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="cursor-pointer rounded-[22px] border-2 border-dashed border-[#bad0c0] bg-[#f3f8f1] p-8 text-center transition hover:border-[#679973] hover:bg-[#edf5eb]"
+                    className="cursor-pointer rounded-[22px] border-2 border-dashed border-brand-border bg-brand-subtle/40 p-8 text-center transition hover:border-brand hover:bg-brand-subtle"
                   >
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#dfeee1] text-[#2d6a4f]">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-subtle text-brand">
                       <Upload size={24} strokeWidth={1.8} />
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-[#1d4234]">Subí una foto de tu ticket o envase</p>
-                    <p className="mt-1 text-[11px] text-[#788d7f]">Hacé clic para seleccionar archivo JPG, PNG o WEBP</p>
-                    <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-[10px] font-bold text-[#2d6a4f] shadow-sm">
+                    <p className="mt-3 text-sm font-semibold text-brand">Subí una foto de tu ticket o envase</p>
+                    <p className="mt-1 text-xs text-content-muted">Hacé clic para seleccionar archivo JPG, PNG o WEBP</p>
+                    <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-brand shadow-sm">
                       Seleccionar imagen
                     </span>
                   </div>
@@ -489,29 +526,29 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
             {/* Sub-view: Samples */}
             {inputMethod === "sample" && (
               <div className="mt-4 space-y-2">
-                <p className="text-[11px] text-[#7a887d]">
+                <p className="text-xs text-content-muted">
                   Probá el motor OCR inmediatamente con estos ejemplos representativos:
                 </p>
                 {SAMPLE_TICKETS.map((sample) => (
                   <button
                     key={sample.name}
                     onClick={() => runSampleTicket(sample.text)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-[#ebe5da] bg-[#faf8f3] p-3.5 text-left transition hover:border-[#b8d6be] hover:bg-[#f1f7ef]"
+                    className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface-elevated p-3.5 text-left transition hover:border-brand-border hover:bg-brand-subtle"
                   >
                     <div>
-                      <p className="text-[12px] font-bold text-[#1f493a]">{sample.name}</p>
-                      <p className="mt-0.5 line-clamp-1 text-[10px] text-[#8e988f] font-mono">
+                      <p className="text-xs font-bold text-brand">{sample.name}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-content-muted font-mono">
                         {sample.text.replace(/\n+/g, " · ").slice(0, 70)}...
                       </p>
                     </div>
-                    <ChevronRight size={16} className="text-[#8e988f]" />
+                    <ChevronRight size={16} className="text-content-muted" />
                   </button>
                 ))}
               </div>
             )}
 
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-[#8e978f]">
-              <Sparkles size={12} className="text-[#d6a143]" /> Motor Tesseract.js integrado · Reconocimiento local
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-content-muted">
+              <Sparkles size={12} className="text-status-soon-dot" /> Motor Tesseract.js integrado · Reconocimiento local
             </p>
           </div>
         )}
@@ -519,21 +556,21 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         {/* Stage 2: Scanning Progress */}
         {stage === "scanning" && (
           <div className="flex flex-col items-center px-5 py-14 text-center">
-            <div className="relative flex h-20 w-20 items-center justify-center rounded-[24px] bg-[#e5f0e5] text-[#2d6a4f]">
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-[24px] bg-brand-subtle text-brand">
               <LoaderCircle size={38} className="animate-spin" strokeWidth={1.6} />
-              <span className="absolute inset-0 animate-ping rounded-[24px] border border-[#9fc4a7] opacity-30" />
+              <span className="absolute inset-0 animate-ping rounded-[24px] border border-brand-border opacity-30" />
             </div>
-            <p className="mt-5 font-serif text-2xl font-semibold text-[#17372b]">Procesando compra...</p>
-            <p className="mt-1 text-[12px] text-[#87948a]">{ocrProgress.status}</p>
+            <p className="mt-5 font-serif text-2xl font-semibold text-content">Procesando compra...</p>
+            <p className="mt-1 text-xs text-content-muted">{ocrProgress.status}</p>
 
-            <div className="mt-6 h-2 w-56 overflow-hidden rounded-full bg-[#e6eee5]">
+            <div className="mt-6 h-2 w-56 overflow-hidden rounded-full bg-brand-subtle">
               <div
-                className="h-full rounded-full bg-[#5d9b72] transition-all duration-300"
+                className="h-full rounded-full bg-status-ok-dot transition-all duration-300"
                 style={{ width: `${Math.max(10, ocrProgress.progress)}%` }}
               />
             </div>
-            <p className="mt-2 text-[10px] font-bold text-[#5d9b72]">{ocrProgress.progress}%</p>
-            <p className="mt-4 max-w-xs text-[10px] text-[#97a398]">
+            <p className="mt-2 text-xs font-bold text-status-ok-text">{ocrProgress.progress}%</p>
+            <p className="mt-4 max-w-xs text-xs text-content-muted">
               Extrayendo productos, cantidades e identificando fechas de vencimiento con catálogo regional.
             </p>
           </div>
@@ -542,33 +579,33 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         {/* Stage 3: Results & Editing */}
         {stage === "results" && (
           <div className="max-h-[75vh] overflow-y-auto p-5">
-            <div className="flex items-start gap-3 rounded-2xl bg-[#e7f1e9] p-3.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#cae3cf] text-[#2d6a4f]">
+            <div className="flex items-start gap-3 rounded-2xl bg-brand-subtle p-3.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-subtle text-brand">
                 <Check size={17} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#1e4b38]">
+                <p className="text-xs font-semibold text-brand">
                   {detectedProducts.length} producto{detectedProducts.length === 1 ? "" : "s"} detectado
                   {detectedProducts.length === 1 ? "" : "s"}
                 </p>
-                <p className="text-[10px] text-[#6f8978]">
+                <p className="text-xs text-content-muted">
                   Podés editar el nombre, cantidad o fecha antes de ingresar a tu despensa.
                 </p>
               </div>
               <button
                 onClick={handleAddManualCandidate}
-                className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-[#c2dac7] bg-white px-2 py-1 text-[10px] font-bold text-[#2d6a4f]"
+                className="min-h-[44px] shrink-0 inline-flex items-center gap-1 rounded-lg border border-brand-border bg-white px-3 py-1.5 text-xs font-bold text-brand"
               >
                 <Plus size={12} /> Agregar
               </button>
             </div>
 
             {/* List of Scanned Products */}
-            <div className="mt-4 divide-y divide-[#eee9df] rounded-2xl border border-[#eee9df] bg-white px-3">
+            <div className="mt-4 divide-y divide-line rounded-2xl border border-line bg-white px-3">
               {detectedProducts.map((product) => (
                 <div key={product.id} className="py-3">
                   <div className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f6f1e7] text-xl">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-elevated text-xl">
                       {product.icon}
                     </span>
                     <div className="min-w-0 flex-1 space-y-1.5">
@@ -576,34 +613,35 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         <input
                           value={product.name}
                           onChange={(e) => handleUpdateProduct(product.id, "name", e.target.value)}
-                          className="w-full rounded-lg border border-[#e8e4db] px-2 py-1 text-[12px] font-semibold text-[#294338] outline-none focus:border-[#4c845d]"
+                          className="w-full rounded-lg border border-line-strong px-2 py-1 text-xs font-semibold text-content outline-none focus:border-brand"
                           placeholder="Nombre del producto"
                         />
                         <button
                           onClick={() => handleRemoveProduct(product.id)}
-                          className="rounded-lg p-1 text-[#a5aca5] hover:bg-[#fceeed] hover:text-[#c45341]"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-content-muted hover:bg-status-expired-bg hover:text-status-expired-text"
+                          aria-label={`Quitar ${product.name}`}
                           title="Quitar"
                         >
                           <Trash2 size={15} />
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                      <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <label className="text-[9px] font-semibold uppercase text-[#96a096]">Cantidad</label>
+                          <label className="text-xs font-semibold uppercase text-content-muted">Cantidad</label>
                           <input
                             value={product.quantity}
                             onChange={(e) => handleUpdateProduct(product.id, "quantity", e.target.value)}
-                            className="mt-0.5 w-full rounded-lg border border-[#e8e4db] px-2 py-1 text-[11px] text-[#4d5c52] outline-none"
+                            className="mt-0.5 w-full rounded-lg border border-line-strong px-2 py-1 text-xs text-content-body outline-none"
                             placeholder="ej. 1 litro"
                           />
                         </div>
                         <div>
-                          <label className="text-[9px] font-semibold uppercase text-[#96a096]">Categoría</label>
+                          <label className="text-xs font-semibold uppercase text-content-muted">Categoría</label>
                           <select
                             value={product.category}
                             onChange={(e) => handleUpdateProduct(product.id, "category", e.target.value)}
-                            className="mt-0.5 w-full rounded-lg border border-[#e8e4db] bg-white px-1.5 py-1 text-[11px] text-[#4d5c52] outline-none"
+                            className="mt-0.5 w-full rounded-lg border border-line-strong bg-white px-1.5 py-1 text-xs text-content-body outline-none"
                           >
                             {ALL_CATEGORIES.map((cat) => (
                               <option key={cat} value={cat}>
@@ -614,23 +652,23 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[10px]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[#78887b]">
+                          <span className="text-content-muted">
                             {labelForDisplay(product.dateLabel || "desconocida")}:
                           </span>
                           <input
                             type="date"
                             value={product.expiryDate}
                             onChange={(e) => handleUpdateProduct(product.id, "expiryDate", e.target.value)}
-                            className="rounded-lg border border-[#e8e4db] bg-white px-2 py-0.5 text-[11px] font-semibold text-[#2c473a] outline-none focus:border-[#4c845d]"
+                            className="rounded-lg border border-line-strong bg-white px-2 py-0.5 text-xs font-semibold text-content outline-none focus:border-brand"
                           />
                         </div>
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                             product.estimated
-                              ? "bg-[#eaf4ea] text-[#487e58]"
-                              : "bg-[#fbf1db] text-[#9b7224]"
+                              ? "bg-status-ok-bg text-status-ok-text"
+                              : "bg-status-soon-bg text-status-soon-text"
                           }`}
                         >
                           {product.estimated ? "vida útil estimada" : "detectado en envase"}
@@ -646,20 +684,20 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => setStage("choose")}
-                className="flex-1 rounded-xl border border-[#dfe3db] px-4 py-3 text-[12px] font-semibold text-[#657268] transition hover:bg-[#f6f3ed]"
+                className="min-h-[44px] flex-1 rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-content-body transition hover:bg-surface-elevated"
               >
                 Volver a escanear
               </button>
               <button
                 onClick={handleConfirmAdd}
-                className="flex-1 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white transition hover:bg-[#16392c] active:scale-[0.97]"
+                className="min-h-[44px] flex-1 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-hover active:scale-[0.97]"
               >
                 Agregar a despensa ({detectedProducts.length})
               </button>
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

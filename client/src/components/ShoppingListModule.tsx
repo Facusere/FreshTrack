@@ -29,10 +29,10 @@ interface ShoppingListModuleProps {
 }
 
 const reasonBadges: Record<ShoppingItemReason, { label: string; bg: string; text: string }> = {
-  frecuente: { label: "Frecuente", bg: "bg-[#e5f1e8]", text: "text-[#2e6443]" },
-  stock_bajo: { label: "Stock bajo", bg: "bg-[#fef3d8]", text: "text-[#9e6f1f]" },
-  vencido: { label: "Reponer", bg: "bg-[#fce8e6]", text: "text-[#aa4b3c]" },
-  manual: { label: "Manual", bg: "bg-[#f0ece3]", text: "text-[#6c766e]" },
+  frecuente: { label: "Frecuente", bg: "bg-status-ok-bg", text: "text-status-ok-text" },
+  stock_bajo: { label: "Stock bajo", bg: "bg-status-soon-bg", text: "text-status-soon-text" },
+  vencido: { label: "Reponer", bg: "bg-status-expired-bg", text: "text-status-expired-text" },
+  manual: { label: "Manual", bg: "bg-surface-elevated", text: "text-content-muted" },
 };
 
 export function ShoppingListModule({
@@ -70,77 +70,76 @@ export function ShoppingListModule({
     if (!itemName.trim()) return;
 
     const newItem: ShoppingItem = {
-      id: `shop-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `manual-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       name: itemName.trim(),
-      category: itemCategory,
       quantity: itemQuantity.trim() || "1 unidad",
+      category: itemCategory,
       reason: "manual",
       completed: false,
       createdAt: new Date().toISOString(),
     };
 
-    setShoppingList((curr) => [newItem, ...curr]);
+    setShoppingList((prev) => [newItem, ...prev]);
+    toast.success(`"${newItem.name}" agregado a la lista de compras.`);
     setItemName("");
     setItemQuantity("1 unidad");
-    toast.success("Producto agregado a la lista de compras");
   };
 
   const handleToggleItem = (id: string) => {
-    setShoppingList((curr) =>
-      curr.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item))
+    setShoppingList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item))
     );
   };
 
   const handleRemoveItem = (id: string) => {
-    setShoppingList((curr) => curr.filter((item) => item.id !== id));
+    setShoppingList((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleAddSuggestion = (suggestion: ShoppingItem) => {
-    setShoppingList((curr) => [suggestion, ...curr]);
-    toast.success(`"${suggestion.name}" agregado para reposición`);
+  const handleAddSuggestion = (sug: ShoppingItem) => {
+    setShoppingList((prev) => [sug, ...prev]);
+    toast.success(`"${sug.name}" agregado a tu lista.`);
   };
 
   const handleAddAllSuggestions = () => {
     if (smartSuggestions.length === 0) return;
-    setShoppingList((curr) => [...smartSuggestions, ...curr]);
-    toast.success(`Se agregaron ${smartSuggestions.length} sugerencias a tu lista`);
+    setShoppingList((prev) => [...smartSuggestions, ...prev]);
+    toast.success(`${smartSuggestions.length} sugerencias agregadas a la lista.`);
+  };
+
+  const handleClearCompleted = () => {
+    setShoppingList((prev) => prev.filter((item) => !item.completed));
+    toast("Productos comprados eliminados de la lista.");
   };
 
   const handleMigrateCompletedToPantry = () => {
-    if (completedCount === 0) return;
-
     const { createdProducts, remainingShoppingList } = migratePurchasedItemsToPantry(
       shoppingList,
       detectIconFn
     );
+    if (createdProducts.length === 0) return;
 
     onAddProductsToPantry(createdProducts);
     setShoppingList(remainingShoppingList);
-
-    toast.success("¡Compras ingresadas a la despensa!", {
-      description: `Se sumaron ${createdProducts.length} producto${
-        createdProducts.length === 1 ? "" : "s"
-      } con vida útil estimada.`,
-    });
-  };
-
-  const handleClearCompleted = () => {
-    setShoppingList((curr) => curr.filter((item) => !item.completed));
-    toast("Comprados eliminados de la lista");
+    toast.success(
+      `¡${createdProducts.length} ${createdProducts.length === 1 ? "producto migrado" : "productos migrados"} a tu despensa!`,
+      {
+        description: "Se estimaron sus fechas de vencimiento automáticamente.",
+      }
+    );
   };
 
   return (
-    <section id="module-shopping" className="scroll-mt-24 mt-8 rounded-[28px] border border-[#ebe7de] bg-[#fffdf9] p-6 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-8">
+    <section id="module-shopping" className="scroll-mt-24 mt-8 rounded-[28px] border border-line bg-surface p-6 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-8">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-semibold text-[#4e815e]">
+          <div className="flex items-center gap-2 text-xs font-semibold text-brand">
             <ShoppingCart size={15} /> Lista inteligente de reposición
           </div>
-          <h2 className="mt-1 font-serif text-[26px] font-semibold tracking-[-0.035em] text-[#1a382d]">
+          <h2 className="mt-1 font-serif text-2xl font-semibold tracking-[-0.035em] text-content">
             Lista de compras y reposición
           </h2>
-          <p className="mt-0.5 text-[12px] text-[#869288]">
+          <p className="mt-0.5 text-xs text-content-muted">
             Generada automáticamente según los alimentos que consumís con más frecuencia y el stock bajo de tu despensa.
           </p>
         </div>
@@ -148,7 +147,7 @@ export function ShoppingListModule({
         {completedCount > 0 && (
           <button
             onClick={handleMigrateCompletedToPantry}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white shadow-[0_6px_18px_rgba(31,73,58,0.18)] transition hover:bg-[#16392c] active:scale-[0.98]"
+            className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-brand-hover active:scale-[0.98]"
           >
             <PackageCheck size={16} /> Mover comprados a despensa ({completedCount})
           </button>
@@ -157,20 +156,20 @@ export function ShoppingListModule({
 
       {/* Smart Restock Suggestions Banner */}
       {smartSuggestions.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-[#cfe2d2] bg-[#edf6ee] p-4 sm:p-5">
+        <div className="mt-6 rounded-2xl border border-brand-border bg-brand-subtle p-4 sm:p-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[12px] font-bold text-[#235338]">
-              <Sparkles size={16} className="text-[#d69f36]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-brand">
+              <Sparkles size={16} className="text-status-soon-dot" />
               Sugerencias automáticas por consumo y stock ({smartSuggestions.length})
             </div>
             <button
               onClick={handleAddAllSuggestions}
-              className="text-[11px] font-bold text-[#2b6544] underline hover:text-[#183c27]"
+              className="min-h-[44px] flex items-center text-xs font-bold text-brand underline hover:text-brand-hover"
             >
               Agregar todas
             </button>
           </div>
-          <p className="mt-1 text-[11px] text-[#63846d]">
+          <p className="mt-1 text-xs text-content-body">
             Detectamos productos consumidos en tus recetas que hoy están agotados o por vencerse:
           </p>
 
@@ -178,24 +177,25 @@ export function ShoppingListModule({
             {smartSuggestions.map((sug) => (
               <div
                 key={sug.id}
-                className="flex min-w-[200px] shrink-0 items-center justify-between rounded-xl border border-[#d2e5d5] bg-white p-2.5 shadow-sm"
+                className="flex min-w-[200px] shrink-0 items-center justify-between rounded-xl border border-brand-border bg-surface p-2.5 shadow-sm"
               >
                 <div className="min-w-0 pr-2">
-                  <p className="truncate text-[12px] font-bold text-[#213f30]">{sug.name}</p>
+                  <p className="truncate text-xs font-bold text-content">{sug.name}</p>
                   <div className="mt-1 flex items-center gap-1.5">
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[9px] font-semibold ${
+                      className={`rounded px-1.5 py-0.5 text-xs font-semibold ${
                         reasonBadges[sug.reason].bg
                       } ${reasonBadges[sug.reason].text}`}
                     >
                       {reasonBadges[sug.reason].label}
                     </span>
-                    <span className="truncate text-[10px] text-[#8e988f]">{sug.notes}</span>
+                    <span className="truncate text-xs text-content-muted">{sug.notes}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => handleAddSuggestion(sug)}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#e7f1e9] text-[#2c5f40] transition hover:bg-[#1f493a] hover:text-white"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-status-ok-bg text-brand transition hover:bg-brand hover:text-white"
+                  aria-label={`Agregar ${sug.name} a la lista`}
                   title="Agregar a la lista"
                 >
                   <Plus size={15} />
@@ -209,24 +209,27 @@ export function ShoppingListModule({
       {/* Add Item Form */}
       <form
         onSubmit={handleAddItem}
-        className="mt-6 grid gap-2.5 rounded-2xl border border-[#ede9e0] bg-[#fbf9f4] p-3.5 sm:grid-cols-[1.5fr_1fr_1fr_auto]"
+        className="mt-6 grid gap-2.5 rounded-2xl border border-line bg-surface-subtle p-3.5 sm:grid-cols-[1.5fr_1fr_1fr_auto]"
       >
         <input
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
+          aria-label="Nombre del producto"
           placeholder="¿Qué necesitás comprar? (ej. Leche entera, Huevos)"
-          className="rounded-xl border border-[#e5dfd2] bg-white px-3 py-2 text-[12px] text-[#263e32] outline-none focus:border-[#4d8660]"
+          className="rounded-xl border border-line-strong bg-white px-3 py-2 text-xs text-content outline-none focus:border-brand"
         />
         <input
           value={itemQuantity}
           onChange={(e) => setItemQuantity(e.target.value)}
+          aria-label="Cantidad"
           placeholder="Cantidad (ej. 2 litros, 500g)"
-          className="rounded-xl border border-[#e5dfd2] bg-white px-3 py-2 text-[12px] text-[#263e32] outline-none focus:border-[#4d8660]"
+          className="rounded-xl border border-line-strong bg-white px-3 py-2 text-xs text-content outline-none focus:border-brand"
         />
         <select
           value={itemCategory}
           onChange={(e) => setItemCategory(e.target.value)}
-          className="rounded-xl border border-[#e5dfd2] bg-white px-2.5 py-2 text-[12px] text-[#263e32] outline-none"
+          aria-label="Categoría del producto"
+          className="rounded-xl border border-line-strong bg-white px-2.5 py-2 text-xs text-content outline-none"
         >
           {ALL_CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
@@ -236,35 +239,35 @@ export function ShoppingListModule({
         </select>
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#1f493a] px-4 py-2 text-[12px] font-bold text-white transition hover:bg-[#16392c]"
+          className="min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-hover"
         >
           <Plus size={15} /> Agregar
         </button>
       </form>
 
       {/* Filter Tabs & Clean Actions */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-b border-[#eeeae1] pb-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFilterMode("all")}
-            className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-              filterMode === "all" ? "bg-[#e8f1e7] text-[#2e6241]" : "text-[#879288] hover:bg-[#f6f2ea]"
+            className={`min-h-[44px] rounded-lg px-3 py-2 text-xs font-semibold transition ${
+              filterMode === "all" ? "bg-brand-subtle text-brand" : "text-content-muted hover:bg-surface-elevated"
             }`}
           >
             Todos ({shoppingList.length})
           </button>
           <button
             onClick={() => setFilterMode("pending")}
-            className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-              filterMode === "pending" ? "bg-[#e8f1e7] text-[#2e6241]" : "text-[#879288] hover:bg-[#f6f2ea]"
+            className={`min-h-[44px] rounded-lg px-3 py-2 text-xs font-semibold transition ${
+              filterMode === "pending" ? "bg-brand-subtle text-brand" : "text-content-muted hover:bg-surface-elevated"
             }`}
           >
             Pendientes ({pendingCount})
           </button>
           <button
             onClick={() => setFilterMode("completed")}
-            className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
-              filterMode === "completed" ? "bg-[#e8f1e7] text-[#2e6241]" : "text-[#879288] hover:bg-[#f6f2ea]"
+            className={`min-h-[44px] rounded-lg px-3 py-2 text-xs font-semibold transition ${
+              filterMode === "completed" ? "bg-brand-subtle text-brand" : "text-content-muted hover:bg-surface-elevated"
             }`}
           >
             Comprados ({completedCount})
@@ -274,7 +277,7 @@ export function ShoppingListModule({
         {completedCount > 0 && (
           <button
             onClick={handleClearCompleted}
-            className="text-[11px] font-semibold text-[#a55243] transition hover:underline"
+            className="min-h-[44px] flex items-center text-xs font-semibold text-status-expired-text transition hover:underline"
           >
             Limpiar comprados
           </button>
@@ -282,7 +285,7 @@ export function ShoppingListModule({
       </div>
 
       {/* Shopping List Items */}
-      <div className="mt-3 divide-y divide-[#eee9df]">
+      <div className="mt-3 divide-y divide-line">
         {displayedItems.length > 0 ? (
           displayedItems.map((item) => {
             const badge = reasonBadges[item.reason] || reasonBadges.manual;
@@ -296,24 +299,29 @@ export function ShoppingListModule({
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     onClick={() => handleToggleItem(item.id)}
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${
-                      item.completed
-                        ? "border-[#4c845d] bg-[#4c845d] text-white"
-                        : "border-[#c5cdc5] hover:border-[#4c845d]"
-                    }`}
+                    aria-label={item.completed ? `Marcar ${item.name} como pendiente` : `Marcar ${item.name} como comprado`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg hover:bg-surface-elevated"
                   >
-                    {item.completed && <Check size={13} strokeWidth={3} />}
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-md border transition ${
+                        item.completed
+                          ? "border-brand bg-brand text-white"
+                          : "border-line-strong hover:border-brand"
+                      }`}
+                    >
+                      {item.completed && <Check size={13} strokeWidth={3} />}
+                    </span>
                   </button>
 
                   <div className="min-w-0">
                     <p
-                      className={`truncate text-[13px] font-semibold ${
-                        item.completed ? "line-through text-[#8b958c]" : "text-[#233b30]"
+                      className={`truncate text-sm font-semibold ${
+                        item.completed ? "line-through text-content-muted" : "text-content"
                       }`}
                     >
                       {item.name}
                     </p>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-[#8e988f]">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-content-muted">
                       <span>{item.quantity}</span>
                       <span>·</span>
                       <span>{item.category}</span>
@@ -323,13 +331,14 @@ export function ShoppingListModule({
 
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${badge.bg} ${badge.text}`}
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge.bg} ${badge.text}`}
                   >
                     {badge.label}
                   </span>
                   <button
                     onClick={() => handleRemoveItem(item.id)}
-                    className="rounded-lg p-1.5 text-[#a8b0a8] hover:bg-[#fceeed] hover:text-[#c45341]"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg text-content-muted hover:bg-status-expired-bg hover:text-status-expired-text"
+                    aria-label={`Eliminar ${item.name} de la lista`}
                     title="Eliminar de la lista"
                   >
                     <Trash2 size={15} />
@@ -340,11 +349,11 @@ export function ShoppingListModule({
           })
         ) : (
           <div className="py-12 text-center">
-            <PackageOpen className="mx-auto text-[#c1cac1]" size={32} />
-            <p className="mt-2 text-sm font-semibold text-[#5e7166]">
+            <PackageOpen className="mx-auto text-line-strong" size={32} />
+            <p className="mt-2 text-sm font-semibold text-content-body">
               {filterMode === "completed" ? "No hay productos comprados aún" : "Tu lista de compras está vacía"}
             </p>
-            <p className="mt-1 text-[11px] text-[#919c92]">
+            <p className="mt-1 text-xs text-content-muted">
               Agregá productos manualmente o elegí de las sugerencias inteligentes de reposición.
             </p>
           </div>
