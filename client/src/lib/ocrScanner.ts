@@ -178,15 +178,20 @@ export function parseReceiptAndLabelText(
       let isEstimated = true;
       let dateLabel: DateLabel = "vencimiento";
 
-      // Look for a date candidate nearby that is specifically vencimiento or consumo preferente
-      const nearbyExpiry = dateCandidates.find((d) => {
-        if (d.label !== "vencimiento" && d.label !== "consumo preferente" && d.label !== "elaboración") return false;
+      // Look for date candidates nearby (+/- 3 lines)
+      const nearbyCandidates = dateCandidates.filter((d) => {
         for (let offset = -3; offset <= 3; offset++) {
           const targetLine = lines[i + offset];
           if (targetLine && targetLine.includes(d.value)) return true;
         }
         return false;
       });
+
+      // Prioritize vencimiento or consumo preferente over elaboración
+      const nearbyExpiry =
+        nearbyCandidates.find((d) => d.label === "vencimiento" || d.label === "consumo preferente") ||
+        nearbyCandidates.find((d) => d.label === "elaboración") ||
+        nearbyCandidates[0];
 
       if (nearbyExpiry && nearbyExpiry.iso) {
         if (nearbyExpiry.label === "elaboración") {

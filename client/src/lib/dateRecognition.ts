@@ -55,35 +55,82 @@ export function classifyDateContext(context: string, learning?: DateLearningRule
   return winner[1] > 0 ? winner[0] : "desconocida";
 }
 
+const dateRegex =
+  /(?:\b\d{1,2}\s+de\s+[a-zA-ZáéíóúÁÉÍÓÚ]+\s+(?:de|del)\s+[0-9OolISB]{2,4}\b|\b[0-9OolISB]{1,2}[\s\/\.\-]+[a-zA-ZáéíóúÁÉÍÓÚ]{3,10}[\s\/\.\-]+[0-9OolISB]{2,4}\b|\b[0-9OolISB]{1,2}[a-zA-Z]{3,4}[0-9OolISB]{2,4}\b|\b(?:0?[1-9]|[12]\d|3[01])[\/\.\-\s](?:0?[1-9]|1[0-2])[\/\.\-\s](?:\d{2}|\d{4})\b|\b[a-zA-ZáéíóúÁÉÍÓÚ]{3,10}\s*[\/\.\-\s]\s*[0-9OolISB]{2,4}\b|\b(?:0?[1-9]|1[0-2])[\/\.\-][0-9OolISB]{2,4}\b)/gi;
+
 export function detectDateCandidates(ocrText: string, learning?: DateLearningRule): DateCandidate[] {
   const lines = ocrText.split(/\r?\n/).filter(Boolean);
   const candidates: DateCandidate[] = [];
 
   for (const line of lines) {
-    const parsed = parseDateToISO(line);
-    if (parsed) {
-      const label =
-        learning?.preferredLabel && learning.corrections > 0
-          ? learning.preferredLabel
-          : parsed.label !== "desconocida"
-          ? parsed.label
-          : classifyDateContext(line, learning);
+    const matches = Array.from(line.matchAll(dateRegex));
+    if (matches.length > 0) {
+      for (const match of matches) {
+        const dateIndex = match.index ?? 0;
+        const keywordHits = (Object.entries(labelKeywords) as Array<[Exclude<DateLabel, "desconocida">, string[]]>)
+          .flatMap(([label, keywords]) =>
+            keywords.map((keyword) => ({
+              label,
+              keyword: normalize(keyword),
+              index: normalize(line).indexOf(normalize(keyword)),
+            }))
+          )
+          .filter((hit) => hit.index >= 0);
 
-      candidates.push({
-        value: parsed.value,
-        iso: parsed.iso,
-        precision: parsed.precision,
-        rawContext: line,
-        label,
-        score:
-          label === "vencimiento"
-            ? 10
-            : label === "consumo preferente"
-            ? 8
-            : label === "elaboración"
-            ? 4
-            : parsed.score,
-      });
+        const nearest = keywordHits.sort(
+          (a, b) => Math.abs(a.index - dateIndex) - Math.abs(b.index - dateIndex)
+        )[0];
+
+        const contextStart = nearest ? Math.max(0, nearest.index - 4) : Math.max(0, dateIndex - 24);
+        const context = line.slice(contextStart, Math.min(line.length, dateIndex + match[0].length + 12));
+        const label =
+          learning?.preferredLabel && learning.corrections > 0
+            ? learning.preferredLabel
+            : nearest?.label || classifyDateContext(context, learning);
+
+        const parsed = parseDateToISO(match[0]) || parseDateToISO(context);
+        candidates.push({
+          value: match[0],
+          iso: parsed?.iso,
+          precision: parsed?.precision,
+          rawContext: context,
+          label,
+          score:
+            label === "vencimiento"
+              ? 10
+              : label === "consumo preferente"
+              ? 8
+              : label === "elaboración"
+              ? 4
+              : parsed?.score || 1,
+        });
+      }
+    } else {
+      const parsed = parseDateToISO(line);
+      if (parsed) {
+        const label =
+          learning?.preferredLabel && learning.corrections > 0
+            ? learning.preferredLabel
+            : parsed.label !== "desconocida"
+            ? parsed.label
+            : classifyDateContext(line, learning);
+
+        candidates.push({
+          value: parsed.value,
+          iso: parsed.iso,
+          precision: parsed.precision,
+          rawContext: line,
+          label,
+          score:
+            label === "vencimiento"
+              ? 10
+              : label === "consumo preferente"
+              ? 8
+              : label === "elaboración"
+              ? 4
+              : parsed.score,
+        });
+      }
     }
   }
 

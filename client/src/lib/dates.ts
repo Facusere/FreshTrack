@@ -368,21 +368,25 @@ export function parseDateToISO(
   }
 
   // 7) Numeric Month-Year: mm/aaaa, mm/aa, mm-aaaa, mm-aa, mm.aaaa, mm.aa
-  const numMonthYearMatch = text.match(
-    /(?:^|[^\w])([0-9OolISB]{1,2})\s*[\/\.\-]\s*([0-9OolISB]{2,4})(?:[^\w]|$)/i
-  );
-  if (numMonthYearMatch) {
-    const year = resolveYear(numMonthYearMatch[2]);
-    const month = resolveMonth(numMonthYearMatch[1]);
-    if (year && month) {
-      const lastDay = getLastDayOfMonth(year, month);
-      return {
-        value: numMonthYearMatch[0].trim(),
-        iso: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
-        precision: "month",
-        label,
-        score,
-      };
+  // Guard against 3-part dates like 12/08/1995
+  const hasThreeNumericParts = /(?:^|[^0-9A-Za-z])\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}(?:[^0-9A-Za-z]|$)/.test(text);
+  if (!hasThreeNumericParts) {
+    const numMonthYearMatch = text.match(
+      /(?:^|[^0-9A-Za-z\/\.\-])([0-9OolISB]{1,2})\s*[\/\.\-]\s*([0-9OolISB]{2,4})(?:[^0-9A-Za-z\/\.\-]|$)/i
+    );
+    if (numMonthYearMatch) {
+      const year = resolveYear(numMonthYearMatch[2]);
+      const month = resolveMonth(numMonthYearMatch[1]);
+      if (year && month) {
+        const lastDay = getLastDayOfMonth(year, month);
+        return {
+          value: numMonthYearMatch[0].trim(),
+          iso: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+          precision: "month",
+          label,
+          score,
+        };
+      }
     }
   }
 

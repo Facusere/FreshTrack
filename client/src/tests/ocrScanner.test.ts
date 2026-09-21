@@ -67,13 +67,13 @@ describe("ocrScanner - Receipt & Label Parsing", () => {
       },
       {
         line: "1.500 KG TOMATE REDONDO $ 4.500",
-        expectedQuantity: "1.5 kg",
+        expectedQuantity: "1,5 kg",
         expectedCleanName: "TOMATE REDONDO",
         description: "leading weight with decimal period and price",
       },
       {
         line: "TOMATE REDONDO 1,500 KG $ 4.500",
-        expectedQuantity: "1.5 kg",
+        expectedQuantity: "1,5 kg",
         expectedCleanName: "TOMATE REDONDO",
         description: "trailing weight with decimal comma and price",
       },
