@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseReceiptAndLabelText, parseDateCandidateToISO, buildSampleTickets } from "../lib/ocrScanner";
+import {
+  parseReceiptAndLabelText,
+  parseDateCandidateToISO,
+  buildSampleTickets,
+  extractQuantityFromTicketLine,
+} from "../lib/ocrScanner";
 
 describe("ocrScanner - Receipt & Label Parsing", () => {
   const mockDetectIcon = (name: string) => (name.includes("Leche") ? "🥛" : "📦");
@@ -45,5 +50,89 @@ describe("ocrScanner - Receipt & Label Parsing", () => {
     expect(yogur?.dateLabel).toBe("vencimiento");
     expect(yogur?.estimated).toBe(false);
     expect(yogur?.expiryDate).toBe("2026-09-22");
+  });
+
+  describe("extractQuantityFromTicketLine - Ticket Quantity Extraction", () => {
+    const ticketCases: Array<{
+      line: string;
+      expectedQuantity: string;
+      expectedCleanName: string;
+      description: string;
+    }> = [
+      {
+        line: "2 LECHE ENTERA 1L $ 1.250",
+        expectedQuantity: "2 litros",
+        expectedCleanName: "LECHE ENTERA",
+        description: "multiplier and volume container with price",
+      },
+      {
+        line: "1.500 KG TOMATE REDONDO $ 4.500",
+        expectedQuantity: "1.5 kg",
+        expectedCleanName: "TOMATE REDONDO",
+        description: "leading weight with decimal period and price",
+      },
+      {
+        line: "TOMATE REDONDO 1,500 KG $ 4.500",
+        expectedQuantity: "1.5 kg",
+        expectedCleanName: "TOMATE REDONDO",
+        description: "trailing weight with decimal comma and price",
+      },
+      {
+        line: "3 HARINA 000 1KG $1500",
+        expectedQuantity: "3 kg",
+        expectedCleanName: "HARINA 000",
+        description: "multiplier with product name containing 000 and 1KG container",
+      },
+      {
+        line: "QUESO CREMOSO 0,425 kg x $4500",
+        expectedQuantity: "425 g",
+        expectedCleanName: "QUESO CREMOSO",
+        description: "sub-kg weight converted to grams with unit multiplier price",
+      },
+      {
+        line: "YOGUR SER 4X120G",
+        expectedQuantity: "480 g",
+        expectedCleanName: "YOGUR SER",
+        description: "pack multiplier expression 4X120G",
+      },
+      {
+        line: "2 PAN LACTAL $2.100",
+        expectedQuantity: "2 unidades",
+        expectedCleanName: "PAN LACTAL",
+        description: "count multiplier without container unit",
+      },
+      {
+        line: "GALLETITAS DIVERSAS ART 12345 $850",
+        expectedQuantity: "1 unidad",
+        expectedCleanName: "GALLETITAS DIVERSAS",
+        description: "article code and price stripped, defaulting to 1 unidad",
+      },
+      {
+        line: "7791234567890 ARROZ LARGO FINO 1KG $1200",
+        expectedQuantity: "1 kg",
+        expectedCleanName: "ARROZ LARGO FINO",
+        description: "EAN barcode and price stripped with 1KG container",
+      },
+      {
+        line: "3 X 1L JUGO DE NARANJA $3000",
+        expectedQuantity: "3 litros",
+        expectedCleanName: "JUGO DE NARANJA",
+        description: "multiplied volume container 3 X 1L",
+      },
+      {
+        line: "MANZANA ROJA 2 KG",
+        expectedQuantity: "2 kg",
+        expectedCleanName: "MANZANA ROJA",
+        description: "clean weight without price",
+      },
+    ];
+
+    for (const tc of ticketCases) {
+      it(`extracts quantity from "${tc.line}" -> ${tc.expectedQuantity} (${tc.expectedCleanName})`, () => {
+        const { quantity, cleanName } = extractQuantityFromTicketLine(tc.line);
+        expect(quantity).toBe(tc.expectedQuantity);
+        expect(cleanName).toBe(tc.expectedCleanName);
+      });
+    }
   });
 });

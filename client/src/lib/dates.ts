@@ -97,32 +97,304 @@ export function formatTimeAgo(isoString: string, now: Date = new Date()): string
   return formatExpiryDisplay(toISODate(d), now);
 }
 
-/**
- * Parses dd/mm/aa, dd/mm/aaaa, dd-mm-aa, dd-mm-aaaa into YYYY-MM-DD.
- * 2-digit years convert to 20xx.
- * Returns null if the date does not exist in the calendar (e.g. 31/02).
- */
-export function parseDateCandidateToISO(text: string): string | null {
-  const match = text.trim().match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2}|\d{4})$/);
-  if (!match) return null;
+export type DateLabel = "elaboración" | "vencimiento" | "consumo preferente" | "desconocida";
 
-  const day = parseInt(match[1], 10);
-  const month = parseInt(match[2], 10);
-  let year = parseInt(match[3], 10);
+export type DateParseResult = {
+  value: string;
+  iso: string;
+  precision: "day" | "month";
+  label: DateLabel;
+  score: number;
+};
 
-  if (year < 100) {
-    year += 2000;
+const MONTH_MAP: Record<string, number> = {
+  // Spanish
+  ene: 1,
+  enero: 1,
+  feb: 2,
+  febrero: 2,
+  mar: 3,
+  marzo: 3,
+  abr: 4,
+  abril: 4,
+  may: 5,
+  mayo: 5,
+  jun: 6,
+  junio: 6,
+  jul: 7,
+  julio: 7,
+  ago: 8,
+  agosto: 8,
+  sep: 9,
+  set: 9,
+  sept: 9,
+  septiembre: 9,
+  setiembre: 9,
+  oct: 10,
+  octubre: 10,
+  nov: 11,
+  noviembre: 11,
+  dic: 12,
+  diciembre: 12,
+
+  // English
+  jan: 1,
+  january: 1,
+  apr: 4,
+  april: 4,
+  aug: 8,
+  august: 8,
+  dec: 12,
+  december: 12,
+};
+
+function cleanOcrDigits(str: string): string {
+  return str
+    .replace(/[Oo]/g, "0")
+    .replace(/[lI]/g, "1")
+    .replace(/[Ss]/g, "5")
+    .replace(/B/g, "8");
+}
+
+function resolveYear(str: string): number | null {
+  const cleaned = cleanOcrDigits(str);
+  if (!/^\d+$/.test(cleaned)) return null;
+  let y = parseInt(cleaned, 10);
+  if (y >= 0 && y <= 50) {
+    y += 2000;
   }
-
-  if (month < 1 || month > 12) return null;
-  if (day < 1 || day > 31) return null;
-
-  const d = new Date(year, month - 1, day);
-  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+  // Sanity check: years between 2000 and 2040
+  if (y < 2000 || y > 2040) {
     return null;
   }
+  return y;
+}
 
-  return toISODate(d);
+export function getLastDayOfMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate();
+}
+
+function resolveMonth(str: string): number | null {
+  const cleaned = cleanOcrDigits(str);
+  if (/^\d+$/.test(cleaned)) {
+    const m = parseInt(cleaned, 10);
+    return m >= 1 && m <= 12 ? m : null;
+  }
+  const norm = str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+  return MONTH_MAP[norm] || null;
+}
+
+function resolveDay(str: string, year: number, month: number): number | null {
+  const cleaned = cleanOcrDigits(str);
+  if (!/^\d+$/.test(cleaned)) return null;
+  const d = parseInt(cleaned, 10);
+  const maxDay = getLastDayOfMonth(year, month);
+  return d >= 1 && d <= maxDay ? d : null;
+}
+
+function extractDateLabel(text: string): DateLabel {
+  const norm = text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (
+    /\b(?:vto|venc|vence|vencimiento|val|validez|exp|expiry|bb|consumir preferentemente|consumo antes|best before|use by|caducidad)\b/i.test(
+      norm
+    )
+  ) {
+    return "vencimiento";
+  }
+  if (
+    /\b(?:elab|elaboracion|elaborado|fabricacion|fabricado|fab|env|envasado|pack|mfg|fecha de elaboracion|producido)\b/i.test(
+      norm
+    )
+  ) {
+    return "elaboración";
+  }
+  return "desconocida";
+}
+
+/**
+ * Parses dates from OCR text into ISO (YYYY-MM-DD) format.
+ * Supports:
+ * - Numeric dd/mm/aaaa, dd/mm/aa, dd-mm-aa, dd.mm.aa, dd mm aa
+ * - Text months in ES/EN: 12 AGO 2027, 12-AGO-27, 12 de agosto de 2027, 12 Aug 2027
+ * - Glued dates: 12AGO27, 12AGO2027
+ * - Month-Year: mm/aaaa, mm/aa, MMM aaaa, MMM aa, AGO 2027, AGO/27 (defaults to last day of month)
+ * - OCR noise repair: O/o->0, l/I->1, S->5, B->8
+ * - Sanity checks: years 2000..2040, valid day in month (rejects 31/02), 2-digit years > 50 rejected
+ */
+export function parseDateToISO(
+  text: string,
+  _referenceDate?: Date
+): DateParseResult | null {
+  if (!text || typeof text !== "string") return null;
+
+  const label = extractDateLabel(text);
+  const score =
+    label === "vencimiento"
+      ? 10
+      : label === "consumo preferente"
+      ? 8
+      : label === "elaboración"
+      ? 4
+      : 5;
+
+  // 1) dd de MMMM de aaaa / dd de MMMM del aaaa
+  const deMatch = text.match(
+    /(?:^|[^\w])(\d{1,2})\s+de\s+([a-zA-ZáéíóúÁÉÍÓÚ]+)\s+(?:de|del)\s+([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (deMatch) {
+    const year = resolveYear(deMatch[3]);
+    const month = resolveMonth(deMatch[2]);
+    if (year && month) {
+      const day = resolveDay(deMatch[1], year, month);
+      if (day) {
+        return {
+          value: deMatch[0].trim(),
+          iso: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+          precision: "day",
+          label,
+          score,
+        };
+      }
+    }
+  }
+
+  // 2) dd MMM aaaa / dd-MMM-aa / dd.MMM.aa / dd/MMM/aa
+  const mmmMatch = text.match(
+    /(?:^|[^\w])([0-9OolISB]{1,2})[\s\/\.\-]+([a-zA-ZáéíóúÁÉÍÓÚ]{3,10})[\s\/\.\-]+([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (mmmMatch) {
+    const year = resolveYear(mmmMatch[3]);
+    const month = resolveMonth(mmmMatch[2]);
+    if (year && month) {
+      const day = resolveDay(mmmMatch[1], year, month);
+      if (day) {
+        return {
+          value: mmmMatch[0].trim(),
+          iso: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+          precision: "day",
+          label,
+          score,
+        };
+      }
+    }
+  }
+
+  // 3) Glued ddMMMyy / ddMMMyyyy (e.g. 12AGO27, 12AGO2027)
+  const gluedMatch = text.match(
+    /(?:^|[^\w])([0-9OolISB]{1,2})([a-zA-Z]{3,4})([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (gluedMatch) {
+    const year = resolveYear(gluedMatch[3]);
+    const month = resolveMonth(gluedMatch[2]);
+    if (year && month) {
+      const day = resolveDay(gluedMatch[1], year, month);
+      if (day) {
+        return {
+          value: gluedMatch[0].trim(),
+          iso: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+          precision: "day",
+          label,
+          score,
+        };
+      }
+    }
+  }
+
+  // 4) Numeric full date: dd/mm/aaaa, dd/mm/aa, dd-mm-aa, dd.mm.aa, dd mm aa
+  const numMatch = text.match(
+    /(?:^|[^\w])([0-9OolISB]{1,2})\s*[\/\.\-\s]\s*([0-9OolISB]{1,2})\s*[\/\.\-\s]\s*([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (numMatch) {
+    const year = resolveYear(numMatch[3]);
+    const month = resolveMonth(numMatch[2]);
+    if (year && month) {
+      const day = resolveDay(numMatch[1], year, month);
+      if (day) {
+        return {
+          value: numMatch[0].trim(),
+          iso: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+          precision: "day",
+          label,
+          score,
+        };
+      }
+    }
+  }
+
+  // 5) Month-Year with month name: MMM aaaa, MMM aa, MMM/aa, MMM-aa
+  const mmmYearMatch = text.match(
+    /(?:^|[^\w])([a-zA-ZáéíóúÁÉÍÓÚ]{3,10})\s*[\/\.\-\s]\s*([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (mmmYearMatch) {
+    const year = resolveYear(mmmYearMatch[2]);
+    const month = resolveMonth(mmmYearMatch[1]);
+    if (year && month) {
+      const lastDay = getLastDayOfMonth(year, month);
+      return {
+        value: mmmYearMatch[0].trim(),
+        iso: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+        precision: "month",
+        label,
+        score,
+      };
+    }
+  }
+
+  // 6) Glued Month-Year: AGO27, AGO2027
+  const gluedMmmYearMatch = text.match(
+    /(?:^|[^\w])([a-zA-Z]{3,4})([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (gluedMmmYearMatch) {
+    const year = resolveYear(gluedMmmYearMatch[2]);
+    const month = resolveMonth(gluedMmmYearMatch[1]);
+    if (year && month) {
+      const lastDay = getLastDayOfMonth(year, month);
+      return {
+        value: gluedMmmYearMatch[0].trim(),
+        iso: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+        precision: "month",
+        label,
+        score,
+      };
+    }
+  }
+
+  // 7) Numeric Month-Year: mm/aaaa, mm/aa, mm-aaaa, mm-aa, mm.aaaa, mm.aa
+  const numMonthYearMatch = text.match(
+    /(?:^|[^\w])([0-9OolISB]{1,2})\s*[\/\.\-]\s*([0-9OolISB]{2,4})(?:[^\w]|$)/i
+  );
+  if (numMonthYearMatch) {
+    const year = resolveYear(numMonthYearMatch[2]);
+    const month = resolveMonth(numMonthYearMatch[1]);
+    if (year && month) {
+      const lastDay = getLastDayOfMonth(year, month);
+      return {
+        value: numMonthYearMatch[0].trim(),
+        iso: `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`,
+        precision: "month",
+        label,
+        score,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Backward-compatible helper returning just ISO string YYYY-MM-DD or null.
+ */
+export function parseDateCandidateToISO(text: string): string | null {
+  const res = parseDateToISO(text);
+  return res ? res.iso : null;
 }
 
 /**

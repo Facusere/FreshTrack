@@ -6,6 +6,7 @@ import {
   formatRelativeDays,
   formatTimeAgo,
   parseDateCandidateToISO,
+  parseDateToISO,
   statusFromDays,
   toISODate,
 } from "../lib/dates";
@@ -98,6 +99,91 @@ describe("dates.ts - Core Date Calculations", () => {
     expect(parseDateCandidateToISO("00/05/2026")).toBeNull();
     expect(parseDateCandidateToISO("15/13/2026")).toBeNull();
     expect(parseDateCandidateToISO("invalid text")).toBeNull();
+  });
+
+  describe("parseDateToISO - Table-driven generalized date parsing", () => {
+    const validTestCases: Array<{
+      input: string;
+      expectedIso: string;
+      expectedPrecision: "day" | "month";
+      description: string;
+    }> = [
+      // Numeric formats with various separators and spaces
+      { input: "12/08/2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd/mm/aaaa" },
+      { input: "12/08/27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd/mm/aa" },
+      { input: "12-08-2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd-mm-aaaa" },
+      { input: "12-08-27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd-mm-aa" },
+      { input: "12.08.2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd.mm.aaaa" },
+      { input: "12.08.27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd.mm.aa" },
+      { input: "12 08 2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd mm aaaa" },
+      { input: "12 08 27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd mm aa" },
+      { input: "12 / 08 / 2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "spaces around slashes" },
+
+      // Text months (Spanish and English)
+      { input: "12 AGO 2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd MMM aaaa (ES)" },
+      { input: "12-AGO-27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd-MMM-aa (ES)" },
+      { input: "12 Aug 2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd MMM aaaa (EN)" },
+      { input: "15 Oct 26", expectedIso: "2026-10-15", expectedPrecision: "day", description: "dd MMM aa (EN)" },
+      { input: "12 de agosto de 2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "dd de MMMM de aaaa" },
+      { input: "5 de mayo del 2026", expectedIso: "2026-05-05", expectedPrecision: "day", description: "dd de MMMM del aaaa" },
+
+      // Glued dates
+      { input: "12AGO27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "glued 12AGO27" },
+      { input: "12AGO2027", expectedIso: "2027-08-12", expectedPrecision: "day", description: "glued 12AGO2027" },
+      { input: "12AUG28", expectedIso: "2028-08-12", expectedPrecision: "day", description: "glued 12AUG28" },
+
+      // Month-Year only (defaults to last day of month)
+      { input: "08/27", expectedIso: "2027-08-31", expectedPrecision: "month", description: "mm/aa (Aug has 31 days)" },
+      { input: "08-2027", expectedIso: "2027-08-31", expectedPrecision: "month", description: "mm-aaaa" },
+      { input: "AGO 2027", expectedIso: "2027-08-31", expectedPrecision: "month", description: "MMM aaaa" },
+      { input: "AGO/27", expectedIso: "2027-08-31", expectedPrecision: "month", description: "MMM/aa" },
+      { input: "04/27", expectedIso: "2027-04-30", expectedPrecision: "month", description: "April last day (30)" },
+      { input: "02/28", expectedIso: "2028-02-29", expectedPrecision: "month", description: "leap year Feb (29)" },
+      { input: "02/27", expectedIso: "2027-02-28", expectedPrecision: "month", description: "non-leap year Feb (28)" },
+
+      // OCR digit confusion noise repair
+      { input: "12/O8/2O27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "O replaced with 0" },
+      { input: "l2/08/27", expectedIso: "2027-08-12", expectedPrecision: "day", description: "l replaced with 1" },
+      { input: "I5/05/2026", expectedIso: "2026-05-15", expectedPrecision: "day", description: "I replaced with 1" },
+    ];
+
+    for (const tc of validTestCases) {
+      it(`parses ${tc.description}: "${tc.input}" -> ${tc.expectedIso}`, () => {
+        const res = parseDateToISO(tc.input);
+        expect(res).not.toBeNull();
+        expect(res?.iso).toBe(tc.expectedIso);
+        expect(res?.precision).toBe(tc.expectedPrecision);
+      });
+    }
+
+    it("detects context labels accurately with word boundaries", () => {
+      const vto = parseDateToISO("VTO: 12/08/2027");
+      expect(vto?.label).toBe("vencimiento");
+      expect(vto?.score).toBe(10);
+
+      const elab = parseDateToISO("ELAB 10/05/2026");
+      expect(elab?.label).toBe("elaboración");
+      expect(elab?.score).toBe(4);
+
+      const pref = parseDateToISO("Consumir preferentemente antes de 12/08/27");
+      expect(pref?.label).toBe("vencimiento");
+
+      // Word boundary check: "ELOTE" must NOT match "lote"
+      const elote = parseDateToISO("ELOTE 12/08/2027");
+      expect(elote?.label).toBe("desconocida");
+      expect(elote?.score).toBe(5);
+    });
+
+    it("rejects invalid calendar dates and out-of-range years", () => {
+      expect(parseDateToISO("31/02/2027")).toBeNull(); // Feb never has 31
+      expect(parseDateToISO("29/02/2027")).toBeNull(); // 2027 not leap year
+      expect(parseDateToISO("31/04/2027")).toBeNull(); // Apr has 30 days
+      expect(parseDateToISO("12/08/1995")).toBeNull(); // Year < 2000
+      expect(parseDateToISO("12/08/2055")).toBeNull(); // Year > 2040
+      expect(parseDateToISO("12/08/75")).toBeNull(); // 2-digit > 50
+      expect(parseDateToISO("")).toBeNull();
+      expect(parseDateToISO("lorem ipsum")).toBeNull();
+    });
   });
 });
 

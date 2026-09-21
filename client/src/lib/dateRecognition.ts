@@ -1,7 +1,11 @@
-export type DateLabel = "elaboración" | "vencimiento" | "consumo preferente" | "desconocida";
+import { parseDateToISO, DateLabel, DateParseResult } from "./dates.js";
+export { parseDateToISO };
+export type { DateLabel, DateParseResult };
 
 export type DateCandidate = {
   value: string;
+  iso?: string;
+  precision?: "day" | "month";
   rawContext: string;
   label: DateLabel;
   score: number;
@@ -53,16 +57,37 @@ export function classifyDateContext(context: string, learning?: DateLearningRule
 
 export function detectDateCandidates(ocrText: string, learning?: DateLearningRule): DateCandidate[] {
   const lines = ocrText.split(/\r?\n/).filter(Boolean);
-  const dateRegex = /\b(?:0?[1-9]|[12]\d|3[01])[\/-](?:0?[1-9]|1[0-2])[\/-](?:\d{2}|\d{4})\b/g;
-  return lines.flatMap((line) => Array.from(line.matchAll(dateRegex)).map((match) => {
-    const dateIndex = match.index ?? 0;
-    const keywordHits = (Object.entries(labelKeywords) as Array<[Exclude<DateLabel, "desconocida">, string[]]>).flatMap(([label, keywords]) => keywords.map((keyword) => ({ label, keyword: normalize(keyword), index: normalize(line).indexOf(normalize(keyword)) }))).filter((hit) => hit.index >= 0);
-    const nearest = keywordHits.sort((a, b) => Math.abs(a.index - dateIndex) - Math.abs(b.index - dateIndex))[0];
-    const contextStart = nearest ? Math.max(0, nearest.index - 4) : Math.max(0, dateIndex - 24);
-    const context = line.slice(contextStart, Math.min(line.length, dateIndex + match[0].length + 12));
-    const label = learning?.preferredLabel && learning.corrections > 0 ? learning.preferredLabel : nearest?.label || classifyDateContext(context, learning);
-    return { value: match[0], rawContext: context, label, score: label === "vencimiento" ? 10 : label === "consumo preferente" ? 8 : label === "elaboración" ? 4 : 1 };
-  }));
+  const candidates: DateCandidate[] = [];
+
+  for (const line of lines) {
+    const parsed = parseDateToISO(line);
+    if (parsed) {
+      const label =
+        learning?.preferredLabel && learning.corrections > 0
+          ? learning.preferredLabel
+          : parsed.label !== "desconocida"
+          ? parsed.label
+          : classifyDateContext(line, learning);
+
+      candidates.push({
+        value: parsed.value,
+        iso: parsed.iso,
+        precision: parsed.precision,
+        rawContext: line,
+        label,
+        score:
+          label === "vencimiento"
+            ? 10
+            : label === "consumo preferente"
+            ? 8
+            : label === "elaboración"
+            ? 4
+            : parsed.score,
+      });
+    }
+  }
+
+  return candidates;
 }
 
 export function loadLearningRules(): DateLearningRule[] {
