@@ -51,8 +51,8 @@ import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shopping
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
-import { addDaysISO, daysUntil, formatRelativeDays, useToday } from "@/lib/dates";
-import { loadStoredProducts, saveStoredProducts, loadJSON, saveJSON, CONSUMPTION_HISTORY_KEY } from "@/lib/storage";
+import { addDaysISO, daysUntil, formatRelativeDays, formatTimeAgo, SOON_THRESHOLD_DAYS, useToday } from "@/lib/dates";
+import { loadStoredProducts, saveStoredProducts, loadJSON, saveJSON, CONSUMPTION_HISTORY_KEY, loadLastScan, LastScanInfo } from "@/lib/storage";
 
 type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
 type ConsumptionRecord = { id: number; title: string; ingredients: string[]; before: StoredProduct[]; delta: { kg: number; money: number; meals: number }; createdAt: string };
@@ -170,12 +170,11 @@ function ProductRow({ product, onEdit }: { product: Product; onEdit: (product: P
   );
 }
 
-function StatCard({ label, value, note, icon, tone, trend }: { label: string; value: string; note: string; icon: React.ReactNode; tone: string; trend?: "up" | "down" }) {
+function StatCard({ label, value, note, icon, tone }: { label: string; value: string; note: string; icon: React.ReactNode; tone: string }) {
   return (
     <div className="rounded-[20px] border border-[#ece8df] bg-[#fffdf9] p-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(55,63,48,0.08)]">
       <div className="flex items-start justify-between">
         <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${tone}`}>{icon}</span>
-        {trend && <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${trend === "down" ? "text-[#43715b]" : "text-[#c7802d]"}`}>{trend === "down" ? <ArrowDownRight size={13} /> : <ArrowUpRight size={13} />} {trend === "down" ? "12%" : "8%"}</span>}
       </div>
       <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.12em] text-[#929991]">{label}</p>
       <p className="mt-1 text-[26px] font-semibold tracking-[-0.04em] text-[#1c332b]">{value}</p>
@@ -669,7 +668,8 @@ function AddProductModal({
 
 export default function Home() {
   const today = useToday();
-  const [storedProducts, setStoredProducts] = useState<StoredProduct[]>(() => loadStoredProducts(new Date()) ?? buildDemoProducts(new Date()));
+  const [storedProducts, setStoredProducts] = useState<StoredProduct[]>(() => loadStoredProducts(new Date()) ?? []);
+  const [lastScan, setLastScan] = useState<LastScanInfo | null>(() => loadLastScan());
   const products = useMemo(() => storedProducts.map((p) => deriveProduct(p, today)), [storedProducts, today]);
   const [activeNav, setActiveNav] = useState("Resumen");
   const [filter, setFilter] = useState<"all" | ProductStatus>("all");
@@ -764,9 +764,9 @@ export default function Home() {
 
   const currentNavItems = [
     { label: "Resumen", icon: HomeIcon },
-    { label: "Mi despensa", icon: PackageOpen, count: String(products.length + 17) },
+    { label: "Mi despensa", icon: PackageOpen, count: products.length > 0 ? String(products.length) : undefined },
     { label: "Lista de compras", icon: ShoppingCart, count: pendingShoppingCount > 0 ? String(pendingShoppingCount) : undefined },
-    { label: "Recorrida", icon: Route, count: String(suggestedRoute.length) },
+    { label: "Recorrida", icon: Route, count: suggestedRoute.length > 0 ? String(suggestedRoute.length) : undefined },
     { label: "Reportes", icon: BarChart3 },
   ];
 
@@ -826,6 +826,7 @@ export default function Home() {
 
   const addProducts = (newProducts: StoredProduct[]) => {
     setStoredProducts((current) => [...newProducts, ...current]);
+    setLastScan(loadLastScan());
     toast.success(`${newProducts.length} productos agregados`, { description: "Las fechas estimadas quedaron listas para revisar." });
   };
 
@@ -903,8 +904,31 @@ export default function Home() {
           <p className="mb-2 mt-9 px-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#72927c]">Tu espacio</p>
           <nav className="space-y-1">{currentNavItems.map(({ label, icon: Icon, count }) => <button key={label} onClick={() => navigateToModule(label)} className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[12px] font-semibold transition ${activeNav === label ? "bg-[#315844] text-white" : "text-[#a4b9a8] hover:bg-[#254b39] hover:text-white"}`}><span className="flex items-center gap-3"><Icon size={16} strokeWidth={1.8} />{label}</span>{count && <span className={`rounded-md px-1.5 py-0.5 text-[10px] ${activeNav === label ? "bg-[#496e55] text-[#eaf4e8]" : "bg-[#254b39] text-[#8eaa91]"}`}>{count}</span>}</button>)}</nav>
           <p className="mb-2 mt-8 px-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#72927c]">Cuenta</p>
-          <nav className="space-y-1"><button onClick={() => setNotificationModal(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-[#a4b9a8] transition hover:bg-[#254b39] hover:text-white"><Bell size={16} strokeWidth={1.8} />Notificaciones<span className="ml-auto flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#d9e982]" />{notificationGroups.length > 0 && <span className="text-[10px] text-[#d9e982]">{notificationGroups.length}</span>}</span></button><button onClick={() => setNotificationModal(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-[#a4b9a8] transition hover:bg-[#254b39] hover:text-white"><Settings2 size={16} strokeWidth={1.8} />Configuración</button></nav>
-          <div className="mt-auto rounded-2xl bg-[#204632] p-3.5"><div className="flex items-center gap-2.5"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#d9e982] text-[12px] font-extrabold text-[#17372b]">SM</div><div className="min-w-0"><p className="truncate text-[12px] font-semibold text-white">Sofía Martínez</p><p className="text-[10px] text-[#89a993]">Plan personal</p></div><ChevronRight size={14} className="ml-auto text-[#7da088]" /></div></div>
+          <nav className="space-y-1">
+            <button onClick={() => setNotificationModal(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-[#a4b9a8] transition hover:bg-[#254b39] hover:text-white">
+              <Bell size={16} strokeWidth={1.8} />Notificaciones
+              {notificationGroups.length > 0 && (
+                <span className="ml-auto flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-[#d9e982]" />
+                  <span className="text-[10px] text-[#d9e982]">{notificationGroups.length}</span>
+                </span>
+              )}
+            </button>
+            <button onClick={() => setNotificationModal(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[12px] font-semibold text-[#a4b9a8] transition hover:bg-[#254b39] hover:text-white">
+              <Settings2 size={16} strokeWidth={1.8} />Configuración
+            </button>
+          </nav>
+          <div className="mt-auto rounded-2xl bg-[#204632] p-3.5">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#d9e982] text-[11px] font-extrabold text-[#17372b]">
+                FT
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[12px] font-semibold text-white">Despensa local</p>
+                <p className="text-[10px] text-[#89a993]">Datos en tu dispositivo</p>
+              </div>
+            </div>
+          </div>
         </aside>
 
         <main className="min-w-0 flex-1 md:ml-[244px]">
@@ -919,22 +943,27 @@ export default function Home() {
                   <Smartphone size={14} /> Instalar PWA
                 </button>
               )}
-              <div className="hidden items-center gap-2 rounded-xl border border-[#e6e3db] bg-[#fffdf9] px-3 py-2 text-[#9ca59d] sm:flex"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar en tu despensa" className="w-[150px] bg-transparent text-[11px] outline-none placeholder:text-[#aeb5ae]" /></div><button aria-label="Buscar" onClick={() => document.querySelector<HTMLInputElement>("input[placeholder='Buscar en tu despensa']")?.focus()} className="rounded-xl border border-[#e6e3db] bg-[#fffdf9] p-2.5 text-[#75867b] sm:hidden"><Search size={16} /></button><button aria-label="Ayuda" onClick={() => toast("¿Necesitás ayuda?", { description: "Escaneá un ticket y FreshTrack hace el resto." })} className="hidden rounded-xl p-2.5 text-[#75867b] transition hover:bg-[#ecebe3] sm:block"><CircleHelp size={17} /></button><button aria-label="Notificaciones" onClick={() => setNotificationModal(true)} className="relative rounded-xl p-2.5 text-[#75867b] transition hover:bg-[#ecebe3]"><Bell size={17} /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#d79a2b]" /></button><div className="hidden h-8 w-8 items-center justify-center rounded-full bg-[#d9e982] text-[10px] font-extrabold text-[#17372b] sm:flex">SM</div></div>
+              <div className="hidden items-center gap-2 rounded-xl border border-[#e6e3db] bg-[#fffdf9] px-3 py-2 text-[#9ca59d] sm:flex"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar en tu despensa" className="w-[150px] bg-transparent text-[11px] outline-none placeholder:text-[#aeb5ae]" /></div><button aria-label="Buscar" onClick={() => document.querySelector<HTMLInputElement>("input[placeholder='Buscar en tu despensa']")?.focus()} className="rounded-xl border border-[#e6e3db] bg-[#fffdf9] p-2.5 text-[#75867b] sm:hidden"><Search size={16} /></button><button aria-label="Ayuda" onClick={() => toast("¿Necesitás ayuda?", { description: "Escaneá un ticket y FreshTrack hace el resto." })} className="hidden rounded-xl p-2.5 text-[#75867b] transition hover:bg-[#ecebe3] sm:block"><CircleHelp size={17} /></button><button aria-label="Notificaciones" onClick={() => setNotificationModal(true)} className="relative rounded-xl p-2.5 text-[#75867b] transition hover:bg-[#ecebe3]"><Bell size={17} />{notificationGroups.length > 0 && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#d79a2b]" />}</button><div className="hidden h-8 w-8 items-center justify-center rounded-full bg-[#d9e982] text-[10px] font-extrabold text-[#17372b] sm:flex" title="Despensa local">FT</div></div>
           </header>
 
           {mobileNav && <div className="fixed inset-0 z-40 bg-[#142c23]/30 md:hidden" onClick={() => setMobileNav(false)}><div className="h-full w-[260px] bg-[#17372b] p-5 text-white" onClick={(e) => e.stopPropagation()}><div className="flex items-center gap-2"><Leaf size={19} className="text-[#d9e982]" /><p className="font-serif text-xl">freshtrack</p></div><button onClick={() => { setModal("scan"); setMobileNav(false); }} className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#d9e982] px-3 py-3 text-[12px] font-bold text-[#17372b]"><ScanLine size={16} /> Escanear compra</button><div className="mt-6 space-y-1">{currentNavItems.map(({ label, icon: Icon, count }) => <button key={label} onClick={() => { navigateToModule(label); setMobileNav(false); }} className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-[12px] font-semibold text-[#afc4b2]"><span className="flex items-center gap-3"><Icon size={16} />{label}</span>{count && <span>{count}</span>}</button>)}</div></div></div>}
 
           <div className="mx-auto max-w-[1400px] px-4 py-7 sm:px-6 lg:px-10 lg:py-9">
             <section id="module-summary" className="scroll-mt-24 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="relative overflow-hidden rounded-[26px] bg-[#dfead7] px-6 py-7 sm:px-8 sm:py-9"><div className="absolute -right-12 -top-14 h-48 w-48 rounded-full border-[28px] border-[#cadfbd]/60" /><div className="absolute -bottom-20 right-16 h-40 w-40 rounded-full border-[20px] border-[#e9f1df]/65" /><div className="relative max-w-[470px]"><div className="flex items-center gap-2 text-[11px] font-semibold text-[#588064]"><span className="h-2 w-2 rounded-full bg-[#7eaf83]" /> Tu despensa, en calma</div><h1 className="mt-4 max-w-[450px] font-serif text-[36px] font-semibold leading-[0.98] tracking-[-0.045em] text-[#17372b] sm:text-[47px]">Que nada rico<br /><span className="italic text-[#4c815c]">termine en la basura.</span></h1><p className="mt-4 max-w-[380px] text-[13px] leading-6 text-[#5d7866]">FreshTrack lee tus tickets, estima vencimientos y te avisa justo a tiempo. Menos carga manual, más comida aprovechada.</p><div className="mt-6 flex flex-wrap items-center gap-2.5"><button onClick={() => setModal("scan")} className="inline-flex items-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(31,73,58,0.18)] transition hover:bg-[#16392c] active:scale-[0.97]"><ScanLine size={16} /> Escanear compra</button><button onClick={() => setModal("add")} className="inline-flex items-center gap-2 rounded-xl border border-[#b9d0bb] bg-[#eef5e8]/60 px-4 py-3 text-[12px] font-bold text-[#2c6448] transition hover:bg-white"><Plus size={15} /> Agregar manual</button></div><div className="mt-4 flex items-center gap-2 text-[10px] font-semibold text-[#5f8167]"><span className="rounded-full bg-[#eff6e9] px-2 py-1">{getCatalogSize()} productos regionales</span><span>·</span><span>vida útil abierto / cerrado</span></div><div className="mt-5 flex items-center gap-3 text-[11px] text-[#6f8978]"><div className="flex -space-x-2"><span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#dfead7] bg-[#e7b98c] text-[9px]">LM</span><span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#dfead7] bg-[#a9c4a1] text-[9px]">JP</span><span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#dfead7] bg-[#e7d690] text-[9px]">+2</span></div><span>Ya lo usan familias que quieren desperdiciar menos.</span></div></div></div>
-              <div className="group relative min-h-[300px] overflow-hidden rounded-[26px] bg-[#e9e1cf] shadow-[0_14px_35px_rgba(74,79,55,0.09)]"><div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]" style={{ backgroundImage: "url('/groceries.jpg')" }} /><div className="absolute inset-0 bg-gradient-to-t from-[#18352a]/80 via-[#18352a]/10 to-transparent" /><div className="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-[#fffdf9]/85 px-3 py-1.5 text-[10px] font-bold text-[#315542] backdrop-blur-sm"><span className="h-1.5 w-1.5 rounded-full bg-[#6cac78]" /> Último escaneo · hace 2 h</div><div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3 text-white"><div><p className="text-[11px] font-medium text-[#d8ead8]">Supermercado Día</p><p className="mt-1 font-serif text-[25px] font-semibold tracking-[-0.03em]">12 productos detectados</p></div><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d9e982] text-[#17372b]"><ArrowUpRight size={18} /></div></div></div>
+              <div className="relative overflow-hidden rounded-[26px] bg-[#dfead7] px-6 py-7 sm:px-8 sm:py-9"><div className="absolute -right-12 -top-14 h-48 w-48 rounded-full border-[28px] border-[#cadfbd]/60" /><div className="absolute -bottom-20 right-16 h-40 w-40 rounded-full border-[20px] border-[#e9f1df]/65" /><div className="relative max-w-[470px]"><div className="flex items-center gap-2 text-[11px] font-semibold text-[#588064]"><span className="h-2 w-2 rounded-full bg-[#7eaf83]" /> Tu despensa, en calma</div><h1 className="mt-4 max-w-[450px] font-serif text-[36px] font-semibold leading-[0.98] tracking-[-0.045em] text-[#17372b] sm:text-[47px]">Que nada rico<br /><span className="italic text-[#4c815c]">termine en la basura.</span></h1><p className="mt-4 max-w-[380px] text-[13px] leading-6 text-[#5d7866]">FreshTrack lee tus tickets, estima vencimientos y te avisa justo a tiempo. Menos carga manual, más comida aprovechada.</p><div className="mt-6 flex flex-wrap items-center gap-2.5"><button onClick={() => setModal("scan")} className="inline-flex items-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white shadow-[0_10px_20px_rgba(31,73,58,0.18)] transition hover:bg-[#16392c] active:scale-[0.97]"><ScanLine size={16} /> Escanear compra</button><button onClick={() => setModal("add")} className="inline-flex items-center gap-2 rounded-xl border border-[#b9d0bb] bg-[#eef5e8]/60 px-4 py-3 text-[12px] font-bold text-[#2c6448] transition hover:bg-white"><Plus size={15} /> Agregar manual</button></div><div className="mt-4 flex items-center gap-2 text-[10px] font-semibold text-[#5f8167]"><span className="rounded-full bg-[#eff6e9] px-2 py-1">{getCatalogSize()} productos regionales</span><span>·</span><span>vida útil abierto / cerrado</span></div><div className="mt-5 flex items-center gap-2 text-[11px] text-[#6f8978]"><span className="h-1.5 w-1.5 rounded-full bg-[#6cac78]" /><span>Tus datos se guardan únicamente en este dispositivo.</span></div></div></div>
+              <div onClick={() => setModal("scan")} className="group relative min-h-[300px] cursor-pointer overflow-hidden rounded-[26px] bg-[#e9e1cf] shadow-[0_14px_35px_rgba(74,79,55,0.09)]"><div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]" style={{ backgroundImage: "url('/groceries.jpg')" }} /><div className="absolute inset-0 bg-gradient-to-t from-[#18352a]/80 via-[#18352a]/10 to-transparent" /><div className="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-[#fffdf9]/85 px-3 py-1.5 text-[10px] font-bold text-[#315542] backdrop-blur-sm"><span className="h-1.5 w-1.5 rounded-full bg-[#6cac78]" /> {lastScan ? `Último escaneo · ${formatTimeAgo(lastScan.at, today)}` : "Sin escaneos recientes"}</div><div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3 text-white"><div>{lastScan ? (<><p className="text-[11px] font-medium text-[#d8ead8]">Compra registrada</p><p className="mt-1 font-serif text-[25px] font-semibold tracking-[-0.03em]">{lastScan.count} {lastScan.count === 1 ? "producto detectado" : "productos detectados"}</p></>) : (<><p className="text-[11px] font-medium text-[#d8ead8]">Comenzá ahora</p><p className="mt-1 font-serif text-[25px] font-semibold tracking-[-0.03em]">Escaneá tu primer ticket</p></>)}</div><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d9e982] text-[#17372b]"><ArrowUpRight size={18} /></div></div></div>
             </section>
 
-            <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4"><StatCard label="En tu despensa" value={`${products.length + 17}`} note="productos registrados" icon={<PackageOpen size={17} />} tone="bg-[#e6f0e6] text-[#4d835e]" /><StatCard label="Por vencer" value={`${soonCount + 7}`} note="en los próximos 7 días" icon={<Clock3 size={17} />} tone="bg-[#fbf0d2] text-[#b67d27]" trend="up" /><StatCard label="Ya vencidos" value={`${expiredCount}`} note="requieren atención" icon={<Zap size={17} />} tone="bg-[#f8e4dd] text-[#bf644f]" /><StatCard label="Desperdicio evitado" value={formatMoney(impact.moneySaved)} note={`${impact.kgSaved} kg este mes`} icon={<ArrowDownRight size={17} />} tone="bg-[#e5eee8] text-[#4d835e]" trend="down" /></section>
+            <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <StatCard label="En tu despensa" value={String(products.length)} note="productos registrados" icon={<PackageOpen size={17} />} tone="bg-[#e6f0e6] text-[#4d835e]" />
+              <StatCard label="Por vencer" value={String(soonCount)} note={`en los próximos ${SOON_THRESHOLD_DAYS} días`} icon={<Clock3 size={17} />} tone="bg-[#fbf0d2] text-[#b67d27]" />
+              <StatCard label="Ya vencidos" value={String(expiredCount)} note="requieren atención" icon={<Zap size={17} />} tone="bg-[#f8e4dd] text-[#bf644f]" />
+              <StatCard label="Desperdicio evitado" value={formatMoney(impact.moneySaved)} note={`${impact.kgSaved} kg este mes (estimado)`} icon={<ArrowDownRight size={17} />} tone="bg-[#e5eee8] text-[#4d835e]" />
+            </section>
 
             {consumptionHistory.length > 0 && <section className="mt-5 rounded-[24px] border border-[#dfe9dc] bg-[#fffdf9] p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Actividad reciente</p><h2 className="mt-1 font-serif text-[23px] font-semibold text-[#1b392e]">Últimos consumos</h2></div><p className="text-[10px] text-[#829585]">Podés deshacer varias acciones</p></div><div className="mt-4 grid gap-2 sm:grid-cols-3">{consumptionHistory.slice().reverse().map((record) => <div key={record.id} className="rounded-2xl bg-[#f7faf4] p-3"><div className="flex items-start justify-between gap-2"><p className="text-[11px] font-bold text-[#425b4b]">{record.title}</p><span className="text-[9px] text-[#97a698]">{record.createdAt}</span></div><p className="mt-1 text-[10px] text-[#78907d]">{record.ingredients.join(", ") || "Sin coincidencias"}</p><button onClick={() => undoConsumption(record.id)} className="mt-2 rounded-lg border border-[#d9e5d5] px-2 py-1 text-[9px] font-bold text-[#4f805b] hover:bg-white">Deshacer desde acá</button></div>)}</div></section>}
 
-            <section id="module-reports" className="scroll-mt-24 mt-5 rounded-[24px] border border-[#dfe9dc] bg-[#edf6e9] p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5b8964]"><ArrowDownRight size={14} /> Impacto de este mes</p><h2 className="mt-2 font-serif text-[26px] font-semibold tracking-[-0.04em] text-[#1b392e]">Pequeños gestos, menos desperdicio.</h2><p className="mt-1 max-w-[500px] text-[11px] leading-5 text-[#708674]">Cada vez que aprovechás algo a tiempo, FreshTrack lo suma. Sin rankings ni presión: solo una señal amable de lo que estás logrando.</p></div><div className="rounded-2xl bg-white/75 px-4 py-3 text-right"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#86a18a]">Acciones</p><p className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-[#315542]">{impact.actions}</p><p className="text-[10px] text-[#829585]">este mes</p></div></div><div className="mt-5 grid grid-cols-3 gap-2"><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comida salvada</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.kgSaved} kg</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Valor recuperado</p><p className="mt-1 text-xl font-semibold text-[#315542]">{formatMoney(impact.moneySaved)}</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comidas posibles</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.mealsSaved}</p></div></div></section>
+            <section id="module-reports" className="scroll-mt-24 mt-5 rounded-[24px] border border-[#dfe9dc] bg-[#edf6e9] p-5 sm:p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5b8964]"><ArrowDownRight size={14} /> Impacto de este mes</p><h2 className="mt-2 font-serif text-[26px] font-semibold tracking-[-0.04em] text-[#1b392e]">Pequeños gestos, menos desperdicio.</h2><p className="mt-1 max-w-[500px] text-[11px] leading-5 text-[#708674]">Cada vez que aprovechás algo a tiempo, FreshTrack lo suma. Sin rankings ni presión: solo una señal amable de lo que estás logrando.</p></div><div className="rounded-2xl bg-white/75 px-4 py-3 text-right"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#86a18a]">Acciones</p><p className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-[#315542]">{impact.actions}</p><p className="text-[10px] text-[#829585]">este mes</p></div></div><div className="mt-5 grid grid-cols-3 gap-2"><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comida salvada</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.kgSaved} kg</p><p className="text-[9px] text-[#829585]">(estimado)</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Valor recuperado</p><p className="mt-1 text-xl font-semibold text-[#315542]">{formatMoney(impact.moneySaved)}</p><p className="text-[9px] text-[#829585]">(estimado)</p></div><div className="rounded-2xl bg-white/70 p-3"><p className="text-[10px] font-semibold text-[#829585]">Comidas posibles</p><p className="mt-1 text-xl font-semibold text-[#315542]">{impact.mealsSaved}</p><p className="text-[9px] text-[#829585]">(estimado)</p></div></div></section>
 
             <section id="module-pantry" className="scroll-mt-24 mt-6 grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
               <div className="rounded-[24px] border border-[#ebe8df] bg-[#fffdf9] px-4 py-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:px-5">
@@ -945,19 +974,55 @@ export default function Home() {
                         {pantryView === "calendar" ? "Próxima semana" : "Por vencer esta semana"}
                       </h2>
                       <span className="rounded-full bg-[#fbf0d2] px-2 py-0.5 text-[10px] font-bold text-[#a67425]">
-                        {soonCount + 7} pendientes
+                        {soonCount} por vencer
                       </span>
                     </div>
                     <p className="mt-1 text-[11px] text-[#929b93]">
                       {pantryView === "calendar" ? "Planificá tus comidas viendo qué vence cada día." : "Una mirada rápida para decidir qué consumir primero."}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 rounded-xl bg-[#f4f1e9] p-1">
-                    <button onClick={() => setPantryView("list")} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold ${pantryView === "list" ? "bg-white text-[#3c7350] shadow-sm" : "text-[#9aa29a]"}`}>Lista</button>
-                    <button onClick={() => setPantryView("calendar")} className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold ${pantryView === "calendar" ? "bg-white text-[#3c7350] shadow-sm" : "text-[#9aa29a]"}`}><CalendarDays size={12} /> Próxima semana</button>
-                  </div>
+                  {storedProducts.length > 0 && (
+                    <div className="flex items-center gap-1 rounded-xl bg-[#f4f1e9] p-1">
+                      <button onClick={() => setPantryView("list")} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold ${pantryView === "list" ? "bg-white text-[#3c7350] shadow-sm" : "text-[#9aa29a]"}`}>Lista</button>
+                      <button onClick={() => setPantryView("calendar")} className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-bold ${pantryView === "calendar" ? "bg-white text-[#3c7350] shadow-sm" : "text-[#9aa29a]"}`}><CalendarDays size={12} /> Próxima semana</button>
+                    </div>
+                  )}
                 </div>
-                {pantryView === "calendar" ? (
+                {storedProducts.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <PackageOpen className="mx-auto text-[#b7c2b7]" size={36} />
+                    <p className="mt-3 text-base font-semibold text-[#213e32]">Tu despensa está vacía</p>
+                    <p className="mx-auto mt-1 max-w-sm text-xs text-[#78907d]">
+                      Tu despensa está vacía. Escaneá un ticket o agregá productos para empezar a controlar vencimientos.
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+                      <button
+                        onClick={() => setModal("scan")}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#1f493a] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#16392c]"
+                      >
+                        <ScanLine size={15} /> Escanear compra
+                      </button>
+                      <button
+                        onClick={() => setModal("add")}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#b9d0bb] bg-[#eef5e8]/60 px-4 py-2.5 text-xs font-bold text-[#2c6448] transition hover:bg-white"
+                      >
+                        <Plus size={15} /> Agregar manual
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const demo = buildDemoProducts(today);
+                        setStoredProducts(demo);
+                        toast.success("Datos de ejemplo cargados", {
+                          description: `${demo.length} productos agregados a tu despensa.`,
+                        });
+                      }}
+                      className="mt-4 text-[11px] font-medium text-[#7c9582] underline transition hover:text-[#2c6448]"
+                    >
+                      Cargar datos de ejemplo
+                    </button>
+                  </div>
+                ) : pantryView === "calendar" ? (
                   <WeekCalendar products={products} />
                 ) : (
                   <>
@@ -1053,7 +1118,7 @@ export default function Home() {
                       {filteredProducts.length === 0 && (
                         <div className="py-10 text-center">
                           <PackageOpen className="mx-auto text-[#b7c2b7]" size={28} />
-                          <p className="mt-2 text-sm font-semibold text-[#607369]">No encontramos productos</p>
+                          <p className="mt-2 text-sm font-semibold text-[#607369]">No encontramos productos con los filtros actuales</p>
                           <p className="mt-1 text-[11px] text-[#9aa29a]">Probá cambiar el filtro o tu búsqueda.</p>
                         </div>
                       )}
@@ -1157,7 +1222,11 @@ export default function Home() {
                   <div className="text-4xl">🥬</div>
                 </div>
                 <p className="mt-3 text-[11px] leading-5 text-[#806c53]">
-                  {recipesLoading ? "Buscando opciones que aprovechen tu despensa…" : `Encontramos ${visibleRecipes.length || recipes.length || 3} ideas para usar antes de que se pierdan.`}
+                  {recipesLoading
+                    ? "Buscando opciones que aprovechen tu despensa…"
+                    : visibleRecipes.length > 0 || recipes.length > 0
+                    ? `Encontramos ${visibleRecipes.length || recipes.length} ideas para usar antes de que se pierdan.`
+                    : "No encontramos recetas para los productos actuales."}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => (
@@ -1184,7 +1253,7 @@ export default function Home() {
               </div>
             </section>
 
-            <footer className="flex flex-col gap-2 pb-2 pt-8 text-[10px] text-[#a0a79f] sm:flex-row sm:items-center sm:justify-between"><p>FreshTrack · Menos desperdicio, más tranquilidad.</p><p className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#75a879]" /> Datos guardados localmente · Última sincronización hace 2 min</p></footer>
+            <footer className="flex flex-col gap-2 pb-2 pt-8 text-[10px] text-[#a0a79f] sm:flex-row sm:items-center sm:justify-between"><p>FreshTrack · Menos desperdicio, más tranquilidad.</p><p className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#75a879]" /> Datos guardados localmente</p></footer>
           </div>
         </main>
       </div>

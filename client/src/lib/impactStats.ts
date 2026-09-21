@@ -9,7 +9,11 @@ export type ImpactStats = {
 const STORAGE_KEY = "freshtrack-impact-stats-v1";
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
-const initialStats: ImpactStats = { month: currentMonth(), mealsSaved: 12, kgSaved: 4.8, moneySaved: 18400, actions: 9 };
+export const ESTIMATED_KG_PER_RECIPE = 0.4;
+export const ESTIMATED_MONEY_PER_RECIPE = 1200;
+export const ESTIMATED_MEALS_PER_RECIPE = 1;
+
+const initialStats: ImpactStats = { month: currentMonth(), mealsSaved: 0, kgSaved: 0, moneySaved: 0, actions: 0 };
 
 export function loadImpactStats(): ImpactStats {
   try {
@@ -21,9 +25,18 @@ export function loadImpactStats(): ImpactStats {
 
 export function saveImpactStats(stats: ImpactStats) { localStorage.setItem(STORAGE_KEY, JSON.stringify(stats)); }
 
-export function recordImpact(input: { kg?: number; money?: number; meals?: number }) {
+export function recordImpact(input: { kg?: number; money?: number; meals?: number } = {}) {
   const stats = loadImpactStats();
-  const next = { ...stats, kgSaved: Number((stats.kgSaved + (input.kg || 0.4)).toFixed(1)), moneySaved: stats.moneySaved + (input.money || 1200), mealsSaved: stats.mealsSaved + (input.meals || 1), actions: stats.actions + 1 };
+  const kgDelta = input.kg ?? ESTIMATED_KG_PER_RECIPE;
+  const moneyDelta = input.money ?? ESTIMATED_MONEY_PER_RECIPE;
+  const mealsDelta = input.meals ?? ESTIMATED_MEALS_PER_RECIPE;
+  const next = {
+    ...stats,
+    kgSaved: Number((stats.kgSaved + kgDelta).toFixed(1)),
+    moneySaved: stats.moneySaved + moneyDelta,
+    mealsSaved: stats.mealsSaved + mealsDelta,
+    actions: stats.actions + 1,
+  };
   saveImpactStats(next);
   return next;
 }

@@ -71,6 +71,33 @@ export function formatRelativeDays(days: number): string {
 }
 
 /**
+ * Formats an ISO date/timestamp into a relative time string in Rioplatense Spanish.
+ * e.g. "recién", "hace 5 minutos", "hace 2 horas", "ayer", "hace 3 días".
+ */
+export function formatTimeAgo(isoString: string, now: Date = new Date()): string {
+  const d = new Date(isoString);
+  const diffMs = now.getTime() - d.getTime();
+  if (isNaN(diffMs) || diffMs < 0) return "recién";
+
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 60) return "recién";
+
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin === 1) return "hace 1 minuto";
+  if (diffMin < 60) return `hace ${diffMin} minutos`;
+
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours === 1) return "hace 1 hora";
+  if (diffHours < 24) return `hace ${diffHours} horas`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "ayer";
+  if (diffDays < 7) return `hace ${diffDays} días`;
+
+  return formatExpiryDisplay(toISODate(d), now);
+}
+
+/**
  * Parses dd/mm/aa, dd/mm/aaaa, dd-mm-aa, dd-mm-aaaa into YYYY-MM-DD.
  * 2-digit years convert to 20xx.
  * Returns null if the date does not exist in the calendar (e.g. 31/02).

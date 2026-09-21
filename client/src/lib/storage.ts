@@ -5,6 +5,24 @@ export const PRODUCTS_STORAGE_KEY = "freshtrack-products-v3";
 export const OLD_PRODUCTS_STORAGE_KEY = "freshtrack-products-v2";
 export const CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v2";
 export const OLD_CONSUMPTION_HISTORY_KEY = "freshtrack-consumption-history-v1";
+export const LAST_SCAN_STORAGE_KEY = "freshtrack-last-scan-v1";
+
+export type LastScanInfo = {
+  at: string;
+  count: number;
+};
+
+export function loadLastScan(): LastScanInfo | null {
+  const data = loadJSON<LastScanInfo | null>(LAST_SCAN_STORAGE_KEY, null);
+  if (data && typeof data.at === "string" && typeof data.count === "number") {
+    return data;
+  }
+  return null;
+}
+
+export function saveLastScan(info: LastScanInfo): boolean {
+  return saveJSON(LAST_SCAN_STORAGE_KEY, info);
+}
 
 export function loadJSON<T>(key: string, fallback: T): T {
   if (typeof window === "undefined" || !window.localStorage) {

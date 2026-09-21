@@ -4,6 +4,7 @@ import {
   daysUntil,
   formatExpiryDisplay,
   formatRelativeDays,
+  formatTimeAgo,
   parseDateCandidateToISO,
   statusFromDays,
   toISODate,
@@ -15,7 +16,11 @@ import {
   OLD_CONSUMPTION_HISTORY_KEY,
   OLD_PRODUCTS_STORAGE_KEY,
   PRODUCTS_STORAGE_KEY,
+  LAST_SCAN_STORAGE_KEY,
+  loadLastScan,
+  saveLastScan,
 } from "../lib/storage";
+import { loadImpactStats, recordImpact, reverseImpact } from "../lib/impactStats";
 
 describe("dates.ts - Core Date Calculations", () => {
   it("toISODate formats local calendar date without UTC drift", () => {
@@ -134,32 +139,32 @@ describe("product.ts - Dynamic Status & Days Derivation", () => {
   });
 });
 
+let store: Record<string, string>;
+
+beforeEach(() => {
+  store = {};
+  const mockStorage = {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => {
+      store[key] = String(value);
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
+  (globalThis as any).window = { localStorage: mockStorage };
+  (globalThis as any).localStorage = mockStorage;
+});
+
+afterEach(() => {
+  delete (globalThis as any).window;
+  delete (globalThis as any).localStorage;
+});
+
 describe("storage.ts - Persistence, Validation and Migration", () => {
-  let store: Record<string, string>;
-
-  beforeEach(() => {
-    store = {};
-    const mockStorage = {
-      getItem: (key: string) => store[key] ?? null,
-      setItem: (key: string, value: string) => {
-        store[key] = String(value);
-      },
-      removeItem: (key: string) => {
-        delete store[key];
-      },
-      clear: () => {
-        store = {};
-      },
-    };
-    (globalThis as any).window = { localStorage: mockStorage };
-    (globalThis as any).localStorage = mockStorage;
-  });
-
-  afterEach(() => {
-    delete (globalThis as any).window;
-    delete (globalThis as any).localStorage;
-  });
-
   it("validates StoredProduct contract and discards corrupted items", () => {
     expect(
       isValidStoredProduct({
@@ -257,3 +262,74 @@ describe("storage.ts - Persistence, Validation and Migration", () => {
     expect(parsedV3).toHaveLength(2);
   });
 });
+
+describe("impactStats.ts - Zeroed Initial Stats & Real Calculations", () => {
+  it("initial impact stats start at 0 without placeholder counts", () => {
+    localStorage.removeItem("freshtrack-impact-v1");
+    // Dynamically import or load
+    const stats = loadImpactStats();
+    expect(stats.kgSaved).toBe(0);
+    expect(stats.moneySaved).toBe(0);
+    expect(stats.mealsSaved).toBe(0);
+    expect(stats.actions).toBe(0);
+  });
+
+  it("recordImpact correctly records increments and updates storage", () => {
+    localStorage.removeItem("freshtrack-impact-v1");
+    const updated = recordImpact({ kg: 0.4, money: 1200, meals: 1 });
+    expect(updated.kgSaved).toBe(0.4);
+    expect(updated.moneySaved).toBe(1200);
+    expect(updated.mealsSaved).toBe(1);
+    expect(updated.actions).toBe(1);
+
+    const second = recordImpact({ kg: 0.8, money: 2400, meals: 2 });
+    expect(second.kgSaved).toBe(1.2);
+    expect(second.moneySaved).toBe(3600);
+    expect(second.mealsSaved).toBe(3);
+    expect(second.actions).toBe(2);
+
+    const reversed = reverseImpact({ kg: 0.4, money: 1200, meals: 1 });
+    expect(reversed.kgSaved).toBe(0.8);
+    expect(reversed.moneySaved).toBe(2400);
+    expect(reversed.mealsSaved).toBe(2);
+    expect(reversed.actions).toBe(1);
+  });
+});
+
+describe("storage.ts - Last Scan Persistence & formatTimeAgo", () => {
+  it("loadLastScan returns null when empty and loads saved scan accurately", () => {
+    localStorage.removeItem(LAST_SCAN_STORAGE_KEY);
+    expect(loadLastScan()).toBeNull();
+
+    saveLastScan({ count: 5, at: "2026-09-20T20:00:00.000Z" });
+    const loaded = loadLastScan();
+    expect(loaded).not.toBeNull();
+    expect(loaded?.count).toBe(5);
+    expect(loaded?.at).toBe("2026-09-20T20:00:00.000Z");
+  });
+
+  it("formatTimeAgo renders relative time in Rioplatense Spanish", () => {
+    const now = new Date(2026, 8, 20, 15, 0, 0); // 15:00:00
+
+    // Just now (< 1 min)
+    const justNow = new Date(2026, 8, 20, 14, 59, 30).toISOString();
+    expect(formatTimeAgo(justNow, now)).toBe("recién");
+
+    // 5 mins ago
+    const fiveMin = new Date(2026, 8, 20, 14, 55, 0).toISOString();
+    expect(formatTimeAgo(fiveMin, now)).toBe("hace 5 minutos");
+
+    // 2 hours ago
+    const twoHours = new Date(2026, 8, 20, 13, 0, 0).toISOString();
+    expect(formatTimeAgo(twoHours, now)).toBe("hace 2 horas");
+
+    // Yesterday
+    const yesterday = new Date(2026, 8, 19, 15, 0, 0).toISOString();
+    expect(formatTimeAgo(yesterday, now)).toBe("ayer");
+
+    // 3 days ago
+    const threeDays = new Date(2026, 8, 17, 15, 0, 0).toISOString();
+    expect(formatTimeAgo(threeDays, now)).toBe("hace 3 días");
+  });
+});
+

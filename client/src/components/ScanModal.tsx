@@ -25,6 +25,7 @@ import {
 import { StoredProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
 import { addDaysISO } from "@/lib/dates";
+import { saveLastScan } from "@/lib/storage";
 import { estimateShelfLife } from "@/lib/shelfLifeCatalog";
 
 interface ScanModalProps {
@@ -273,6 +274,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       dateLabel: p.dateLabel,
     }));
 
+    saveLastScan({ at: new Date().toISOString(), count: finalProducts.length });
     onComplete(finalProducts);
     onClose();
   };

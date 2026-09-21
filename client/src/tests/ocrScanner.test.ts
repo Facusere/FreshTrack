@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseReceiptAndLabelText, parseDateCandidateToISO, SAMPLE_TICKETS } from "../lib/ocrScanner";
+import { parseReceiptAndLabelText, parseDateCandidateToISO, buildSampleTickets } from "../lib/ocrScanner";
 
 describe("ocrScanner - Receipt & Label Parsing", () => {
   const mockDetectIcon = (name: string) => (name.includes("Leche") ? "🥛" : "📦");
+  const fixedToday = new Date(2026, 8, 20); // 2026-09-20
+  const sampleTickets = buildSampleTickets(fixedToday);
 
   it("parses date candidates properly to ISO date", () => {
     const result = parseDateCandidateToISO("20/12/2026");
@@ -10,8 +12,8 @@ describe("ocrScanner - Receipt & Label Parsing", () => {
   });
 
   it("extracts catalog products and quantities from supermarket ticket text", () => {
-    const ticket = SAMPLE_TICKETS[0].text;
-    const products = parseReceiptAndLabelText(ticket, mockDetectIcon);
+    const ticket = sampleTickets[0].text;
+    const products = parseReceiptAndLabelText(ticket, mockDetectIcon, fixedToday);
 
     expect(products.length).toBeGreaterThanOrEqual(3);
 
@@ -33,8 +35,8 @@ describe("ocrScanner - Receipt & Label Parsing", () => {
   });
 
   it("extracts explicit expiry date from product packaging label", () => {
-    const label = SAMPLE_TICKETS[1].text;
-    const products = parseReceiptAndLabelText(label, mockDetectIcon);
+    const label = sampleTickets[1].text;
+    const products = parseReceiptAndLabelText(label, mockDetectIcon, fixedToday);
 
     expect(products.length).toBeGreaterThanOrEqual(1);
     const yogur = products.find((p) => p.name.toLowerCase().includes("yogur"));
