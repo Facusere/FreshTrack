@@ -263,3 +263,10 @@ export function findBestMatchingItem<T extends StoredProduct | Product>(
 
   return bestMatch;
 }
+
+export function findMatchingPantryItem<T extends StoredProduct | Product>(
+  ingredientName: string,
+  pantryItems: T[]
+): T | null {
+  return findBestMatchingItem(pantryItems, { name: ingredientName });
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  AlertTriangle,
   ArrowDownRight,
   ArrowUpDown,
   ArrowUpRight,
@@ -12,6 +13,7 @@ import {
   CircleHelp,
   Clock3,
   Home as HomeIcon,
+  Info,
   Leaf,
   MapPin,
   Menu,
@@ -35,7 +37,13 @@ import {
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import { estimateShelfLife, getCatalogSize, getValidationThreshold, ShelfLifeState, submitShelfLifeSuggestion } from "@/lib/shelfLifeCatalog";
 import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
-import { getRecipeDetails, RecipeSuggestion, searchRecipesByIngredients } from "@/lib/recipeApi";
+import {
+  getRecipeDetails,
+  RecipeSuggestion,
+  searchRecipesByExpiring,
+  getRecipeFallbackImage,
+  isGlutenFreeEstimated,
+} from "@/lib/recipeApi";
 import { formatMoney, ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
 import {
   ConsumptionPlan,
@@ -74,9 +82,13 @@ type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
 
 function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
   if (filter === "all") return true;
+  if (filter === "glutenFree") {
+    return recipe.isGlutenFreeEstimated !== undefined
+      ? recipe.isGlutenFreeEstimated
+      : isGlutenFreeEstimated(recipe.ingredients);
+  }
   const text = `${recipe.title} ${recipe.matchedIngredients.join(" ")} ${(recipe.ingredients || []).map((item) => item.name).join(" ")}`;
   if (filter === "vegetarian") return !/(chicken|pollo|beef|carne|pork|cerdo|bacon|salmon|fish|pescado|tuna|atún|meat)/i.test(text);
-  if (filter === "glutenFree") return !/(bread|pan|pasta|flour|harina|wheat|trigo|noodle|fideos|couscous)/i.test(text);
   return /(quick|salad|ensalada|omelette|tortilla|sandwich|wrap|pasta|salteado)/i.test(text);
 }
 
@@ -699,6 +711,9 @@ export default function Home() {
   const [pantryView, setPantryView] = useState<"list" | "calendar">("list");
   const [recipes, setRecipes] = useState<RecipeSuggestion[]>([]);
   const [recipesLoading, setRecipesLoading] = useState(false);
+  const [recipesWarning, setRecipesWarning] = useState<string | null>(null);
+  const [recipesInfo, setRecipesInfo] = useState<string | null>(null);
+  const [recipesError, setRecipesError] = useState<string | null>(null);
   const [impact, setImpact] = useState<ImpactStats>(() => loadImpactStats());
   const [recipeDetail, setRecipeDetail] = useState<RecipeSuggestion | null>(null);
   const [recipeDetailLoading, setRecipeDetailLoading] = useState(false);
@@ -791,18 +806,37 @@ export default function Home() {
   ];
 
   const notificationGroups = groupNotifications(products, notificationPreferences);
-  const expiringProducts = products.filter((product) => product.status === "soon" || product.status === "expired");
   const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
   const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   useEffect(() => { saveStoredProducts(storedProducts); }, [storedProducts]);
 
+  const priorityKey = useMemo(() => {
+    const valid = products.filter((p) => p.status !== "expired" && p.days > 0);
+    let prio = valid.filter((p) => p.status === "soon").sort((a, b) => a.days - b.days);
+    if (prio.length === 0) {
+      prio = valid.filter((p) => p.days <= 7).sort((a, b) => a.days - b.days);
+    }
+    const expiredCount = products.filter((p) => p.status === "expired" || p.days <= 0).length;
+    return `${expiredCount}|${prio.slice(0, 3).map((p) => `${p.name}:${p.days}`).join(",")}`;
+  }, [products]);
+
   useEffect(() => {
     const controller = new AbortController();
     setRecipesLoading(true);
-    searchRecipesByIngredients(expiringProducts.map((product) => product.name), controller.signal).then(setRecipes).finally(() => setRecipesLoading(false));
+    searchRecipesByExpiring(products, controller.signal)
+      .then((result) => {
+        setRecipes(result.recipes);
+        setRecipesWarning(result.warning || null);
+        setRecipesInfo(result.info || null);
+        setRecipesError(result.error || null);
+      })
+      .catch(() => {
+        // silently ignore abort
+      })
+      .finally(() => setRecipesLoading(false));
     return () => controller.abort();
-  }, [products]);
+  }, [priorityKey]);
 
   useEffect(() => { setRecipeLimit(3); }, [recipeFilter, products]);
 
@@ -1290,18 +1324,59 @@ export default function Home() {
                     ? `Encontramos ${visibleRecipes.length || recipes.length} ideas para usar antes de que se pierdan.`
                     : "No encontramos recetas para los productos actuales."}
                 </p>
+
+                {recipesWarning && (
+                  <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-[#eed4cd] bg-[#fdf2ef] p-3 text-[11px] text-[#9a4537]">
+                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                    <span>{recipesWarning}</span>
+                  </div>
+                )}
+
+                {recipesInfo && (
+                  <div className="mt-3 rounded-xl border border-[#d2e4d5] bg-[#edf6ee] p-4 text-center">
+                    <p className="text-2xl">🌱</p>
+                    <p className="mt-1 text-xs font-bold text-[#275338]">{recipesInfo}</p>
+                    <p className="mt-0.5 text-[11px] text-[#65856e]">
+                      Cuando algún alimento esté cerca de vencer te sugeriremos ideas para aprovecharlo.
+                    </p>
+                  </div>
+                )}
+
+                {recipesError && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl border border-[#eddac2] bg-[#fbf5eb] p-2.5 text-[11px] text-[#865d29]">
+                    <Info size={14} className="mt-0.5 shrink-0" />
+                    <span>{recipesError}</span>
+                  </div>
+                )}
+
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => (
+                  {([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC (estimado)"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => (
                     <button key={value} onClick={() => setRecipeFilter(value)} className={`rounded-lg px-2.5 py-1.5 text-[10px] font-bold transition ${recipeFilter === value ? "bg-[#fffdf9] text-[#765a35] shadow-sm" : "bg-[#eadfc9]/70 text-[#a28b6b] hover:bg-[#fffdf9]"}`}>{label}</button>
                   ))}
                 </div>
                 <div className="mt-3 grid gap-2">
                   {shownRecipes.map((recipe) => (
                     <div key={recipe.id} data-testid="recipe-card" role="button" tabIndex={0} aria-label={`Ver detalle de ${recipe.title}`} onClick={() => openRecipeDetail(recipe)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }} className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white/60 p-2 transition hover:bg-white">
-                      <img src={recipe.image} alt={recipe.title} className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                      <img
+                        src={recipe.image || getRecipeFallbackImage(recipe.title, recipe.category)}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(recipe.title, recipe.category);
+                        }}
+                        alt={recipe.title}
+                        className="h-12 w-12 shrink-0 rounded-xl object-cover"
+                      />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p>
-                        <p className="mt-0.5 truncate text-[10px] text-[#967e61]">Usa: {recipe.matchedIngredients.join(", ")}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-[11px] font-bold text-[#5a452c]">{recipe.title}</p>
+                          {(recipe.isLocalFallback || recipe.source === "FreshTrack") && (
+                            <span className="shrink-0 rounded-md bg-[#dcebd8] px-1.5 py-0.5 text-[9px] font-bold text-[#356340]">Ideas locales</span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 truncate text-[10px] text-[#967e61]">
+                          {recipe.pantryMatchRatio
+                            ? `Tenés ${recipe.pantryMatchRatio.matched} de ${recipe.pantryMatchRatio.total} ingredientes`
+                            : `Usa: ${recipe.matchedIngredients.join(", ")}`}
+                        </p>
                         <p className="mt-0.5 text-[9px] font-semibold text-[#a28153]">Ver ingredientes y pasos</p>
                       </div>
                       <button onClick={(event) => { event.stopPropagation(); initiateRecipeConsumption(recipe); }} className="shrink-0 rounded-lg bg-[#ead7b8] px-2 py-1.5 text-[9px] font-bold text-[#765a35] transition hover:bg-[#dfc79f]">Aproveché</button>
@@ -1311,7 +1386,11 @@ export default function Home() {
                 {recipeLimit < visibleRecipes.length && (
                   <button onClick={() => setRecipeLimit((limit) => Math.min(limit + 3, visibleRecipes.length))} className="mt-4 w-full rounded-xl border border-[#d7c6a6] bg-[#fffdf9]/70 px-3 py-2.5 text-[11px] font-bold text-[#765a35] transition hover:bg-white">Cargar más ({visibleRecipes.length - recipeLimit} disponibles)</button>
                 )}
-                <p className="mt-3 text-[9px] text-[#aa967b]">Fuente: TheMealDB · sugerencias orientativas</p>
+                <p className="mt-3 text-[9px] text-[#aa967b]">
+                  {recipes.some((r) => r.isLocalFallback || r.source === "FreshTrack")
+                    ? "Ideas locales y sugerencias orientativas"
+                    : "Fuente: TheMealDB · sugerencias orientativas"}
+                </p>
               </div>
             </section>
 
@@ -1328,7 +1407,94 @@ export default function Home() {
         />
       )}
       {modal === "add" && <AddProductModal onClose={() => { setModal(null); setEditingProduct(null); }} onAdd={addProduct} initialProduct={editingProduct || undefined} onCorrection={correctProduct} onSuggest={suggestShelfLife} today={today} />}
-      {recipeDetail && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center"><div className="max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-[28px] bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.26)]"><div className="relative h-40 overflow-hidden rounded-t-[28px] bg-[#e8dfcf]"><img src={recipeDetail.image} alt="" className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#17372b]/75 to-transparent" /><button aria-label="Cerrar receta" onClick={() => setRecipeDetail(null)} className="absolute right-4 top-4 rounded-full bg-white/80 p-2 text-[#315542] backdrop-blur-sm"><X size={17} /></button><div className="absolute bottom-4 left-5 right-5"><p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p><p className="mt-1 text-[10px] text-[#dcebdd]">{recipeDetail.area || "Receta sugerida"}{recipeDetail.category ? ` · ${recipeDetail.category}` : ""}</p></div></div>{recipeDetailLoading ? <div className="p-6 text-center text-sm text-[#718273]">Cargando ingredientes y pasos…</div> : <div className="p-5 sm:p-6"><div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Ingredientes</p><div className="mt-3 space-y-2">{(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-[#f0ede6] pb-2 text-[11px]"><span className="font-semibold text-[#425b4b]">{ingredient.name}</span><span className="text-right text-[#9a8b75]">{ingredient.measure}</span></div>)}</div></div><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Paso a paso</p><div className="mt-3 space-y-3">{(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e6f0e6] text-[10px] font-bold text-[#4d835e]">{index + 1}</span><p className="text-[11px] leading-5 text-[#6e7d70]">{step}</p></div>)}</div></div></div><button data-testid="consume-recipe" onClick={() => { initiateRecipeConsumption(recipeDetail); setRecipeDetail(null); }} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white hover:bg-[#16392c]"><Check size={15} /> Aproveché esta receta</button></div>}</div></div>}
+      {recipeDetail && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#142c23]/40 p-3 backdrop-blur-sm sm:items-center">
+          <div className="max-h-[90vh] w-full max-w-[620px] overflow-y-auto rounded-[28px] bg-[#fffdf9] shadow-[0_30px_80px_rgba(13,33,25,0.26)]">
+            <div className="relative h-40 overflow-hidden rounded-t-[28px] bg-[#e8dfcf]">
+              <img
+                src={recipeDetail.image || getRecipeFallbackImage(recipeDetail.title, recipeDetail.category)}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(recipeDetail.title, recipeDetail.category);
+                }}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#17372b]/85 via-[#17372b]/40 to-transparent" />
+              <button
+                aria-label="Cerrar receta"
+                onClick={() => setRecipeDetail(null)}
+                className="absolute right-4 top-4 rounded-full bg-white/80 p-2 text-[#315542] backdrop-blur-sm"
+              >
+                <X size={17} />
+              </button>
+              <div className="absolute bottom-4 left-5 right-5">
+                <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                  {recipeDetail.isOriginalEnglish && (
+                    <span className="rounded-full bg-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-200">
+                      Texto original en inglés
+                    </span>
+                  )}
+                  {(recipeDetail.isLocalFallback || recipeDetail.source === "FreshTrack") && (
+                    <span className="rounded-full bg-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+                      Ideas locales
+                    </span>
+                  )}
+                  {recipeDetail.isGlutenFreeEstimated && (
+                    <span className="rounded-full bg-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-200">
+                      Sin TACC (estimado)
+                    </span>
+                  )}
+                </div>
+                <p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p>
+                <p className="mt-1 text-[10px] text-[#dcebdd]">
+                  {recipeDetail.area || "Receta sugerida"}
+                  {recipeDetail.category ? ` · ${recipeDetail.category}` : ""}
+                </p>
+              </div>
+            </div>
+            {recipeDetailLoading ? (
+              <div className="p-6 text-center text-sm text-[#718273]">Cargando ingredientes y pasos…</div>
+            ) : (
+              <div className="p-5 sm:p-6">
+                <div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Ingredientes</p>
+                    <div className="mt-3 space-y-2">
+                      {(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => (
+                        <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-[#f0ede6] pb-2 text-[11px]">
+                          <span className="font-semibold text-[#425b4b]">{ingredient.name}</span>
+                          <span className="text-right text-[#9a8b75]">{ingredient.measure}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#719078]">Paso a paso</p>
+                    <div className="mt-3 space-y-3">
+                      {(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => (
+                        <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e6f0e6] text-[10px] font-bold text-[#4d835e]">{index + 1}</span>
+                          <p className="text-[11px] leading-5 text-[#6e7d70]">{step}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  data-testid="consume-recipe"
+                  onClick={() => {
+                    initiateRecipeConsumption(recipeDetail);
+                    setRecipeDetail(null);
+                  }}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1f493a] px-4 py-3 text-[12px] font-bold text-white hover:bg-[#16392c]"
+                >
+                  <Check size={15} /> Aproveché esta receta
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {notificationModal && <NotificationSettingsModal onClose={() => setNotificationModal(false)} products={products} preferences={notificationPreferences} onSave={savePreferences} />}
       {consumptionPlanToConfirm && (
         <ConsumptionConfirmDialog

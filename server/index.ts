@@ -3,6 +3,7 @@ import { createServer } from "http";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { handleTranslateRequest } from "./translate.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,9 @@ process.env.NODE_ENV = process.env.NODE_ENV || "production";
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  app.use(express.json());
+  app.post("/api/translate", handleTranslateRequest);
 
   // Serve static files from dist/public (or public if running bundled from dist)
   const candidate1 = path.resolve(__dirname, "public");
