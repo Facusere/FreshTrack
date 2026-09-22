@@ -54,14 +54,27 @@ export function isStandaloneMode(): boolean {
   );
 }
 
-export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+import { registerSW } from "virtual:pwa-register";
+
+export function registerServiceWorker() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
     return null;
   }
 
   try {
-    const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    return registration;
+    const updateSW = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        console.log("Nueva versión de FreshTrack disponible.");
+      },
+      onOfflineReady() {
+        console.log("FreshTrack está lista para funcionar offline.");
+      },
+      onRegisterError(error: any) {
+        console.warn("Fallo al registrar ServiceWorker con Workbox:", error);
+      },
+    });
+    return updateSW;
   } catch (err) {
     console.warn("ServiceWorker registration failed:", err);
     return null;
