@@ -250,36 +250,203 @@ export function parseReceiptAndLabelText(
   return results;
 }
 
+export type CropArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 /**
- * Runs Tesseract OCR on an image source (Blob, File, ImageData, HTMLCanvasElement, or data URL string).
+ * Converts pixel data to grayscale and applies dynamic contrast stretching
+ * to enhance faint or embossed dates on food packaging and receipts.
+ */
+export function applyGrayscaleAndContrast(
+  imageData: { data: Uint8ClampedArray | number[]; width: number; height: number },
+  contrastFactor = 1.35
+) {
+  const { data } = imageData;
+  let minLum = 255;
+  let maxLum = 0;
+
+  // 1. Convert to grayscale and find min/max luminance
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+    if (gray < minLum) minLum = gray;
+    if (gray > maxLum) maxLum = gray;
+  }
+
+  // 2. Dynamic contrast stretching
+  const range = maxLum - minLum;
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = data[i];
+    let stretched: number;
+    if (range > 15) {
+      stretched = Math.round(((gray - minLum) / range) * 255);
+    } else {
+      stretched = Math.round((gray - 128) * contrastFactor + 128);
+    }
+    const clamped = Math.max(0, Math.min(255, stretched));
+    data[i] = clamped;
+    data[i + 1] = clamped;
+    data[i + 2] = clamped;
+  }
+
+  return imageData;
+}
+
+/**
+ * Preprocesses an image using standard 2D canvas operations:
+ * optional bounding box cropping, grayscale conversion, and contrast enhancement.
+ */
+export async function preprocessImage(
+  imageSource: HTMLCanvasElement | HTMLImageElement | ImageData | Blob | File | string,
+  cropArea?: CropArea
+): Promise<HTMLCanvasElement> {
+  if (typeof document === "undefined") {
+    return imageSource as any;
+  }
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) throw new Error("No se pudo obtener el contexto 2D del canvas");
+
+  let img: HTMLImageElement | HTMLCanvasElement;
+  if (imageSource instanceof HTMLCanvasElement) {
+    img = imageSource;
+  } else if (typeof Image !== "undefined" && imageSource instanceof Image) {
+    img = imageSource;
+  } else {
+    img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.crossOrigin = "anonymous";
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Error al cargar la imagen para preprocesamiento"));
+      if (typeof imageSource === "string") {
+        el.src = imageSource;
+      } else if (typeof URL !== "undefined" && URL.createObjectURL) {
+        el.src = URL.createObjectURL(imageSource as Blob);
+      } else {
+        resolve(el);
+      }
+    });
+  }
+
+  const naturalWidth = (img as HTMLImageElement).naturalWidth || img.width || 640;
+  const naturalHeight = (img as HTMLImageElement).naturalHeight || img.height || 480;
+
+  let sx = 0;
+  let sy = 0;
+  let sw = naturalWidth;
+  let sh = naturalHeight;
+
+  if (cropArea) {
+    sx = cropArea.x <= 1 ? cropArea.x * naturalWidth : cropArea.x;
+    sy = cropArea.y <= 1 ? cropArea.y * naturalHeight : cropArea.y;
+    sw = cropArea.width <= 1 ? cropArea.width * naturalWidth : cropArea.width;
+    sh = cropArea.height <= 1 ? cropArea.height * naturalHeight : cropArea.height;
+
+    sx = Math.max(0, Math.min(naturalWidth - 1, sx));
+    sy = Math.max(0, Math.min(naturalHeight - 1, sy));
+    sw = Math.max(1, Math.min(naturalWidth - sx, sw));
+    sh = Math.max(1, Math.min(naturalHeight - sy, sh));
+  }
+
+  canvas.width = Math.round(sw);
+  canvas.height = Math.round(sh);
+
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+  try {
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    applyGrayscaleAndContrast(imgData);
+    ctx.putImageData(imgData, 0, 0);
+  } catch (err) {
+    console.warn("No se pudo aplicar filtro de escala de grises/contraste:", err);
+  }
+
+  return canvas;
+}
+
+/**
+ * Runs Tesseract OCR on an image source (Blob, File, ImageData, HTMLCanvasElement, or data URL string)
+ * using 100% offline local assets from /tesseract/.
  */
 export async function performBrowserOCR(
   imageSource: string | HTMLCanvasElement | Blob | File,
-  onProgress?: OCRProgressCallback
+  onProgress?: OCRProgressCallback,
+  cropArea?: CropArea
 ): Promise<{ text: string; confidence: number }> {
+  let worker: Tesseract.Worker | null = null;
   try {
-    const result = await Tesseract.recognize(imageSource, "spa", {
-      logger: (m) => {
-        if (onProgress && m) {
-          const progressVal = typeof m.progress === "number" ? Math.round(m.progress * 100) : 0;
-          let friendlyStatus = "Procesando imagen...";
-          if (m.status === "loading tesseract core") friendlyStatus = "Cargando motor de reconocimiento...";
-          else if (m.status === "initializing tesseract") friendlyStatus = "Inicializando OCR...";
-          else if (m.status === "loading language traineddata") friendlyStatus = "Descargando modelo de español...";
-          else if (m.status === "recognizing text") friendlyStatus = `Leyendo texto: ${progressVal}%`;
+    // 1. Preprocesamiento opcional en canvas (recorte, escala de grises, contraste)
+    let processedSource: any = imageSource;
+    if (typeof document !== "undefined") {
+      try {
+        processedSource = await preprocessImage(imageSource, cropArea);
+      } catch (e) {
+        console.warn("Fallo en preprocesamiento visual, usando imagen original:", e);
+        processedSource = imageSource;
+      }
+    }
 
-          onProgress({ status: friendlyStatus, progress: progressVal });
+    // 2. Inicializar worker con rutas a assets locales versionados
+    onProgress?.({ status: "Iniciando OCR local...", progress: 5 });
+
+    const isBrowser = typeof window !== "undefined";
+    const workerOptions: any = isBrowser
+      ? {
+          workerPath: "/tesseract/worker.min.js",
+          corePath: "/tesseract/tesseract-core-lstm.wasm.js",
+          langPath: "/tesseract",
         }
-      },
+      : {};
+
+    workerOptions.logger = (m: any) => {
+      if (onProgress && m) {
+        const progressVal = typeof m.progress === "number" ? Math.round(m.progress * 100) : 0;
+        let friendlyStatus = "Procesando imagen...";
+        if (m.status === "loading tesseract core") friendlyStatus = "Cargando motor OCR local...";
+        else if (m.status === "initializing tesseract") friendlyStatus = "Inicializando escáner...";
+        else if (m.status === "loading language traineddata") friendlyStatus = "Cargando modelo en español...";
+        else if (m.status === "recognizing text") friendlyStatus = `Leyendo texto: ${progressVal}%`;
+
+        onProgress({ status: friendlyStatus, progress: progressVal });
+      }
+    };
+
+    const workerPromise = Tesseract.createWorker("spa", 1, workerOptions);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("Timeout al inicializar OCR local")), 15000);
     });
+
+    worker = (await Promise.race([workerPromise, timeoutPromise])) as Tesseract.Worker;
+
+    const result = await worker.recognize(processedSource);
 
     return {
       text: result.data.text || "",
       confidence: result.data.confidence || 0,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Tesseract OCR recognition error:", error);
-    throw error;
+    // B2: Si no hay conexión y los assets locales fallan por algún motivo, mostrar un error claro ("No se pudo inicializar el escáner") en vez de colgarse.
+    throw new Error("No se pudo inicializar el escáner");
+  } finally {
+    if (worker) {
+      try {
+        await worker.terminate();
+      } catch {
+        // Ignorar error al terminar worker
+      }
+    }
   }
 }
 

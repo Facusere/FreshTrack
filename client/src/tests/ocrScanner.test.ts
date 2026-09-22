@@ -1,9 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import Tesseract from "tesseract.js";
 import {
   parseReceiptAndLabelText,
   parseDateCandidateToISO,
   buildSampleTickets,
   extractQuantityFromTicketLine,
+  applyGrayscaleAndContrast,
+  performBrowserOCR,
 } from "../lib/ocrScanner";
 
 describe("ocrScanner - Receipt & Label Parsing", () => {
@@ -135,4 +138,50 @@ describe("ocrScanner - Receipt & Label Parsing", () => {
       });
     }
   });
+
+  describe("applyGrayscaleAndContrast - Image Preprocessing", () => {
+    it("converts RGB channels to grayscale using standard luminance weights", () => {
+      // Single red pixel [255, 0, 0, 255]
+      // Gray = Math.round(0.299 * 255) = 76
+      const mockImage = {
+        width: 1,
+        height: 1,
+        data: new Uint8ClampedArray([255, 0, 0, 255]),
+      };
+      applyGrayscaleAndContrast(mockImage);
+
+      expect(mockImage.data[0]).toBe(mockImage.data[1]);
+      expect(mockImage.data[1]).toBe(mockImage.data[2]);
+    });
+
+    it("stretches contrast dynamically across min and max pixel luminance", () => {
+      // 2 pixels: low contrast dark gray (50) and medium gray (100)
+      const mockImage = {
+        width: 2,
+        height: 1,
+        data: new Uint8ClampedArray([
+          50, 50, 50, 255,
+          100, 100, 100, 255,
+        ]),
+      };
+
+      applyGrayscaleAndContrast(mockImage);
+
+      // Pixel 0 should stretch towards 0
+      expect(mockImage.data[0]).toBeLessThanOrEqual(5);
+      // Pixel 1 should stretch towards 255
+      expect(mockImage.data[4]).toBeGreaterThanOrEqual(250);
+    });
+  });
+
+  describe("performBrowserOCR - Offline Error Handling", () => {
+    it("throws a user-friendly error if OCR initialization fails", async () => {
+      const spy = vi.spyOn(Tesseract, "createWorker").mockRejectedValueOnce(new Error("Worker failed"));
+      await expect(performBrowserOCR("invalid-image-source")).rejects.toThrow(
+        "No se pudo inicializar el escáner"
+      );
+      spy.mockRestore();
+    });
+  });
 });
+

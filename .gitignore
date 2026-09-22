@@ -105,3 +105,4 @@ temp/
 # Test outputs
 test-results/
 playwright-report/
+*.timestamp-*.mjs

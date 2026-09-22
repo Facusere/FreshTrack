@@ -163,9 +163,9 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     try {
       const { text } = await performBrowserOCR(canvas, (info) => setOcrProgress(info));
       processOCRResult(text);
-    } catch (err) {
+    } catch (err: any) {
       console.error("OCR capture failed:", err);
-      toast.error("No se pudo leer la imagen capturada. Intentá con mejor luz o un ticket de prueba.");
+      toast.error(err?.message || "No se pudo inicializar el escáner");
       setStage("choose");
     }
   };
@@ -192,9 +192,9 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     try {
       const { text } = await performBrowserOCR(selectedImagePreview, (info) => setOcrProgress(info));
       processOCRResult(text);
-    } catch (err) {
+    } catch (err: any) {
       console.error("OCR upload processing failed:", err);
-      toast.error("Error al procesar la imagen con OCR.");
+      toast.error(err?.message || "No se pudo inicializar el escáner");
       setStage("choose");
     }
   };
@@ -333,7 +333,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
             <DialogDescription id="scan-modal-desc" className="mt-0.5 text-xs text-content-muted">
               {stage === "results"
                 ? "Verificá cantidades y fechas antes de guardar"
-                : "Lectura de tickets y etiquetas en tu navegador"}
+                : "El reconocimiento de texto corre en tu dispositivo, sin conexión."}
             </DialogDescription>
           </div>
           <button
