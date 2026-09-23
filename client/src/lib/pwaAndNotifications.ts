@@ -64,12 +64,8 @@ export function registerServiceWorker() {
   try {
     const updateSW = registerSW({
       immediate: true,
-      onNeedRefresh() {
-        console.log("Nueva versión de FreshTrack disponible.");
-      },
-      onOfflineReady() {
-        console.log("FreshTrack está lista para funcionar offline.");
-      },
+      onNeedRefresh() {},
+      onOfflineReady() {},
       onRegisterError(error: any) {
         console.warn("Fallo al registrar ServiceWorker con Workbox:", error);
       },
