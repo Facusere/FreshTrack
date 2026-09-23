@@ -158,11 +158,11 @@ export function ReportsSection({
             <div className="mt-6 h-[260px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <XAxis dataKey="month" stroke="var(--content-muted)" fontSize={11} tickLine={false} />
+                  <XAxis dataKey="month" stroke="var(--content-muted)" fontSize={12} tickLine={false} />
                   <YAxis
                     yAxisId="left"
                     stroke="var(--brand)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     tickFormatter={(v) => `${v}kg`}
                   />
@@ -170,7 +170,7 @@ export function ReportsSection({
                     yAxisId="right"
                     orientation="right"
                     stroke="var(--status-soon-dot)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
                   />
@@ -188,7 +188,7 @@ export function ReportsSection({
                       return [value, name];
                     }}
                   />
-                  <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                  <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
                   <Bar
                     yAxisId="left"
                     dataKey="kg"
@@ -266,7 +266,7 @@ export function ReportsSection({
                         name,
                       ]}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
+                    <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
                   </PieChart>
                 </ResponsiveContainer>
               )}

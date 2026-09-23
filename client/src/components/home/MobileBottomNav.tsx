@@ -100,7 +100,7 @@ export function MobileBottomNav({
           <div className="relative">
             <PackageOpen size={19} strokeWidth={activeSection === "pantry" ? 2.4 : 1.8} />
             {typeof pantryCount === "number" && pantryCount > 0 && (
-              <span className="absolute -right-2 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent-lime px-1 text-[9px] font-bold text-accent-lime-fg">
+              <span className="absolute -right-2.5 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-lime px-1.5 text-xs font-bold text-accent-lime-fg shadow-xs">
                 {pantryCount}
               </span>
             )}
@@ -140,7 +140,7 @@ export function MobileBottomNav({
           <div className="relative">
             <ShoppingCart size={19} strokeWidth={activeSection === "shopping" ? 2.4 : 1.8} />
             {typeof pendingShoppingCount === "number" && pendingShoppingCount > 0 && (
-              <span className="absolute -right-2 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-status-soon-bg border border-status-soon-border px-1 text-[9px] font-bold text-status-soon-text">
+              <span className="absolute -right-2.5 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-status-soon-bg border border-status-soon-border px-1.5 text-xs font-bold text-status-soon-text shadow-xs">
                 {pendingShoppingCount}
               </span>
             )}
