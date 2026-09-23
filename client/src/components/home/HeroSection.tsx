@@ -70,6 +70,7 @@ export function HeroSection({
         role="button"
         tabIndex={0}
         aria-label="Abrir escáner de tickets"
+        aria-describedby="scan-card-description"
         onClick={onOpenScan}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onOpenScan();
@@ -80,7 +81,27 @@ export function HeroSection({
           className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]"
           style={{ backgroundImage: "url('/groceries.jpg')" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-content/85 via-content/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-content/90 via-content/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 [perspective:900px]">
+          <div className="freshtrack-float-card absolute right-7 top-20 hidden w-36 rotate-[7deg] rounded-2xl border border-white/20 bg-surface/85 p-3 text-content-heading shadow-2xl backdrop-blur-md sm:block">
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-content-muted">
+              <span>Ticket leído</span>
+              <span className="h-2 w-2 rounded-full bg-status-ok-dot" />
+            </div>
+            <div className="mt-3 h-1.5 w-20 rounded-full bg-brand/70" />
+            <div className="mt-2 h-1.5 w-28 rounded-full bg-content-muted/25" />
+            <div className="mt-2 h-1.5 w-16 rounded-full bg-content-muted/25" />
+            <div className="mt-4 flex items-end justify-between">
+              <span className="text-[10px] text-content-muted">Productos</span>
+              <span className="font-serif text-xl font-semibold text-brand-text">{lastScan?.count ?? 0}</span>
+            </div>
+          </div>
+          <div className="freshtrack-float-card freshtrack-float-card-delayed absolute bottom-28 right-24 hidden rotate-[-8deg] rounded-xl border border-white/20 bg-accent-lime px-3 py-2 text-accent-lime-fg shadow-xl sm:block">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em]">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-lime-fg" /> Vencimientos bajo control
+            </div>
+          </div>
+        </div>
         <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-bold text-brand-text backdrop-blur-sm border border-line">
           <span className="h-1.5 w-1.5 rounded-full bg-status-ok-dot" />{" "}
           {lastScan ? `Último escaneo · ${formatTimeAgo(lastScan.at, today)}` : "Sin escaneos recientes"}
@@ -89,7 +110,7 @@ export function HeroSection({
           <div>
             {lastScan ? (
               <>
-                <p className="text-xs font-medium text-brand-subtle">Compra registrada</p>
+                <p id="scan-card-description" className="text-xs font-medium text-brand-subtle">Compra registrada</p>
                 <p className="mt-1 font-serif text-2xl font-semibold tracking-[-0.03em]">
                   {lastScan.count} {lastScan.count === 1 ? "producto detectado" : "productos detectados"}
                 </p>

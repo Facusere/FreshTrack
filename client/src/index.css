@@ -241,6 +241,13 @@
   .animate-in { animation: enter 220ms cubic-bezier(0.23, 1, 0.32, 1) both; }
   .fade-in { --tw-enter-opacity: 0; }
   .zoom-in-95 { --tw-enter-scale: .95; }
+  .freshtrack-float-card { animation: freshtrack-float 5s ease-in-out infinite; transform-style: preserve-3d; }
+  .freshtrack-float-card-delayed { animation-delay: -2.2s; }
+}
+
+@keyframes freshtrack-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(7deg); }
+  50% { transform: translate3d(0, -9px, 18px) rotate(4deg); }
 }
 
 @keyframes enter {
