@@ -579,7 +579,7 @@ function AddProductModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-xl border border-line px-4 py-3 text-xs font-semibold text-content-body hover:bg-surface-elevated"
+            className="flex-1 min-h-[44px] rounded-xl border border-line px-4 py-3 text-xs font-semibold text-content-body transition duration-150 hover:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98]"
           >
             Cancelar
           </button>
@@ -587,7 +587,7 @@ function AddProductModal({
             type="button"
             disabled={!name.trim()}
             onClick={handleSave}
-            className="flex-1 min-h-[44px] rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex-1 min-h-[44px] rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white transition duration-150 hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isEditing ? "Guardar corrección" : "Guardar producto"}
           </button>
