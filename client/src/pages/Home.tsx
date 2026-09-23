@@ -1,38 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpDown,
-  ArrowUpRight,
   BarChart3,
   Bell,
   CalendarDays,
   Check,
-  ChevronRight,
   CircleHelp,
-  Clock3,
   Home as HomeIcon,
-  Info,
   Leaf,
-  MapPin,
   Menu,
-  MoreHorizontal,
   PackageOpen,
   Pencil,
-  Plus,
   Route,
   ScanLine,
   Search,
   Settings2,
   ShoppingCart,
-  SlidersHorizontal,
   Smartphone,
-  Sparkles,
   Trash2,
-  Utensils,
   X,
-  Zap,
 } from "lucide-react";
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import { estimateShelfLife, getCatalogSize, ShelfLifeState, saveShelfLifeCorrection } from "@/lib/shelfLifeCatalog";
@@ -44,7 +30,7 @@ import {
   getRecipeFallbackImage,
   isGlutenFreeEstimated,
 } from "@/lib/recipeApi";
-import { formatMoney, ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
+import { ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
 import {
   ConsumptionPlan,
   ConsumptionRecord,
@@ -53,7 +39,6 @@ import {
   applyConsumptionPlan,
   undoConsumptionHistory,
 } from "@/lib/inventoryConsumption";
-import { isQuantityLow } from "@/lib/quantity";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +48,16 @@ import {
 } from "@/components/ui/dialog";
 import { ConsumptionConfirmDialog } from "@/components/ConsumptionConfirmDialog";
 import { ScanModal } from "@/components/ScanModal";
-import { ShoppingListModule } from "@/components/ShoppingListModule";
+import {
+  HeroSection,
+  StatsSection,
+  ImpactSection,
+  PantrySection,
+  ShoppingSection,
+  RecipesSection,
+  MobileBottomNav,
+  MiniStatus,
+} from "@/components/home";
 import {
   getNotificationPermission,
   notifyExpiringProducts,
@@ -75,7 +69,7 @@ import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shopping
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
-import { addDaysISO, daysUntil, formatRelativeDays, formatTimeAgo, SOON_THRESHOLD_DAYS, useToday } from "@/lib/dates";
+import { addDaysISO, daysUntil, formatRelativeDays, SOON_THRESHOLD_DAYS, useToday } from "@/lib/dates";
 import {
   loadStoredProducts,
   saveStoredProducts,
@@ -110,12 +104,6 @@ export function buildDemoProducts(today: Date = new Date()): StoredProduct[] {
     { id: 7, name: "Pasta seca", category: "Almacén seco", expiryDate: addDaysISO(331, today), quantity: "2 paquetes", icon: "🍝" },
   ];
 }
-
-const statusCopy: Record<ProductStatus, { label: string; color: string; dot: string }> = {
-  ok: { label: "En fecha", color: "text-status-ok-text bg-status-ok-bg", dot: "bg-status-ok-dot" },
-  soon: { label: "Por vencer", color: "text-status-soon-text bg-status-soon-bg", dot: "bg-status-soon-dot" },
-  expired: { label: "Vencido", color: "text-status-expired-text bg-status-expired-bg", dot: "bg-status-expired-dot" },
-};
 
 function formatToday() {
   const now = new Date();
@@ -165,70 +153,6 @@ function inferLocation(category: string): string {
     return "Freezer";
   }
   return "Alacena";
-}
-
-function MiniStatus({ status }: { status: ProductStatus }) {
-  const meta = statusCopy[status];
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${meta.color}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
-      {meta.label}
-    </span>
-  );
-}
-
-function ProductRow({ product, onEdit }: { product: Product; onEdit: (product: Product) => void }) {
-  const lowStock = isQuantityLow(product.quantity);
-  const alertTone =
-    product.status === "expired"
-      ? "border-l-4 border-l-status-expired-dot bg-status-expired-bg/30"
-      : product.status === "soon"
-      ? "border-l-4 border-l-status-soon-dot bg-status-soon-bg/30"
-      : lowStock
-      ? "border-l-4 border-l-brand-border bg-brand-subtle/30"
-      : "";
-
-  return (
-    <div className={`group grid grid-cols-[minmax(0,1fr)_110px_92px_44px] items-center gap-3 border-b border-line py-3.5 pl-2 last:border-b-0 ${alertTone}`}>
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-elevated text-xl">{product.icon}</span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-content-heading">{product.name}</p>
-          <p className="mt-0.5 truncate text-xs text-content-muted">{product.quantity} · {product.category}</p>
-          {product.status === "soon" && <span className="mt-1 inline-flex rounded-full bg-status-soon-bg px-2 py-0.5 text-xs font-bold text-status-soon-text">Vence pronto</span>}
-          {product.status === "expired" && <span className="mt-1 inline-flex rounded-full bg-status-expired-bg px-2 py-0.5 text-xs font-bold text-status-expired-text">Revisar hoy</span>}
-          {product.status !== "expired" && lowStock && <span className="mt-1 inline-flex rounded-full bg-brand-subtle px-2 py-0.5 text-xs font-bold text-brand">Queda poco</span>}
-        </div>
-      </div>
-      <div className="text-left">
-        <p className="text-xs font-semibold text-content-body">{product.expiry}</p>
-        <p className="mt-0.5 text-xs text-content-muted">{formatRelativeDays(product.days)}</p>
-      </div>
-      <MiniStatus status={product.status} />
-      <div className="relative flex justify-end">
-        <button
-          aria-label={`Acciones para ${product.name}`}
-          onClick={() => onEdit(product)}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-content-muted opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 hover:bg-surface-elevated hover:text-brand"
-        >
-          <MoreHorizontal size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, note, icon, tone }: { label: string; value: string; note: string; icon: React.ReactNode; tone: string }) {
-  return (
-    <div className="rounded-[20px] border border-line bg-surface p-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(55,63,48,0.08)]">
-      <div className="flex items-start justify-between">
-        <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${tone}`}>{icon}</span>
-      </div>
-      <p className="mt-4 text-xs font-medium uppercase tracking-[0.12em] text-content-muted">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-content-heading">{value}</p>
-      <p className="mt-0.5 text-xs text-content-muted">{note}</p>
-    </div>
-  );
 }
 
 function NotificationSettingsModal({
@@ -439,52 +363,6 @@ function NotificationSettingsModal({
   );
 }
 
-function WeekCalendar({ products }: { products: Product[] }) {
-  const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-  const monthNames = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  const now = new Date();
-  const calendar = Array.from({ length: 7 }, (_, index) => {
-    const d = new Date(now);
-    d.setDate(now.getDate() + index);
-    const label = index === 0 ? `Hoy · ${d.getDate()} ${monthNames[d.getMonth()]}` : `${dayNames[d.getDay()]} · ${d.getDate()} ${monthNames[d.getMonth()]}`;
-    return { label, index };
-  });
-
-  const productsByDay = calendar.map(({ label, index }) => ({
-    day: label,
-    products: products.filter((product) => product.days === index || (index === 0 && product.days < 0)),
-  }));
-
-  return (
-    <div className="mt-5 grid gap-2 overflow-x-auto pb-1 sm:grid-cols-7">
-      {productsByDay.map(({ day, products: dayProducts }, index) => (
-        <div key={day} className={`min-w-[126px] rounded-2xl border p-3 ${index === 0 ? "border-brand-border bg-brand-subtle/50" : "border-line bg-surface"}`}>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold uppercase tracking-[0.08em] text-content-muted">{day}</p>
-            {dayProducts.length > 0 && <span className="rounded-full bg-brand-subtle px-1.5 py-0.5 text-xs font-bold text-brand-text">{dayProducts.length}</span>}
-          </div>
-          <div className="mt-3 space-y-2">
-            {dayProducts.length ? (
-              dayProducts.map((product) => (
-                <button
-                  key={product.id}
-                  onClick={() => toast(product.name, { description: `${product.category} · ${formatRelativeDays(product.days)}` })}
-                  className="w-full rounded-xl bg-surface-elevated p-2 text-left transition hover:bg-brand-subtle/40"
-                >
-                  <span className="text-base">{product.icon}</span>
-                  <p className="mt-1 truncate text-xs font-semibold text-content-heading">{product.name}</p>
-                  <p className="mt-0.5 truncate text-xs text-content-muted">{product.category}</p>
-                </button>
-              ))
-            ) : (
-              <div className="flex h-20 items-center justify-center rounded-xl border border-dashed border-line text-center text-xs leading-4 text-content-muted">Sin urgencias</div>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function AddProductModal({
   onClose,
@@ -1119,7 +997,7 @@ export default function Home() {
           </div>
         </aside>
 
-        <main id="main-content" className="min-w-0 flex-1 md:ml-[244px]">
+        <main id="main-content" className="min-w-0 flex-1 md:ml-[244px] pb-24 md:pb-0">
           <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-line bg-surface-subtle/90 px-4 backdrop-blur-xl sm:px-6 lg:px-10">
             <div className="flex items-center gap-3">
               <button
@@ -1222,392 +1100,66 @@ export default function Home() {
           )}
 
           <div className="mx-auto max-w-[1400px] px-4 py-7 sm:px-6 lg:px-10 lg:py-9">
-            <section id="module-summary" className="scroll-mt-24 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="relative overflow-hidden rounded-[26px] bg-brand-subtle/60 px-6 py-7 sm:px-8 sm:py-9 border border-brand-border/40">
-                <div className="absolute -right-12 -top-14 h-48 w-48 rounded-full border-[28px] border-brand-border/30" />
-                <div className="absolute -bottom-20 right-16 h-40 w-40 rounded-full border-[20px] border-brand-subtle/65" />
-                <div className="relative max-w-[470px]">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-brand-text">
-                    <span className="h-2 w-2 rounded-full bg-status-ok-dot" /> Tu despensa, en calma
-                  </div>
-                  <h1 className="mt-4 max-w-[450px] font-serif text-[36px] font-semibold leading-[0.98] tracking-[-0.045em] text-content sm:text-[47px]">
-                    Que nada rico<br /><span className="italic text-brand">termine en la basura.</span>
-                  </h1>
-                  <p className="mt-4 max-w-[380px] text-xs sm:text-sm leading-6 text-content-body">
-                    FreshTrack lee tus tickets, estima vencimientos y te avisa justo a tiempo. Menos carga manual, más comida aprovechada.
-                  </p>
-                  <div className="mt-6 flex flex-wrap items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setModal("scan")}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white shadow-[0_10px_20px_rgba(31,73,58,0.18)] transition hover:bg-brand-hover active:scale-[0.97]"
-                    >
-                      <ScanLine size={16} /> Escanear compra
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setModal("add")}
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-surface px-4 py-3 text-xs font-bold text-brand-text transition hover:bg-surface-elevated"
-                    >
-                      <Plus size={15} /> Agregar manual
-                    </button>
-                  </div>
-                  <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-brand-text">
-                    <span className="rounded-full bg-surface px-2.5 py-1 border border-line">{getCatalogSize()} productos regionales</span>
-                    <span>·</span>
-                    <span>vida útil abierto / cerrado</span>
-                  </div>
-                  <div className="mt-5 flex items-center gap-2 text-xs text-content-muted">
-                    <span className="h-1.5 w-1.5 rounded-full bg-status-ok-dot" />
-                    <span>Tus datos se guardan únicamente en este dispositivo.</span>
-                  </div>
-                </div>
-              </div>
+            <HeroSection
+              onOpenScan={() => setModal("scan")}
+              onOpenAdd={() => setModal("add")}
+              lastScan={lastScan}
+              today={today}
+              catalogSize={getCatalogSize()}
+            />
 
-              <div
-                role="button"
-                tabIndex={0}
-                aria-label="Abrir escáner de tickets"
-                onClick={() => setModal("scan")}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setModal("scan"); }}
-                className="group relative min-h-[300px] cursor-pointer overflow-hidden rounded-[26px] bg-surface-elevated shadow-[0_14px_35px_rgba(74,79,55,0.09)] border border-line"
-              >
-                <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]" style={{ backgroundImage: "url('/groceries.jpg')" }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-content/85 via-content/20 to-transparent" />
-                <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-bold text-brand-text backdrop-blur-sm border border-line">
-                  <span className="h-1.5 w-1.5 rounded-full bg-status-ok-dot" /> {lastScan ? `Último escaneo · ${formatTimeAgo(lastScan.at, today)}` : "Sin escaneos recientes"}
-                </div>
-                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3 text-white">
-                  <div>
-                    {lastScan ? (
-                      <>
-                        <p className="text-xs font-medium text-brand-subtle">Compra registrada</p>
-                        <p className="mt-1 font-serif text-2xl font-semibold tracking-[-0.03em]">{lastScan.count} {lastScan.count === 1 ? "producto detectado" : "productos detectados"}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-xs font-medium text-brand-subtle">Comenzá ahora</p>
-                        <p className="mt-1 font-serif text-2xl font-semibold tracking-[-0.03em]">Escaneá tu primer ticket</p>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-lime text-accent-lime-fg">
-                    <ArrowUpRight size={18} />
-                  </div>
-                </div>
-              </div>
-            </section>
+            <StatsSection
+              totalProducts={products.length}
+              soonCount={soonCount}
+              expiredCount={expiredCount}
+              moneySaved={impact.moneySaved}
+              kgSaved={impact.kgSaved}
+              soonThresholdDays={SOON_THRESHOLD_DAYS}
+            />
 
-            <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <StatCard label="En tu despensa" value={String(products.length)} note="productos registrados" icon={<PackageOpen size={17} />} tone="bg-status-ok-bg text-status-ok-text" />
-              <StatCard label="Por vencer" value={String(soonCount)} note={`en los próximos ${SOON_THRESHOLD_DAYS} días`} icon={<Clock3 size={17} />} tone="bg-status-soon-bg text-status-soon-text" />
-              <StatCard label="Ya vencidos" value={String(expiredCount)} note="requieren atención" icon={<Zap size={17} />} tone="bg-status-expired-bg text-status-expired-text" />
-              <StatCard label="Desperdicio evitado" value={formatMoney(impact.moneySaved)} note={`${impact.kgSaved} kg este mes (estimado)`} icon={<ArrowDownRight size={17} />} tone="bg-brand-subtle text-brand-text" />
-            </section>
+            <ImpactSection
+              impact={impact}
+              consumptionHistory={consumptionHistory}
+              onUndoConsumption={undoConsumption}
+            />
 
-            {consumptionHistory.length > 0 && (
-              <section className="mt-5 rounded-[24px] border border-line bg-surface p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Actividad reciente</p>
-                    <h2 className="mt-1 font-serif text-2xl font-semibold text-content-heading">Últimos consumos</h2>
-                  </div>
-                  <p className="text-xs text-content-muted">Podés deshacer varias acciones</p>
-                </div>
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                  {consumptionHistory.slice().reverse().map((record) => (
-                    <div key={record.id} className="rounded-2xl bg-surface-subtle p-3 border border-line">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-bold text-content-heading">{record.title}</p>
-                        <span className="text-xs text-content-muted">{record.createdAt}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-content-muted">{record.ingredients.join(", ") || "Sin coincidencias"}</p>
-                      <button
-                        type="button"
-                        onClick={() => undoConsumption(record.id)}
-                        className="mt-2 min-h-[44px] rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-brand-text hover:bg-surface"
-                      >
-                        Deshacer desde acá
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            <PantrySection
+              products={products}
+              storedProducts={storedProducts}
+              filteredProducts={filteredProducts}
+              soonCount={soonCount}
+              expiredCount={expiredCount}
+              okCount={okCount}
+              okPercent={okPercent}
+              pOk={pOk}
+              pSoon={pSoon}
+              totalTracked={totalTracked}
+              pantryView={pantryView}
+              setPantryView={setPantryView}
+              filter={filter}
+              setFilter={setFilter}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              search={search}
+              setSearch={setSearch}
+              showAllPantry={showAllPantry}
+              setShowAllPantry={setShowAllPantry}
+              onOpenScan={() => setModal("scan")}
+              onOpenAdd={() => setModal("add")}
+              onEditProduct={setSelectedProduct}
+              onLoadDemoProducts={() => {
+                const demo = buildDemoProducts(today);
+                setStoredProducts(demo);
+                toast.success("Datos de ejemplo cargados", {
+                  description: `${demo.length} productos agregados a tu despensa.`,
+                });
+              }}
+              onNavigateToReports={() => navigateToModule("Reportes")}
+            />
 
-            <section id="module-reports" className="scroll-mt-24 mt-5 rounded-[24px] border border-brand-border bg-brand-subtle/40 p-5 sm:p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-text">
-                    <ArrowDownRight size={14} /> Impacto de este mes
-                  </p>
-                  <h2 className="mt-2 font-serif text-2xl sm:text-[26px] font-semibold tracking-[-0.04em] text-content-heading">
-                    Pequeños gestos, menos desperdicio.
-                  </h2>
-                  <p className="mt-1 max-w-[500px] text-xs sm:text-sm leading-5 text-content-body">
-                    Cada vez que aprovechás algo a tiempo, FreshTrack lo suma. Sin rankings ni presión: solo una señal amable de lo que estás logrando.
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-surface/80 border border-line px-4 py-3 text-right">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-content-muted">Acciones</p>
-                  <p className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-brand-text">{impact.actions}</p>
-                  <p className="text-xs text-content-muted">este mes</p>
-                </div>
-              </div>
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-2xl bg-surface/80 border border-line p-3">
-                  <p className="text-xs font-semibold text-content-muted">Comida salvada</p>
-                  <p className="mt-1 text-xl font-semibold text-brand-text">{impact.kgSaved} kg</p>
-                  <p className="text-xs text-content-muted">(estimado)</p>
-                </div>
-                <div className="rounded-2xl bg-surface/80 border border-line p-3">
-                  <p className="text-xs font-semibold text-content-muted">Valor recuperado</p>
-                  <p className="mt-1 text-xl font-semibold text-brand-text">{formatMoney(impact.moneySaved)}</p>
-                  <p className="text-xs text-content-muted">(estimado)</p>
-                </div>
-                <div className="rounded-2xl bg-surface/80 border border-line p-3">
-                  <p className="text-xs font-semibold text-content-muted">Comidas posibles</p>
-                  <p className="mt-1 text-xl font-semibold text-brand-text">{impact.mealsSaved}</p>
-                  <p className="text-xs text-content-muted">(estimado)</p>
-                </div>
-              </div>
-            </section>
-
-            <section id="module-pantry" className="scroll-mt-24 mt-6 grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
-              <div className="rounded-[24px] border border-line bg-surface px-4 py-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:px-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-serif text-2xl font-semibold tracking-[-0.035em] text-content-heading">
-                        {pantryView === "calendar" ? "Próxima semana" : "Por vencer esta semana"}
-                      </h2>
-                      <span className="rounded-full bg-status-soon-bg px-2.5 py-0.5 text-xs font-bold text-status-soon-text border border-status-soon-border">
-                        {soonCount} por vencer
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-content-muted">
-                      {pantryView === "calendar" ? "Planificá tus comidas viendo qué vence cada día." : "Una mirada rápida para decidir qué consumir primero."}
-                    </p>
-                  </div>
-                  {storedProducts.length > 0 && (
-                    <div className="flex items-center gap-1 rounded-xl bg-surface-elevated p-1">
-                      <button
-                        type="button"
-                        onClick={() => setPantryView("list")}
-                        className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition ${pantryView === "list" ? "bg-surface text-brand-text shadow-sm" : "text-content-muted"}`}
-                      >
-                        Lista
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPantryView("calendar")}
-                        className={`flex min-h-[44px] items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition ${pantryView === "calendar" ? "bg-surface text-brand-text shadow-sm" : "text-content-muted"}`}
-                      >
-                        <CalendarDays size={12} /> Próxima semana
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {storedProducts.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <PackageOpen className="mx-auto text-content-muted" size={36} />
-                    <p className="mt-3 text-base font-semibold text-content-heading">Tu despensa está vacía</p>
-                    <p className="mx-auto mt-1 max-w-sm text-xs text-content-muted">
-                      Tu despensa está vacía. Escaneá un ticket o agregá productos para empezar a controlar vencimientos.
-                    </p>
-                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setModal("scan")}
-                        className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-brand-hover"
-                      >
-                        <ScanLine size={15} /> Escanear compra
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setModal("add")}
-                        className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-brand-subtle px-4 py-2.5 text-xs font-bold text-brand-text transition hover:bg-surface"
-                      >
-                        <Plus size={15} /> Agregar manual
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const demo = buildDemoProducts(today);
-                        setStoredProducts(demo);
-                        toast.success("Datos de ejemplo cargados", {
-                          description: `${demo.length} productos agregados a tu despensa.`,
-                        });
-                      }}
-                      className="mt-4 min-h-[44px] text-xs font-medium text-brand hover:underline transition"
-                    >
-                      Cargar datos de ejemplo
-                    </button>
-                  </div>
-                ) : pantryView === "calendar" ? (
-                  <WeekCalendar products={products} />
-                ) : (
-                  <>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
-                      {/* Status Tabs */}
-                      <div className="flex items-center gap-1.5 overflow-x-auto">
-                        <button
-                          type="button"
-                          onClick={() => setFilter("all")}
-                          className={`shrink-0 min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            filter === "all" ? "bg-brand-subtle text-brand-text border border-brand-border" : "text-content-muted hover:bg-surface-elevated"
-                          }`}
-                        >
-                          Todos ({products.length})
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFilter("soon")}
-                          className={`shrink-0 min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            filter === "soon" ? "bg-status-soon-bg text-status-soon-text border border-status-soon-border" : "text-content-muted hover:bg-surface-elevated"
-                          }`}
-                        >
-                          Por vencer ({soonCount})
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setFilter("expired")}
-                          className={`shrink-0 min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            filter === "expired" ? "bg-status-expired-bg text-status-expired-text border border-status-expired-border" : "text-content-muted hover:bg-surface-elevated"
-                          }`}
-                        >
-                          Vencidos ({expiredCount})
-                        </button>
-                      </div>
-
-                      {/* Advanced Filters: Category & Sorting */}
-                      <div className="flex flex-wrap items-center gap-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <SlidersHorizontal size={13} className="text-content-muted" />
-                          <select
-                            value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-semibold text-content-body outline-none focus:ring-2 focus:ring-brand-focus"
-                            aria-label="Filtrar por categoría"
-                          >
-                            <option value="all">Todas las categorías</option>
-                            {ALL_CATEGORIES.map((cat) => (
-                              <option key={cat} value={cat}>
-                                {cat}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <ArrowUpDown size={13} className="text-content-muted" />
-                          <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as any)}
-                            className="min-h-[44px] rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-semibold text-content-body outline-none focus:ring-2 focus:ring-brand-focus"
-                            aria-label="Ordenar productos"
-                          >
-                            <option value="expiry-asc">Vencimiento: más próximo</option>
-                            <option value="expiry-desc">Vencimiento: más lejano</option>
-                            <option value="name-asc">Nombre: A → Z</option>
-                            <option value="name-desc">Nombre: Z → A</option>
-                            <option value="category">Categoría</option>
-                          </select>
-                        </div>
-
-                        {(categoryFilter !== "all" || sortBy !== "expiry-asc") && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCategoryFilter("all");
-                              setSortBy("expiry-asc");
-                            }}
-                            className="min-h-[44px] text-xs font-semibold text-status-expired-text hover:underline"
-                          >
-                            Restablecer
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-1">
-                      {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 5)).map((product) => (
-                        <ProductRow key={product.id} product={product} onEdit={setSelectedProduct} />
-                      ))}
-                      {filteredProducts.length > 5 && (
-                        <button
-                          type="button"
-                          onClick={() => setShowAllPantry(!showAllPantry)}
-                          className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl border border-line bg-surface-muted py-2.5 text-xs font-bold text-brand-text transition hover:bg-surface"
-                        >
-                          {showAllPantry ? "Mostrar menos productos" : `Mostrar todos los productos (${filteredProducts.length} en total)`}
-                        </button>
-                      )}
-                      {filteredProducts.length === 0 && (
-                        <div className="py-10 text-center">
-                          <PackageOpen className="mx-auto text-content-muted" size={28} />
-                          <p className="mt-2 text-sm font-semibold text-content-heading">No encontramos productos con los filtros actuales</p>
-                          <p className="mt-1 text-xs text-content-muted">Probá cambiar el filtro o tu búsqueda.</p>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)]">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold tracking-[-0.035em] text-content-heading">Estado general</h2>
-                    <p className="mt-1 text-xs text-content-muted">
-                      {okPercent >= 80 ? "Tu despensa está bastante bien." : "Tenés productos que requieren consumo pronto."}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigateToModule("Reportes")}
-                    aria-label="Ver reportes"
-                    className="flex h-11 w-11 items-center justify-center rounded-lg text-content-muted hover:bg-surface-elevated"
-                  >
-                    <MoreHorizontal size={17} />
-                  </button>
-                </div>
-                <div className="mt-5 flex items-center gap-5">
-                  <div
-                    className="relative flex h-[136px] w-[136px] shrink-0 items-center justify-center rounded-full"
-                    style={{ background: totalTracked > 0 ? `conic-gradient(var(--status-ok-dot) 0 ${pOk}%, var(--status-soon-dot) ${pOk}% ${pSoon}%, var(--status-expired-dot) ${pSoon}% 100%)` : "var(--status-ok-dot)" }}
-                  >
-                    <div className="flex h-[94px] w-[94px] flex-col items-center justify-center rounded-full bg-surface">
-                      <p className="text-[28px] font-semibold tracking-[-0.06em] text-brand-text">{okPercent}%</p>
-                      <p className="text-xs text-content-muted">en fecha</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {[["En fecha", okCount, "bg-status-ok-dot"], ["Por vencer", soonCount, "bg-status-soon-dot"], ["Vencidos", expiredCount, "bg-status-expired-dot"]].map(([label, count, dotClass]) => (
-                      <div key={label as string} className="flex items-center gap-2.5">
-                        <span className={`h-2 w-2 rounded-full ${dotClass}`} />
-                        <div>
-                          <p className="text-xs font-semibold text-content-heading">{label}</p>
-                          <p className="text-xs text-content-muted">{count} productos</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-6 rounded-2xl bg-brand-subtle/50 p-3.5 border border-brand-border/40">
-                  <div className="flex items-center gap-2 text-brand-text">
-                    <Sparkles size={15} />
-                    <p className="text-xs font-bold">Tip de FreshTrack</p>
-                  </div>
-                  <p className="mt-1.5 text-xs leading-5 text-content-body">
-                    Consumí primero lo que está en amarillo. Así evitás que llegue al rojo.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Smart Shopping List Module */}
-            <ShoppingListModule
+            <ShoppingSection
               shoppingList={shoppingList}
               setShoppingList={setShoppingList}
               pantryProducts={products}
@@ -1616,168 +1168,24 @@ export default function Home() {
               detectIconFn={detectProductIcon}
             />
 
-            <section id="module-route" className="scroll-mt-24 mt-5 grid gap-5 md:grid-cols-[1fr_1fr]">
-              <div className="rounded-[24px] bg-content p-5 text-white sm:p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-subtle">
-                      <Route size={13} /> Recorrida sugerida
-                    </p>
-                    <h2 className="mt-2 font-serif text-2xl sm:text-[25px] font-semibold tracking-[-0.035em]">Cosas para resolver primero.</h2>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-accent-lime">
-                    <MapPin size={18} />
-                  </div>
-                </div>
-                <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                  {suggestedRoute.length > 0 ? (
-                    suggestedRoute.map((item) => (
-                      <button
-                        key={item.name}
-                        type="button"
-                        onClick={() => {
-                          setSelectedProduct(item.product);
-                          toast(item.name, { description: `Ubicación: ${item.place} · ${formatRelativeDays(item.product.days)}` });
-                        }}
-                        className="group rounded-xl bg-brand/50 p-3 text-left transition hover:bg-brand"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-accent-lime text-xs font-extrabold text-accent-lime-fg">{item.number}</span>
-                          <ArrowUpRight size={14} className="text-brand-subtle transition group-hover:text-accent-lime" />
-                        </div>
-                        <p className="mt-4 truncate text-xs font-semibold text-white">{item.name}</p>
-                        <p className="mt-1 truncate text-xs text-brand-subtle/80">{item.place}</p>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="col-span-3 py-4 text-center text-xs text-brand-subtle/80">Tu despensa está al día sin urgencias.</div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigateToModule("Mi despensa")}
-                  className="mt-5 flex min-h-[44px] items-center gap-1 text-xs font-bold text-accent-lime hover:underline"
-                >
-                  Ver despensa completa <ChevronRight size={14} />
-                </button>
-              </div>
-
-              <div className="rounded-[24px] border border-recipe-border bg-recipe-bg p-5 sm:p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-recipe-text">
-                      <Utensils size={13} /> Ideas para aprovechar
-                    </p>
-                    <h2 className="mt-2 max-w-[300px] font-serif text-2xl sm:text-[25px] font-semibold leading-[1.05] tracking-[-0.035em] text-content-heading">
-                      Recetas con lo que vence primero.
-                    </h2>
-                  </div>
-                  <div className="text-4xl">🥬</div>
-                </div>
-                <p className="mt-3 text-xs leading-5 text-content-body">
-                  {recipesLoading
-                    ? "Buscando opciones que aprovechen tu despensa…"
-                    : visibleRecipes.length > 0 || recipes.length > 0
-                    ? `Encontramos ${visibleRecipes.length || recipes.length} ideas para usar antes de que se pierdan.`
-                    : "No encontramos recetas para los productos actuales."}
-                </p>
-
-                {recipesWarning && (
-                  <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-status-expired-border bg-status-expired-bg p-3 text-xs text-status-expired-text">
-                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-                    <span>{recipesWarning}</span>
-                  </div>
-                )}
-
-                {recipesInfo && (
-                  <div className="mt-3 rounded-xl border border-brand-border bg-brand-subtle p-4 text-center">
-                    <p className="text-2xl">🌱</p>
-                    <p className="mt-1 text-xs font-bold text-brand-text">{recipesInfo}</p>
-                    <p className="mt-0.5 text-xs text-content-muted">
-                      Cuando algún alimento esté cerca de vencer te sugeriremos ideas para aprovecharlo.
-                    </p>
-                  </div>
-                )}
-
-                {recipesError && (
-                  <div className="mt-3 flex items-start gap-2 rounded-xl border border-recipe-border bg-recipe-bg p-2.5 text-xs text-recipe-text">
-                    <Info size={14} className="mt-0.5 shrink-0" />
-                    <span>{recipesError}</span>
-                  </div>
-                )}
-
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {([["all", "Todas"], ["vegetarian", "Vegetarianas"], ["glutenFree", "Sin TACC (estimado)"], ["quick", "Rápidas"]] as Array<[RecipeFilter, string]>).map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setRecipeFilter(value)}
-                      className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition ${recipeFilter === value ? "bg-surface text-recipe-badge-text shadow-sm border border-recipe-border" : "bg-recipe-badge-bg/40 text-recipe-text hover:bg-surface"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-3 grid gap-2">
-                  {shownRecipes.map((recipe) => (
-                    <div
-                      key={recipe.id}
-                      data-testid="recipe-card"
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Ver detalle de ${recipe.title}`}
-                      onClick={() => openRecipeDetail(recipe)}
-                      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") openRecipeDetail(recipe); }}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-2xl bg-surface/70 p-2.5 transition hover:bg-surface border border-recipe-border/50"
-                    >
-                      <img
-                        src={recipe.image || getRecipeFallbackImage(recipe.title, recipe.category)}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(recipe.title, recipe.category);
-                        }}
-                        alt={recipe.title}
-                        className="h-12 w-12 shrink-0 rounded-xl object-cover"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <p className="truncate text-xs font-bold text-content-heading">{recipe.title}</p>
-                          {(recipe.isLocalFallback || recipe.source === "FreshTrack") && (
-                            <span className="shrink-0 rounded-md bg-brand-subtle px-1.5 py-0.5 text-xs font-bold text-brand-text border border-brand-border/50">Ideas locales</span>
-                          )}
-                        </div>
-                        <p className="mt-0.5 truncate text-xs text-content-muted">
-                          {recipe.pantryMatchRatio
-                            ? `Tenés ${recipe.pantryMatchRatio.matched} de ${recipe.pantryMatchRatio.total} ingredientes`
-                            : `Usa: ${recipe.matchedIngredients.join(", ")}`}
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-recipe-text">Ver ingredientes y pasos</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(event) => { event.stopPropagation(); initiateRecipeConsumption(recipe); }}
-                        className="shrink-0 min-h-[44px] rounded-lg bg-recipe-badge-bg px-3 py-2 text-xs font-bold text-recipe-badge-text transition hover:opacity-90"
-                      >
-                        Aproveché
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                {recipeLimit < visibleRecipes.length && (
-                  <button
-                    type="button"
-                    onClick={() => setRecipeLimit((limit) => Math.min(limit + 3, visibleRecipes.length))}
-                    className="mt-4 min-h-[44px] w-full rounded-xl border border-recipe-border bg-surface px-3 py-2.5 text-xs font-bold text-recipe-badge-text transition hover:bg-surface-elevated"
-                  >
-                    Cargar más ({visibleRecipes.length - recipeLimit} disponibles)
-                  </button>
-                )}
-                <p className="mt-3 text-xs text-content-muted">
-                  {recipes.some((r) => r.isLocalFallback || r.source === "FreshTrack")
-                    ? "Ideas locales y sugerencias orientativas"
-                    : "Fuente: TheMealDB · sugerencias orientativas"}
-                </p>
-              </div>
-            </section>
+            <RecipesSection
+              suggestedRoute={suggestedRoute}
+              recipes={recipes}
+              visibleRecipes={visibleRecipes}
+              shownRecipes={shownRecipes}
+              recipesLoading={recipesLoading}
+              recipesWarning={recipesWarning}
+              recipesInfo={recipesInfo}
+              recipesError={recipesError}
+              recipeFilter={recipeFilter}
+              setRecipeFilter={setRecipeFilter}
+              recipeLimit={recipeLimit}
+              setRecipeLimit={setRecipeLimit}
+              onOpenRecipeDetail={openRecipeDetail}
+              onInitiateConsumption={initiateRecipeConsumption}
+              onSelectProduct={setSelectedProduct}
+              onNavigateToPantry={() => navigateToModule("Mi despensa")}
+            />
 
             <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-content-muted sm:flex-row sm:items-center sm:justify-between">
               <p>FreshTrack · Menos desperdicio, más tranquilidad.</p>
@@ -1788,6 +1196,12 @@ export default function Home() {
           </div>
         </main>
       </div>
+
+      <MobileBottomNav
+        onOpenScan={() => setModal("scan")}
+        pantryCount={products.length}
+        pendingShoppingCount={pendingShoppingCount}
+      />
 
       {modal === "scan" && (
         <ScanModal

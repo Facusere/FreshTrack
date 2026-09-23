@@ -202,4 +202,28 @@ test.describe("FreshTrack E2E & Accessibility Tests", () => {
     );
     expect(noScroll375).toBe(true);
   });
+
+  test("barra de navegación inferior visible en mobile (390px) con botón central de escaneo funcional", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(baseURL, { waitUntil: "networkidle" });
+
+    const bottomNav = page.getByTestId("mobile-bottom-nav");
+    await expect(bottomNav).toBeVisible();
+
+    // Verify 4 destinations/buttons
+    await expect(page.getByTestId("mobile-nav-summary")).toBeVisible();
+    await expect(page.getByTestId("mobile-nav-pantry")).toBeVisible();
+    await expect(page.getByTestId("mobile-nav-scan")).toBeVisible();
+    await expect(page.getByTestId("mobile-nav-shopping")).toBeVisible();
+
+    // Click on central scan button and verify ScanModal opens
+    await page.getByTestId("mobile-nav-scan").click();
+    await expect(page.getByRole("heading", { name: "Escaneo OCR inteligente" })).toBeVisible();
+
+    // Close Scan modal
+    await page.getByRole("button", { name: "Cerrar modal de escaneo" }).click();
+    await expect(page.getByRole("heading", { name: "Escaneo OCR inteligente" })).not.toBeVisible();
+  });
 });
