@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -159,71 +159,76 @@
 }
 
 .dark {
-  --background: oklch(0.19 0.025 155);
-  --foreground: oklch(0.93 0.02 100);
-  --card: oklch(0.23 0.03 155);
-  --card-foreground: oklch(0.93 0.02 100);
-  --popover: oklch(0.25 0.035 155);
-  --popover-foreground: oklch(0.93 0.02 100);
+  --background: #11231b;
+  --foreground: #eef4ea;
+  --card: #192e24;
+  --card-foreground: #eef4ea;
+  --popover: #1f362b;
+  --popover-foreground: #eef4ea;
   --primary: #9fd3a5;
-  --primary-foreground: #17372b;
-  --secondary: #304a3d;
-  --secondary-foreground: #f4f1e8;
-  --muted: #2a4236;
-  --muted-foreground: #c2d0c4;
-  --accent: #425c46;
-  --accent-foreground: #f4f1e8;
+  --primary-foreground: #11231b;
+  --secondary: #243c31;
+  --secondary-foreground: #eef4ea;
+  --muted: #21382d;
+  --muted-foreground: #bad0bf;
+  --accent: #2b4438;
+  --accent-foreground: #f4f7f2;
   --destructive: #f18b78;
   --destructive-foreground: #2a1511;
-  --border: #41584a;
-  --input: #496253;
-  --ring: #b7df9a;
+  --border: #2e473a;
+  --input: #365344;
+  --ring: #9fd3a5;
+  --chart-1: #9fd3a5;
+  --chart-2: #f4c65d;
+  --chart-3: #f18b78;
+  --chart-4: #60a5fa;
+  --chart-5: #d9e982;
 
-  --surface: #1b3027;
-  --surface-subtle: #14271f;
-  --surface-muted: #20382d;
-  --surface-elevated: #294336;
-  --surface-overlay: rgba(3, 13, 9, 0.7);
+  --surface: #192e24;
+  --surface-subtle: #11231b;
+  --surface-muted: #1f362b;
+  --surface-elevated: #264134;
+  --surface-overlay: rgba(5, 15, 11, 0.75);
 
   --content: #eef4ea;
   --content-heading: #f7f8ee;
-  --content-body: #d7e3d7;
-  --content-muted: #bdcdbf;
-  --content-subtle: #a8bcab;
+  --content-body: #d5e2d6;
+  --content-muted: #bad0bf;
+  --content-subtle: #a6bfa9;
 
-  --line: #385144;
-  --line-subtle: #2d473a;
-  --line-strong: #5e7865;
+  --line: #2b4438;
+  --line-subtle: #22382d;
+  --line-strong: #3f6150;
 
   --brand: #9fd3a5;
-  --brand-hover: #b7df9a;
-  --brand-subtle: #294536;
-  --brand-border: #5d8968;
-  --brand-text: #bde2b9;
-  --brand-focus: #b7df9a;
+  --brand-hover: #b5e4ba;
+  --brand-subtle: #203a2e;
+  --brand-border: #3f6a4e;
+  --brand-text: #bfe5b8;
+  --brand-focus: #9fd3a5;
 
-  --status-ok-bg: #244c38;
-  --status-ok-border: #5b9b72;
+  --status-ok-bg: #1d3c2d;
+  --status-ok-border: #3a7353;
   --status-ok-text: #c4edc8;
-  --status-ok-dot: #86d19a;
+  --status-ok-dot: #6ecb89;
 
-  --status-soon-bg: #51401d;
-  --status-soon-border: #9b7930;
-  --status-soon-text: #ffe6a3;
+  --status-soon-bg: #423414;
+  --status-soon-border: #7e6123;
+  --status-soon-text: #ffe59e;
   --status-soon-dot: #f4c65d;
 
-  --status-expired-bg: #542b29;
-  --status-expired-border: #a76055;
-  --status-expired-text: #ffc0b2;
+  --status-expired-bg: #43201e;
+  --status-expired-border: #823e38;
+  --status-expired-text: #ffc2b7;
   --status-expired-dot: #f18b78;
 
   --accent-lime: #d9e982;
-  --accent-lime-fg: #17372b;
+  --accent-lime-fg: #11231b;
 
-  --recipe-bg: #493b27;
-  --recipe-border: #876b3f;
-  --recipe-text: #ffe4a8;
-  --recipe-badge-bg: #71572f;
+  --recipe-bg: #3b2f1e;
+  --recipe-border: #6e5430;
+  --recipe-text: #ffe3a3;
+  --recipe-badge-bg: #584428;
   --recipe-badge-text: #ffedc2;
 }
 

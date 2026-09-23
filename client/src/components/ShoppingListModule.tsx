@@ -216,20 +216,20 @@ export function ShoppingListModule({
           onChange={(e) => setItemName(e.target.value)}
           aria-label="Nombre del producto"
           placeholder="¿Qué necesitás comprar? (ej. Leche entera, Huevos)"
-          className="rounded-xl border border-line-strong bg-white px-3 py-2 text-xs text-content outline-none focus:border-brand"
+          className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-xs text-content outline-none focus:border-brand"
         />
         <input
           value={itemQuantity}
           onChange={(e) => setItemQuantity(e.target.value)}
           aria-label="Cantidad"
           placeholder="Cantidad (ej. 2 litros, 500g)"
-          className="rounded-xl border border-line-strong bg-white px-3 py-2 text-xs text-content outline-none focus:border-brand"
+          className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-xs text-content outline-none focus:border-brand"
         />
         <select
           value={itemCategory}
           onChange={(e) => setItemCategory(e.target.value)}
           aria-label="Categoría del producto"
-          className="rounded-xl border border-line-strong bg-white px-2.5 py-2 text-xs text-content outline-none"
+          className="rounded-xl border border-line-strong bg-surface px-2.5 py-2 text-xs text-content outline-none"
         >
           {ALL_CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>

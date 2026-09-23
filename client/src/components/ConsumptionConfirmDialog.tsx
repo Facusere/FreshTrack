@@ -138,7 +138,7 @@ export function ConsumptionConfirmDialog({
                   className={`rounded-2xl border p-3 transition ${
                     state.selected
                       ? "border-brand-border bg-brand-subtle/40"
-                      : "border-line bg-surface-muted opacity-75"
+                      : "border-line bg-surface-muted"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -177,7 +177,7 @@ export function ConsumptionConfirmDialog({
                             }
                             placeholder="Ej. 200 g"
                             disabled={!state.selected}
-                            className="w-28 rounded-lg border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-content-heading outline-none disabled:bg-surface-elevated"
+                            className="w-28 rounded-lg border border-line-strong bg-surface px-2 py-1 text-xs font-semibold text-content-heading outline-none disabled:bg-surface-elevated"
                           />
                         </label>
 
@@ -215,14 +215,14 @@ export function ConsumptionConfirmDialog({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-[44px] rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-content-body hover:bg-surface-elevated"
+            className="min-h-[44px] rounded-xl border border-line px-4 py-2.5 text-xs font-semibold text-content-body transition duration-150 hover:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className="min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-brand-hover"
+            className="min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm transition duration-150 hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98]"
           >
             <Check size={14} /> Confirmar y descontar
           </button>
