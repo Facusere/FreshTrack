@@ -51,13 +51,14 @@ import { ScanModal } from "@/components/ScanModal";
 import {
   HeroSection,
   StatsSection,
-  ImpactSection,
+  ReportsSection,
   PantrySection,
   ShoppingSection,
   RecipesSection,
   MobileBottomNav,
   MiniStatus,
 } from "@/components/home";
+import { recordExpiredItem } from "@/lib/reportsData";
 import {
   getNotificationPermission,
   notifyExpiringProducts,
@@ -874,6 +875,9 @@ export default function Home() {
 
   const removeSelected = () => {
     if (!selectedProduct) return;
+    if (selectedProduct.status === "expired" || selectedProduct.days <= 0) {
+      recordExpiredItem(selectedProduct.name, selectedProduct.category);
+    }
     setStoredProducts((current) => current.filter((product) => product.id !== selectedProduct.id));
     toast(`${selectedProduct.name} eliminado`, { icon: <Trash2 size={15} /> });
     setSelectedProduct(null);
@@ -1117,11 +1121,6 @@ export default function Home() {
               soonThresholdDays={SOON_THRESHOLD_DAYS}
             />
 
-            <ImpactSection
-              impact={impact}
-              consumptionHistory={consumptionHistory}
-              onUndoConsumption={undoConsumption}
-            />
 
             <PantrySection
               products={products}
@@ -1185,6 +1184,13 @@ export default function Home() {
               onInitiateConsumption={initiateRecipeConsumption}
               onSelectProduct={setSelectedProduct}
               onNavigateToPantry={() => navigateToModule("Mi despensa")}
+            />
+
+            <ReportsSection
+              impact={impact}
+              products={products}
+              consumptionHistory={consumptionHistory}
+              onUndoConsumption={undoConsumption}
             />
 
             <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-content-muted sm:flex-row sm:items-center sm:justify-between">

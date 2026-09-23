@@ -26,7 +26,7 @@ export function saveLastScan(info: LastScanInfo): boolean {
 }
 
 export function loadJSON<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined" || !window.localStorage) {
+  if (typeof localStorage === "undefined") {
     return fallback;
   }
   try {
@@ -40,7 +40,7 @@ export function loadJSON<T>(key: string, fallback: T): T {
 }
 
 export function saveJSON<T>(key: string, value: T): boolean {
-  if (typeof window === "undefined" || !window.localStorage) {
+  if (typeof localStorage === "undefined") {
     return false;
   }
   try {

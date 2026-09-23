@@ -7,3 +7,4 @@ export * from "./WeekCalendar";
 export * from "./RecipesSection";
 export * from "./ShoppingSection";
 export * from "./MobileBottomNav";
+export * from "./ReportsSection";
