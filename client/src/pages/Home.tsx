@@ -481,7 +481,7 @@ function AddProductModal({
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
               placeholder="Ej. Queso cremoso"
-              className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none transition placeholder:text-content-muted/60 focus:border-brand-focus focus:ring-2 focus:ring-brand-subtle"
+              className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none transition placeholder:text-content-muted focus:border-brand-focus focus:ring-2 focus:ring-brand-subtle"
             />
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -924,7 +924,7 @@ export default function Home() {
             </span>
             <div>
               <p className="font-serif text-[21px] font-bold leading-none tracking-[-0.03em]">freshtrack</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.17em] text-brand-subtle/80">menos desperdicio</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.17em] text-brand-subtle">menos desperdicio</p>
             </div>
           </div>
           <button
@@ -943,7 +943,7 @@ export default function Home() {
               <Smartphone size={14} /> Instalar app en tu celu
             </button>
           )}
-          <p className="mb-2 mt-9 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle/70">Tu espacio</p>
+          <p className="mb-2 mt-9 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle">Tu espacio</p>
           <nav className="space-y-1">
             {currentNavItems.map(({ label, icon: Icon, count }) => (
               <button
@@ -951,7 +951,7 @@ export default function Home() {
                 type="button"
                 onClick={() => navigateToModule(label)}
                 className={`flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition ${
-                  activeNav === label ? "bg-brand text-white" : "text-brand-subtle/80 hover:bg-brand/50 hover:text-white"
+                  activeNav === label ? "bg-brand text-white" : "text-brand-subtle hover:bg-brand/50 hover:text-white"
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -966,12 +966,12 @@ export default function Home() {
               </button>
             ))}
           </nav>
-          <p className="mb-2 mt-8 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle/70">Cuenta</p>
+          <p className="mb-2 mt-8 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle">Cuenta</p>
           <nav className="space-y-1">
             <button
               type="button"
               onClick={() => setNotificationModal(true)}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle/80 transition hover:bg-brand/50 hover:text-white"
+              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
             >
               <Bell size={16} strokeWidth={1.8} />Notificaciones
               {notificationGroups.length > 0 && (
@@ -984,7 +984,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setNotificationModal(true)}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle/80 transition hover:bg-brand/50 hover:text-white"
+              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
             >
               <Settings2 size={16} strokeWidth={1.8} />Configuración
             </button>
@@ -996,7 +996,7 @@ export default function Home() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-xs font-semibold text-white">Despensa local</p>
-                <p className="text-xs text-brand-subtle/80">Datos en tu dispositivo</p>
+                <p className="text-xs text-brand-subtle">Datos en tu dispositivo</p>
               </div>
             </div>
           </div>
@@ -1036,7 +1036,7 @@ export default function Home() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar en tu despensa"
-                  className="w-[150px] bg-transparent text-xs outline-none placeholder:text-content-muted/60"
+                  className="w-[150px] bg-transparent text-xs outline-none placeholder:text-content-muted"
                 />
               </div>
               <button

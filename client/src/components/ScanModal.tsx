@@ -353,7 +353,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
               <button
                 onClick={() => setScanMode("ticket")}
                 className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-                  scanMode === "ticket" ? "bg-white text-brand shadow-sm" : "text-content-muted"
+                  scanMode === "ticket" ? "bg-surface text-brand shadow-sm" : "text-content-muted"
                 }`}
               >
                 <ReceiptText size={15} /> Ticket de compra
@@ -361,7 +361,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
               <button
                 onClick={() => setScanMode("label")}
                 className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-                  scanMode === "label" ? "bg-white text-brand shadow-sm" : "text-content-muted"
+                  scanMode === "label" ? "bg-surface text-brand shadow-sm" : "text-content-muted"
                 }`}
               >
                 <ScanLine size={15} /> Etiqueta / Vto
@@ -412,7 +412,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="mt-4 flex justify-center gap-2">
                       <button
                         onClick={() => startCamera()}
-                        className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-white px-3 py-2 text-xs font-semibold text-brand"
+                        className="min-h-[44px] inline-flex items-center gap-1.5 rounded-xl border border-line-strong bg-surface px-3 py-2 text-xs font-semibold text-brand"
                       >
                         <RefreshCw size={13} /> Reintentar
                       </button>
@@ -453,7 +453,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
 
                       <div className="h-36 w-64 rounded-xl border-2 border-dashed border-accent-lime/80 bg-accent-lime/5" />
 
-                      <span className="rounded-full bg-black/50 px-2 py-0.5 text-xs text-white/80">
+                      <span className="rounded-full bg-black/50 px-2 py-0.5 text-xs text-white">
                         MediaDevices API activa
                       </span>
                     </div>
@@ -493,7 +493,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="mt-4 flex justify-center gap-2">
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="min-h-[44px] rounded-xl border border-line-strong bg-white px-3 py-2 text-xs font-semibold text-content-body"
+                        className="min-h-[44px] rounded-xl border border-line-strong bg-surface px-3 py-2 text-xs font-semibold text-content-body"
                       >
                         Cambiar imagen
                       </button>
@@ -515,7 +515,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     </div>
                     <p className="mt-3 text-sm font-semibold text-brand">Subí una foto de tu ticket o envase</p>
                     <p className="mt-1 text-xs text-content-muted">Hacé clic para seleccionar archivo JPG, PNG o WEBP</p>
-                    <span className="mt-3 inline-block rounded-full bg-white px-3 py-1 text-xs font-bold text-brand shadow-sm">
+                    <span className="mt-3 inline-block rounded-full bg-surface px-3 py-1 text-xs font-bold text-brand shadow-sm border border-line">
                       Seleccionar imagen
                     </span>
                   </div>
@@ -594,14 +594,14 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
               </div>
               <button
                 onClick={handleAddManualCandidate}
-                className="min-h-[44px] shrink-0 inline-flex items-center gap-1 rounded-lg border border-brand-border bg-white px-3 py-1.5 text-xs font-bold text-brand"
+                className="min-h-[44px] shrink-0 inline-flex items-center gap-1 rounded-lg border border-brand-border bg-surface px-3 py-1.5 text-xs font-bold text-brand hover:bg-surface-elevated"
               >
                 <Plus size={12} /> Agregar
               </button>
             </div>
 
             {/* List of Scanned Products */}
-            <div className="mt-4 divide-y divide-line rounded-2xl border border-line bg-white px-3">
+            <div className="mt-4 divide-y divide-line rounded-2xl border border-line bg-surface px-3">
               {detectedProducts.map((product) => (
                 <div key={product.id} className="py-3">
                   <div className="flex items-start gap-3">
@@ -613,7 +613,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         <input
                           value={product.name}
                           onChange={(e) => handleUpdateProduct(product.id, "name", e.target.value)}
-                          className="w-full rounded-lg border border-line-strong px-2 py-1 text-xs font-semibold text-content outline-none focus:border-brand"
+                          className="w-full rounded-lg border border-line-strong bg-surface px-2 py-1 text-xs font-semibold text-content outline-none focus:border-brand"
                           placeholder="Nombre del producto"
                         />
                         <button
@@ -632,7 +632,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                           <input
                             value={product.quantity}
                             onChange={(e) => handleUpdateProduct(product.id, "quantity", e.target.value)}
-                            className="mt-0.5 w-full rounded-lg border border-line-strong px-2 py-1 text-xs text-content-body outline-none"
+                            className="mt-0.5 w-full rounded-lg border border-line-strong bg-surface px-2 py-1 text-xs text-content-body outline-none"
                             placeholder="ej. 1 litro"
                           />
                         </div>
@@ -641,7 +641,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                           <select
                             value={product.category}
                             onChange={(e) => handleUpdateProduct(product.id, "category", e.target.value)}
-                            className="mt-0.5 w-full rounded-lg border border-line-strong bg-white px-1.5 py-1 text-xs text-content-body outline-none"
+                            className="mt-0.5 w-full rounded-lg border border-line-strong bg-surface px-1.5 py-1 text-xs text-content-body outline-none"
                           >
                             {ALL_CATEGORIES.map((cat) => (
                               <option key={cat} value={cat}>
@@ -661,7 +661,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                             type="date"
                             value={product.expiryDate}
                             onChange={(e) => handleUpdateProduct(product.id, "expiryDate", e.target.value)}
-                            className="rounded-lg border border-line-strong bg-white px-2 py-0.5 text-xs font-semibold text-content outline-none focus:border-brand"
+                            className="rounded-lg border border-line-strong bg-surface px-2 py-0.5 text-xs font-semibold text-content outline-none focus:border-brand"
                           />
                         </div>
                         <span

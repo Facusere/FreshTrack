@@ -138,7 +138,7 @@ export function ConsumptionConfirmDialog({
                   className={`rounded-2xl border p-3 transition ${
                     state.selected
                       ? "border-brand-border bg-brand-subtle/40"
-                      : "border-line bg-surface-muted opacity-75"
+                      : "border-line bg-surface-muted"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -177,7 +177,7 @@ export function ConsumptionConfirmDialog({
                             }
                             placeholder="Ej. 200 g"
                             disabled={!state.selected}
-                            className="w-28 rounded-lg border border-line-strong bg-white px-2 py-1 text-xs font-semibold text-content-heading outline-none disabled:bg-surface-elevated"
+                            className="w-28 rounded-lg border border-line-strong bg-surface px-2 py-1 text-xs font-semibold text-content-heading outline-none disabled:bg-surface-elevated"
                           />
                         </label>
 
