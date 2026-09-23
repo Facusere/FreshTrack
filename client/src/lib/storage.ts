@@ -96,7 +96,6 @@ export function loadStoredProducts(today: Date = new Date()): StoredProduct[] | 
     return null;
   }
 
-  // Discard incompatible consumption history v1 if present
   if (localStorage.getItem(OLD_CONSUMPTION_HISTORY_KEY) !== null) {
     localStorage.removeItem(OLD_CONSUMPTION_HISTORY_KEY);
   }
@@ -114,7 +113,6 @@ export function loadStoredProducts(today: Date = new Date()): StoredProduct[] | 
     return [];
   }
 
-  // Attempt migration from v2
   const rawV2 = localStorage.getItem(OLD_PRODUCTS_STORAGE_KEY);
   if (rawV2 !== null) {
     try {
@@ -169,7 +167,6 @@ export function saveStoredProducts(products: StoredProduct[]): boolean {
 
 export function loadConsumptionHistory<T>(fallback: T[] = []): T[] {
   if (typeof window !== "undefined" && window.localStorage) {
-    // Purge outdated v1 and v2 history
     localStorage.removeItem(OLD_CONSUMPTION_HISTORY_KEY);
     localStorage.removeItem(OLD_CONSUMPTION_HISTORY_V2_KEY);
   }

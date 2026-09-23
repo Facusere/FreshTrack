@@ -632,7 +632,6 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
   },
 ];
 
-// Compatibilidad retroactiva para exportar el catálogo completo
 export const shelfLifeCatalog: ShelfLifeEntry[] = SPECIFIC_PRODUCTS;
 
 export function getCatalogSize(): number {
@@ -836,7 +835,6 @@ export function estimateShelfLife(
   return undefined;
 }
 
-// Backward-compat aliases
 export function findShelfLife(productName: string, category?: string): ShelfLifeEntry | undefined {
   const specific = findSpecificProduct(productName);
   if (specific) return specific;
