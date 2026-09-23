@@ -75,7 +75,7 @@ export function MobileBottomNav({
           }`}
         >
           <Home size={19} strokeWidth={activeSection === "summary" ? 2.4 : 1.8} />
-          <span className="text-[11px] leading-none">Resumen</span>
+          <span className="text-xs leading-tight">Resumen</span>
         </button>
 
         {/* 2. Despensa */}
@@ -97,7 +97,7 @@ export function MobileBottomNav({
               </span>
             )}
           </div>
-          <span className="text-[11px] leading-none">Despensa</span>
+          <span className="text-xs leading-tight">Despensa</span>
         </button>
 
         {/* 3. Escanear (Botón central destacado) */}
@@ -133,7 +133,7 @@ export function MobileBottomNav({
               </span>
             )}
           </div>
-          <span className="text-[11px] leading-none">Compras</span>
+          <span className="text-xs leading-tight">Compras</span>
         </button>
       </div>
     </nav>
