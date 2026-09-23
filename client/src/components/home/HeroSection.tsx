@@ -73,9 +73,24 @@ export function HeroSection({
         aria-describedby="scan-card-description"
         onClick={onOpenScan}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") onOpenScan();
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpenScan();
+          }
         }}
-        className="group relative min-h-[300px] cursor-pointer overflow-hidden rounded-[26px] bg-surface-elevated shadow-[0_14px_35px_rgba(74,79,55,0.09)] border border-line"
+        onPointerMove={(e) => {
+          if (e.pointerType === "touch") return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const rotateX = ((e.clientY - rect.top) / rect.height - 0.5) * -5;
+          const rotateY = ((e.clientX - rect.left) / rect.width - 0.5) * 7;
+          e.currentTarget.style.setProperty("--scan-rotate-x", `${rotateX}deg`);
+          e.currentTarget.style.setProperty("--scan-rotate-y", `${rotateY}deg`);
+        }}
+        onPointerLeave={(e) => {
+          e.currentTarget.style.setProperty("--scan-rotate-x", "0deg");
+          e.currentTarget.style.setProperty("--scan-rotate-y", "0deg");
+        }}
+        className="scan-card-3d group relative min-h-[300px] cursor-pointer overflow-hidden rounded-[26px] bg-surface-elevated shadow-[0_14px_35px_rgba(74,79,55,0.09)] border border-line"
       >
         <div
           className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]"
