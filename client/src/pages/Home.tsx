@@ -57,6 +57,7 @@ import {
   RecipesSection,
   MobileBottomNav,
   MiniStatus,
+  InteractiveExperience,
 } from "@/components/home";
 import { recordExpiredItem } from "@/lib/reportsData";
 import {
@@ -1121,6 +1122,14 @@ export default function Home() {
               soonThresholdDays={SOON_THRESHOLD_DAYS}
             />
 
+            <InteractiveExperience
+              products={products}
+              onOpenScan={() => setModal("scan")}
+              onConsume={(product) => {
+                setStoredProducts((current) => current.filter((item) => item.id !== product.id));
+                toast.success(`${product.name} marcado como consumido`);
+              }}
+            />
 
             <PantrySection
               products={products}
