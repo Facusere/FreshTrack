@@ -68,12 +68,16 @@ export function MobileBottomNav({
           type="button"
           data-testid="mobile-nav-summary"
           onClick={() => scrollTo("module-summary", "summary")}
-          className={`flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition active:scale-95 ${
+          aria-current={activeSection === "summary" ? "page" : undefined}
+          className={`relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition duration-200 active:scale-95 ${
             activeSection === "summary"
               ? "text-brand"
-              : "text-content-muted hover:text-content-body"
+              : "text-content-muted hover:bg-surface-muted hover:text-content-body"
           }`}
         >
+          {activeSection === "summary" && (
+            <span aria-hidden="true" className="absolute top-0 h-1 w-8 rounded-full bg-accent-lime" />
+          )}
           <Home size={19} strokeWidth={activeSection === "summary" ? 2.4 : 1.8} />
           <span className="text-xs leading-tight">Resumen</span>
         </button>
@@ -83,12 +87,16 @@ export function MobileBottomNav({
           type="button"
           data-testid="mobile-nav-pantry"
           onClick={() => scrollTo("module-pantry", "pantry")}
-          className={`relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition active:scale-95 ${
+          aria-current={activeSection === "pantry" ? "page" : undefined}
+          className={`relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition duration-200 active:scale-95 ${
             activeSection === "pantry"
               ? "text-brand"
-              : "text-content-muted hover:text-content-body"
+              : "text-content-muted hover:bg-surface-muted hover:text-content-body"
           }`}
         >
+          {activeSection === "pantry" && (
+            <span aria-hidden="true" className="absolute top-0 h-1 w-8 rounded-full bg-accent-lime" />
+          )}
           <div className="relative">
             <PackageOpen size={19} strokeWidth={activeSection === "pantry" ? 2.4 : 1.8} />
             {typeof pantryCount === "number" && pantryCount > 0 && (
@@ -119,12 +127,16 @@ export function MobileBottomNav({
           type="button"
           data-testid="mobile-nav-shopping"
           onClick={() => scrollTo("module-shopping", "shopping")}
-          className={`relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition active:scale-95 ${
+          aria-current={activeSection === "shopping" ? "page" : undefined}
+          className={`relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold transition duration-200 active:scale-95 ${
             activeSection === "shopping"
               ? "text-brand"
-              : "text-content-muted hover:text-content-body"
+              : "text-content-muted hover:bg-surface-muted hover:text-content-body"
           }`}
         >
+          {activeSection === "shopping" && (
+            <span aria-hidden="true" className="absolute top-0 h-1 w-8 rounded-full bg-accent-lime" />
+          )}
           <div className="relative">
             <ShoppingCart size={19} strokeWidth={activeSection === "shopping" ? 2.4 : 1.8} />
             {typeof pendingShoppingCount === "number" && pendingShoppingCount > 0 && (
