@@ -306,9 +306,9 @@ export function ReportsSection({
                     </div>
                     <div className="mt-3">
                       <p className="truncate text-xs font-bold text-content-heading">{item.name}</p>
-                      <p className="truncate text-[11px] text-content-muted">{item.category}</p>
+                      <p className="truncate text-xs text-content-muted">{item.category}</p>
                     </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-2 text-[11px]">
+                    <div className="mt-3 flex items-center justify-between border-t border-line/60 pt-2 text-xs">
                       <span className="text-content-muted">Vencido</span>
                       <span className="font-bold text-status-expired-text">
                         {item.count} {item.count === 1 ? "vez" : "veces"}
