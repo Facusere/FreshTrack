@@ -129,7 +129,9 @@ export function ShoppingListModule({
   };
 
   return (
-    <section id="module-shopping" className="scroll-mt-24 mt-8 rounded-[28px] border border-line bg-surface p-6 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-8">
+    <div className="card-3d relative overflow-hidden rounded-[28px] border border-line bg-surface p-6 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-8">
+      {/* 3D Top Specular Light Highlight */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -359,6 +361,6 @@ export function ShoppingListModule({
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

@@ -77,7 +77,9 @@ export function PantrySection({
   return (
     <section id="module-pantry" className="scroll-mt-24 mt-6 grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
       {/* Main Pantry List / Calendar */}
-      <div className="rounded-[24px] border border-line bg-surface px-4 py-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:px-5">
+      <div className="card-3d relative overflow-hidden rounded-[24px] border border-line bg-surface px-4 py-4 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:px-5">
+        {/* 3D Top Specular Light Highlight */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -129,14 +131,14 @@ export function PantrySection({
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-brand-hover"
+                className="btn-3d inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-xs font-bold text-white transition hover:bg-brand-hover"
               >
                 <ScanLine size={15} /> Escanear compra
               </button>
               <button
                 type="button"
                 onClick={onOpenAdd}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-brand-subtle px-4 py-2.5 text-xs font-bold text-brand-text transition hover:bg-surface"
+                className="btn-3d inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-brand-subtle px-4 py-2.5 text-xs font-bold text-brand-text transition hover:bg-surface"
               >
                 <Plus size={15} /> Agregar manual
               </button>
@@ -283,7 +285,9 @@ export function PantrySection({
       </div>
 
       {/* General Pantry Status Card */}
-      <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)]">
+      <div className="card-3d relative overflow-hidden rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)]">
+        {/* 3D Top Specular Light Highlight */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
         <div className="flex items-start justify-between">
           <div>
             <h2 className="font-serif text-2xl font-semibold tracking-[-0.035em] text-content-heading">

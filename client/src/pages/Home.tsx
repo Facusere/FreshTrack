@@ -9,17 +9,22 @@ import {
   Home as HomeIcon,
   Leaf,
   Menu,
+  Moon,
   PackageOpen,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
-  Route,
   ScanLine,
   Search,
   Settings2,
   ShoppingCart,
   Smartphone,
+  Sun,
   Trash2,
+  Utensils,
   X,
 } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import { estimateShelfLife, getCatalogSize, ShelfLifeState, saveShelfLifeCorrection } from "@/lib/shelfLifeCatalog";
 import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
@@ -646,6 +651,16 @@ export default function Home() {
     return subscribeToInstallPrompt(setCanInstallPWA);
   }, []);
 
+  // Theme & Collapsible Sidebar state
+  const { theme, toggleTheme } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+    const saved = localStorage.getItem("freshtrack_sidebar_open");
+    return saved !== null ? saved === "true" : true;
+  });
+  useEffect(() => {
+    localStorage.setItem("freshtrack_sidebar_open", String(sidebarOpen));
+  }, [sidebarOpen]);
+
   // Automatic background notification check for products expiring in 1 or 2 days
   useEffect(() => {
     if (notificationPreferences.enabled && getNotificationPermission() === "granted") {
@@ -690,29 +705,19 @@ export default function Home() {
   const pOk = okPercent;
   const pSoon = Math.min(100, pOk + soonPercent);
 
-  const suggestedRoute = useMemo(() => {
-    const sorted = [...products].sort((a, b) => a.days - b.days).slice(0, 3);
-    return sorted.map((prod, idx) => ({
-      number: String(idx + 1),
-      name: prod.name,
-      place: prod.location || inferLocation(prod.category),
-      product: prod,
-    }));
-  }, [products]);
-
   const pendingShoppingCount = shoppingList.filter((item) => !item.completed).length;
+  const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
+  const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   const currentNavItems = [
     { label: "Resumen", icon: HomeIcon },
     { label: "Mi despensa", icon: PackageOpen, count: products.length > 0 ? String(products.length) : undefined },
+    { label: "Recetas", icon: Utensils, count: visibleRecipes.length > 0 ? String(visibleRecipes.length) : undefined },
     { label: "Lista de compras", icon: ShoppingCart, count: pendingShoppingCount > 0 ? String(pendingShoppingCount) : undefined },
-    { label: "Recorrida", icon: Route, count: suggestedRoute.length > 0 ? String(suggestedRoute.length) : undefined },
     { label: "Reportes", icon: BarChart3 },
   ];
 
   const notificationGroups = groupNotifications(products, notificationPreferences);
-  const visibleRecipes = recipes.filter((recipe) => recipeMatchesFilter(recipe, recipeFilter));
-  const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   useEffect(() => { saveStoredProducts(storedProducts); }, [storedProducts]);
 
@@ -890,8 +895,8 @@ export default function Home() {
     const targets: Record<string, string> = {
       Resumen: "module-summary",
       "Mi despensa": "module-pantry",
+      Recetas: "module-recipes",
       "Lista de compras": "module-shopping",
-      Recorrida: "module-route",
       Reportes: "module-reports",
     };
     document.getElementById(targets[label] || "module-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -917,20 +922,35 @@ export default function Home() {
         </div>
       )}
       <div className="flex min-h-screen">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-[244px] flex-col bg-content px-4 py-5 text-brand-subtle md:flex">
-          <div className="flex items-center gap-2.5 px-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-[13px] bg-accent-lime text-accent-lime-fg">
-              <Leaf size={20} strokeWidth={2.4} />
-            </span>
-            <div>
-              <p className="font-serif text-[21px] font-bold leading-none tracking-[-0.03em]">freshtrack</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.17em] text-brand-subtle">menos desperdicio</p>
+        <aside
+          className={`fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col bg-content px-4 py-5 text-brand-subtle transition-all duration-300 ease-in-out md:flex ${
+            sidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[13px] bg-accent-lime text-accent-lime-fg shadow-xs">
+                <Leaf size={20} strokeWidth={2.4} />
+              </span>
+              <div>
+                <p className="font-serif text-[21px] font-bold leading-none tracking-[-0.03em]">freshtrack</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.17em] text-brand-subtle">menos desperdicio</p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Ocultar barra lateral"
+              title="Ocultar barra lateral"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-subtle hover:bg-brand/60 hover:text-white transition"
+            >
+              <PanelLeftClose size={18} />
+            </button>
           </div>
           <button
             type="button"
             onClick={() => setModal("scan")}
-            className="mt-9 flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent-lime px-3 py-3 text-xs font-bold text-accent-lime-fg shadow-[0_8px_18px_rgba(217,233,130,0.12)] transition hover:opacity-90 active:scale-[0.98]"
+            className="btn-3d-accent mt-9 flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent-lime px-3 py-3 text-xs font-bold text-accent-lime-fg"
           >
             <ScanLine size={16} /> Escanear compra
           </button>
@@ -951,7 +971,7 @@ export default function Home() {
                 type="button"
                 onClick={() => navigateToModule(label)}
                 className={`flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition ${
-                  activeNav === label ? "bg-brand text-white" : "text-brand-subtle hover:bg-brand/50 hover:text-white"
+                  activeNav === label ? "bg-brand text-white shadow-xs" : "text-brand-subtle hover:bg-brand/50 hover:text-white"
                 }`}
               >
                 <span className="flex items-center gap-3">
@@ -968,6 +988,19 @@ export default function Home() {
           </nav>
           <p className="mb-2 mt-8 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle">Cuenta</p>
           <nav className="space-y-1">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
+            >
+              <span className="flex items-center gap-3">
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                Modo oscuro
+              </span>
+              <span className={`flex h-5 w-9 items-center rounded-full p-0.5 transition ${theme === "dark" ? "bg-accent-lime justify-end" : "bg-brand justify-start"}`}>
+                <span className={`h-4 w-4 rounded-full shadow-xs ${theme === "dark" ? "bg-accent-lime-fg" : "bg-white"}`} />
+              </span>
+            </button>
             <button
               type="button"
               onClick={() => setNotificationModal(true)}
@@ -1002,9 +1035,15 @@ export default function Home() {
           </div>
         </aside>
 
-        <main id="main-content" className="min-w-0 flex-1 md:ml-[244px] pb-24 md:pb-0">
+        <main
+          id="main-content"
+          className={`min-w-0 flex-1 pb-24 md:pb-0 transition-all duration-300 ease-in-out ${
+            sidebarOpen ? "md:ml-[260px]" : "md:ml-0"
+          }`}
+        >
           <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-line bg-surface-subtle/90 px-4 backdrop-blur-xl sm:px-6 lg:px-10">
             <div className="flex items-center gap-3">
+              {/* Mobile drawer toggle */}
               <button
                 type="button"
                 className="flex h-11 w-11 items-center justify-center rounded-xl text-content-body hover:bg-surface-elevated md:hidden"
@@ -1013,57 +1052,101 @@ export default function Home() {
               >
                 <Menu size={19} />
               </button>
+              
+              {/* Desktop Collapsible Sidebar Toggle */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label={sidebarOpen ? "Ocultar barra lateral" : "Mostrar barra lateral"}
+                title={sidebarOpen ? "Ocultar barra lateral" : "Mostrar barra lateral"}
+                className="hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-content-body transition hover:bg-surface-elevated md:flex"
+              >
+                {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+              </button>
+
               <div className="md:hidden">
                 <p className="font-serif text-xl font-bold tracking-[-0.04em] text-content">freshtrack</p>
               </div>
-              <div className="hidden items-center gap-2 text-xs text-content-muted md:flex">
+              
+              {!sidebarOpen && (
+                <div className="hidden items-center gap-2 md:flex">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-lime text-accent-lime-fg">
+                    <Leaf size={15} strokeWidth={2.4} />
+                  </span>
+                  <span className="font-serif text-lg font-bold tracking-tight text-content">freshtrack</span>
+                </div>
+              )}
+
+              <div className="hidden items-center gap-2 text-xs text-content-muted sm:flex">
                 <CalendarDays size={14} />{formatToday()}
               </div>
             </div>
+
             <div className="flex items-center gap-2 sm:gap-3">
               {canInstallPWA && (
                 <button
                   type="button"
                   onClick={() => promptPWAInstall()}
-                  className="hidden min-h-[44px] items-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text shadow-sm transition hover:bg-brand-subtle/80 sm:flex"
+                  className="hidden min-h-[40px] items-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text shadow-xs transition hover:bg-brand-subtle/80 sm:flex"
                 >
                   <Smartphone size={14} /> Instalar PWA
                 </button>
               )}
-              <div className="hidden items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-content-muted sm:flex">
+
+              {/* Omnibar Search */}
+              <div className="hidden items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-content-muted transition focus-within:border-brand-focus focus-within:ring-1 focus-within:ring-brand-focus sm:flex">
                 <Search size={15} />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar en tu despensa"
-                  className="w-[150px] bg-transparent text-xs outline-none placeholder:text-content-muted"
+                  className="w-[150px] bg-transparent text-xs outline-none placeholder:text-content-muted lg:w-[190px]"
                 />
               </div>
+
               <button
                 type="button"
                 aria-label="Buscar"
                 onClick={() => document.querySelector<HTMLInputElement>("input[placeholder='Buscar en tu despensa']")?.focus()}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface p-2.5 text-content-muted sm:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface p-2 text-content-muted sm:hidden"
               >
                 <Search size={16} />
               </button>
+
+              {/* Dark Mode Toggle Button */}
+              <button
+                type="button"
+                aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+                title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+                onClick={toggleTheme}
+                className="btn-3d flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-content-body transition hover:bg-surface-elevated active:scale-95"
+              >
+                {theme === "dark" ? (
+                  <Sun size={17} className="text-accent-lime transition-transform duration-300 hover:rotate-45" />
+                ) : (
+                  <Moon size={17} className="text-content-heading transition-transform duration-300 hover:-rotate-12" />
+                )}
+              </button>
+
               <button
                 type="button"
                 aria-label="Ayuda"
                 onClick={() => toast("¿Necesitás ayuda?", { description: "Escaneá un ticket y FreshTrack hace el resto." })}
-                className="hidden h-11 w-11 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated sm:flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated sm:flex"
               >
                 <CircleHelp size={17} />
               </button>
+
               <button
                 type="button"
                 aria-label="Notificaciones"
                 onClick={() => setNotificationModal(true)}
-                className="relative flex h-11 w-11 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated"
+                className="relative flex h-10 w-10 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated"
               >
                 <Bell size={17} />
                 {notificationGroups.length > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-status-soon-dot" />}
               </button>
+
               <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent-lime text-xs font-extrabold text-accent-lime-fg sm:flex" title="Despensa local">
                 FT
               </div>
@@ -1167,17 +1250,7 @@ export default function Home() {
               onNavigateToReports={() => navigateToModule("Reportes")}
             />
 
-            <ShoppingSection
-              shoppingList={shoppingList}
-              setShoppingList={setShoppingList}
-              pantryProducts={products}
-              consumptionHistory={consumptionHistory}
-              onAddProductsToPantry={addProducts}
-              detectIconFn={detectProductIcon}
-            />
-
             <RecipesSection
-              suggestedRoute={suggestedRoute}
               recipes={recipes}
               visibleRecipes={visibleRecipes}
               shownRecipes={shownRecipes}
@@ -1191,8 +1264,15 @@ export default function Home() {
               setRecipeLimit={setRecipeLimit}
               onOpenRecipeDetail={openRecipeDetail}
               onInitiateConsumption={initiateRecipeConsumption}
-              onSelectProduct={setSelectedProduct}
-              onNavigateToPantry={() => navigateToModule("Mi despensa")}
+            />
+
+            <ShoppingSection
+              shoppingList={shoppingList}
+              setShoppingList={setShoppingList}
+              pantryProducts={products}
+              consumptionHistory={consumptionHistory}
+              onAddProductsToPantry={addProducts}
+              detectIconFn={detectProductIcon}
             />
 
             <ReportsSection

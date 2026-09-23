@@ -39,14 +39,14 @@ export function HeroSection({
             <button
               type="button"
               onClick={onOpenScan}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white shadow-[0_10px_20px_rgba(31,73,58,0.18)] transition hover:bg-brand-hover active:scale-[0.97]"
+              className="btn-3d inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white transition hover:bg-brand-hover"
             >
               <ScanLine size={16} /> Escanear compra
             </button>
             <button
               type="button"
               onClick={onOpenAdd}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-surface px-4 py-3 text-xs font-bold text-brand-text transition hover:bg-surface-elevated"
+              className="btn-3d inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-brand-border bg-surface px-4 py-3 text-xs font-bold text-brand-text transition hover:bg-surface-elevated"
             >
               <Plus size={15} /> Agregar manual
             </button>

@@ -75,7 +75,8 @@ export function ReportsSection({
   return (
     <section id="module-reports" className="scroll-mt-24 mt-6 space-y-6">
       {/* Header and Summary stats banner */}
-      <div className="rounded-[24px] border border-brand-border bg-brand-subtle/40 p-5 sm:p-7">
+      <div className="card-3d relative overflow-hidden rounded-[24px] border border-brand-border bg-brand-subtle/40 p-5 sm:p-7">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-text">
@@ -135,7 +136,8 @@ export function ReportsSection({
         /* Charts Grid */
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Chart 1: Bar chart - Desperdicio evitado por mes */}
-          <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-6">
+          <div className="card-3d relative overflow-hidden rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-content-muted">
@@ -209,7 +211,8 @@ export function ReportsSection({
           </div>
 
           {/* Chart 2: Donut / Pie chart - Categorías con más productos vencidos */}
-          <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-6">
+          <div className="card-3d relative overflow-hidden rounded-[24px] border border-line bg-surface p-5 shadow-[0_8px_24px_rgba(55,63,48,0.035)] sm:p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-status-expired-text">

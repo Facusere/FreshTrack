@@ -38,7 +38,7 @@ export function ProductRow({ product, onEdit }: ProductRowProps) {
 
   return (
     <div
-      className={`group grid grid-cols-[minmax(0,1fr)_110px_92px_44px] items-center gap-3 border-b border-line py-3.5 pl-2 last:border-b-0 ${alertTone}`}
+      className={`group grid grid-cols-[minmax(0,1fr)_110px_92px_44px] items-center gap-3 border-b border-line/60 py-3.5 pl-2.5 pr-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-elevated/60 hover:shadow-xs rounded-xl last:border-b-0 ${alertTone}`}
     >
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-elevated text-xl">
