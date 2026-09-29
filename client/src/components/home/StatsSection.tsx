@@ -17,12 +17,12 @@ export function StatCard({ label, value, note, icon, tone, badge }: StatCardProp
       {/* 3D Top Specular Light Highlight */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/15" />
       
-      <div className="flex items-start justify-between">
-        <span className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-xs transition-transform duration-300 group-hover:scale-105 ${tone}`}>
+      <div className="flex items-start justify-between gap-2">
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-xs transition-transform duration-300 group-hover:scale-105 ${tone}`}>
           {icon}
         </span>
         {badge && (
-          <span className="rounded-full border border-line/70 bg-surface-subtle px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-content-muted">
+          <span className="whitespace-nowrap rounded-full border border-line/70 bg-surface-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-content-muted">
             {badge}
           </span>
         )}
