@@ -23,92 +23,176 @@ export function getContrastRatio(hex1: string, hex2: string): number {
 }
 
 describe("WCAG 2.1 AA Contrast Auditing for Semantic Design Tokens", () => {
-  const tokens = {
-    surface: "#fffdf9",
-    surfaceSubtle: "#f7f5ef",
-    surfaceMuted: "#faf9f5",
-    surfaceElevated: "#f3efe7",
+  const lightTokens = {
+    surface: "#ffffff",
+    surfaceSubtle: "#f8f9f8",
+    surfaceMuted: "#f1f4f2",
+    surfaceElevated: "#ffffff",
 
-    content: "#17372b",
-    contentHeading: "#1c332b",
-    contentBody: "#2d453b",
-    contentMuted: "#415348",
+    content: "#141a16",
+    contentHeading: "#111613",
+    contentBody: "#2c3530",
+    contentMuted: "#526057",
 
     brand: "#1f493a",
-    brandHover: "#16392c",
-    brandSubtle: "#e8f1e7",
-    brandText: "#1b4334",
+    brandHover: "#173b2e",
+    brandSubtle: "#edf4ef",
+    brandText: "#1a4234",
 
-    statusOkBg: "#e7f1e9",
-    statusOkText: "#24543d",
-    statusSoonBg: "#fbf0d2",
-    statusSoonText: "#7a4e0a",
-    statusExpiredBg: "#f9e5df",
-    statusExpiredText: "#8e2d20",
+    statusOkBg: "#edf4ef",
+    statusOkText: "#1a4234",
+    statusSoonBg: "#fdf8ed",
+    statusSoonText: "#7a4d0c",
+    statusExpiredBg: "#fdf2f0",
+    statusExpiredText: "#8e2b20",
 
-    accentLime: "#d9e982",
-    accentLimeFg: "#17372b",
+    accentLime: "#bfe3c0",
+    accentLimeFg: "#122a1e",
 
-    recipeBg: "#fbf5eb",
-    recipeText: "#664614",
-    recipeBadgeBg: "#ead7b8",
-    recipeBadgeText: "#5a3d12",
+    recipeBg: "#faf6f0",
+    recipeText: "#6b4b1a",
+    recipeBadgeBg: "#f1e4d1",
+    recipeBadgeText: "#593c12",
 
     white: "#ffffff",
   };
 
-  it("normal content text must achieve >= 4.5:1 contrast on surface", () => {
-    const ratioContent = getContrastRatio(tokens.content, tokens.surface);
-    const ratioHeading = getContrastRatio(tokens.contentHeading, tokens.surface);
-    const ratioBody = getContrastRatio(tokens.contentBody, tokens.surface);
-    const ratioMuted = getContrastRatio(tokens.contentMuted, tokens.surface);
+  const darkTokens = {
+    background: "#121614",
+    surface: "#1a201d",
+    surfaceSubtle: "#151a17",
+    surfaceMuted: "#212824",
+    surfaceElevated: "#26302b",
 
-    expect(ratioContent).toBeGreaterThanOrEqual(4.5);
-    expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
-    expect(ratioBody).toBeGreaterThanOrEqual(4.5);
-    expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
+    content: "#f2f6f3",
+    contentHeading: "#fafcfb",
+    contentBody: "#d4ded6",
+    contentMuted: "#9cb0a2",
+
+    brand: "#78b387",
+    brandHover: "#8dc29a",
+    brandSubtle: "#202c24",
+    brandText: "#9ed4ac",
+
+    statusOkBg: "#1c2820",
+    statusOkText: "#a3dab0",
+    statusSoonBg: "#2b2416",
+    statusSoonText: "#f5cf7d",
+    statusExpiredBg: "#2e1b19",
+    statusExpiredText: "#f59c90",
+
+    accentLime: "#72a97f",
+    accentLimeFg: "#0e1610",
+
+    recipeBg: "#262016",
+    recipeText: "#eed297",
+    recipeBadgeBg: "#3b301f",
+    recipeBadgeText: "#f7dfab",
+  };
+
+  describe("Light Mode Tokens", () => {
+    it("normal content text must achieve >= 4.5:1 contrast on surface", () => {
+      const ratioContent = getContrastRatio(lightTokens.content, lightTokens.surface);
+      const ratioHeading = getContrastRatio(lightTokens.contentHeading, lightTokens.surface);
+      const ratioBody = getContrastRatio(lightTokens.contentBody, lightTokens.surface);
+      const ratioMuted = getContrastRatio(lightTokens.contentMuted, lightTokens.surface);
+
+      expect(ratioContent).toBeGreaterThanOrEqual(4.5);
+      expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBody).toBeGreaterThanOrEqual(4.5);
+      expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it("normal content text must achieve >= 4.5:1 contrast on surfaceSubtle", () => {
+      const ratioContent = getContrastRatio(lightTokens.content, lightTokens.surfaceSubtle);
+      const ratioHeading = getContrastRatio(lightTokens.contentHeading, lightTokens.surfaceSubtle);
+      const ratioBody = getContrastRatio(lightTokens.contentBody, lightTokens.surfaceSubtle);
+      const ratioMuted = getContrastRatio(lightTokens.contentMuted, lightTokens.surfaceSubtle);
+
+      expect(ratioContent).toBeGreaterThanOrEqual(4.5);
+      expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBody).toBeGreaterThanOrEqual(4.5);
+      expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it("brand buttons with white text must achieve >= 4.5:1 contrast", () => {
+      const ratioBrand = getContrastRatio(lightTokens.white, lightTokens.brand);
+      const ratioBrandHover = getContrastRatio(lightTokens.white, lightTokens.brandHover);
+
+      expect(ratioBrand).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBrandHover).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it("accent lime badge / button must have >= 4.5:1 contrast with accent lime foreground", () => {
+      const ratioLime = getContrastRatio(lightTokens.accentLimeFg, lightTokens.accentLime);
+      expect(ratioLime).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it("status badges must achieve >= 4.5:1 contrast on their respective backgrounds", () => {
+      const ratioOk = getContrastRatio(lightTokens.statusOkText, lightTokens.statusOkBg);
+      const ratioSoon = getContrastRatio(lightTokens.statusSoonText, lightTokens.statusSoonBg);
+      const ratioExpired = getContrastRatio(lightTokens.statusExpiredText, lightTokens.statusExpiredBg);
+
+      expect(ratioOk).toBeGreaterThanOrEqual(4.5);
+      expect(ratioSoon).toBeGreaterThanOrEqual(4.5);
+      expect(ratioExpired).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it("recipe section and badges must achieve >= 4.5:1 contrast", () => {
+      const ratioRecipeText = getContrastRatio(lightTokens.recipeText, lightTokens.recipeBg);
+      const ratioBadgeText = getContrastRatio(lightTokens.recipeBadgeText, lightTokens.recipeBadgeBg);
+
+      expect(ratioRecipeText).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBadgeText).toBeGreaterThanOrEqual(4.5);
+    });
   });
 
-  it("normal content text must achieve >= 4.5:1 contrast on surfaceSubtle", () => {
-    const ratioContent = getContrastRatio(tokens.content, tokens.surfaceSubtle);
-    const ratioHeading = getContrastRatio(tokens.contentHeading, tokens.surfaceSubtle);
-    const ratioBody = getContrastRatio(tokens.contentBody, tokens.surfaceSubtle);
-    const ratioMuted = getContrastRatio(tokens.contentMuted, tokens.surfaceSubtle);
+  describe("Dark Mode Tokens", () => {
+    it("normal content text must achieve >= 4.5:1 contrast on dark surface", () => {
+      const ratioContent = getContrastRatio(darkTokens.content, darkTokens.surface);
+      const ratioHeading = getContrastRatio(darkTokens.contentHeading, darkTokens.surface);
+      const ratioBody = getContrastRatio(darkTokens.contentBody, darkTokens.surface);
+      const ratioMuted = getContrastRatio(darkTokens.contentMuted, darkTokens.surface);
 
-    expect(ratioContent).toBeGreaterThanOrEqual(4.5);
-    expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
-    expect(ratioBody).toBeGreaterThanOrEqual(4.5);
-    expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
-  });
+      expect(ratioContent).toBeGreaterThanOrEqual(4.5);
+      expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBody).toBeGreaterThanOrEqual(4.5);
+      expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
+    });
 
-  it("brand buttons with white text must achieve >= 4.5:1 contrast", () => {
-    const ratioBrand = getContrastRatio(tokens.white, tokens.brand);
-    const ratioBrandHover = getContrastRatio(tokens.white, tokens.brandHover);
+    it("normal content text must achieve >= 4.5:1 contrast on dark background", () => {
+      const ratioContent = getContrastRatio(darkTokens.content, darkTokens.background);
+      const ratioHeading = getContrastRatio(darkTokens.contentHeading, darkTokens.background);
+      const ratioBody = getContrastRatio(darkTokens.contentBody, darkTokens.background);
+      const ratioMuted = getContrastRatio(darkTokens.contentMuted, darkTokens.background);
 
-    expect(ratioBrand).toBeGreaterThanOrEqual(4.5);
-    expect(ratioBrandHover).toBeGreaterThanOrEqual(4.5);
-  });
+      expect(ratioContent).toBeGreaterThanOrEqual(4.5);
+      expect(ratioHeading).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBody).toBeGreaterThanOrEqual(4.5);
+      expect(ratioMuted).toBeGreaterThanOrEqual(4.5);
+    });
 
-  it("accent lime badge / button must have >= 4.5:1 contrast with accent lime foreground", () => {
-    const ratioLime = getContrastRatio(tokens.accentLimeFg, tokens.accentLime);
-    expect(ratioLime).toBeGreaterThanOrEqual(4.5);
-  });
+    it("dark accent lime button must have >= 4.5:1 contrast with accent lime foreground", () => {
+      const ratioLime = getContrastRatio(darkTokens.accentLimeFg, darkTokens.accentLime);
+      expect(ratioLime).toBeGreaterThanOrEqual(4.5);
+    });
 
-  it("status badges must achieve >= 4.5:1 contrast on their respective backgrounds", () => {
-    const ratioOk = getContrastRatio(tokens.statusOkText, tokens.statusOkBg);
-    const ratioSoon = getContrastRatio(tokens.statusSoonText, tokens.statusSoonBg);
-    const ratioExpired = getContrastRatio(tokens.statusExpiredText, tokens.statusExpiredBg);
+    it("dark status badges must achieve >= 4.5:1 contrast on their respective backgrounds", () => {
+      const ratioOk = getContrastRatio(darkTokens.statusOkText, darkTokens.statusOkBg);
+      const ratioSoon = getContrastRatio(darkTokens.statusSoonText, darkTokens.statusSoonBg);
+      const ratioExpired = getContrastRatio(darkTokens.statusExpiredText, darkTokens.statusExpiredBg);
 
-    expect(ratioOk).toBeGreaterThanOrEqual(4.5);
-    expect(ratioSoon).toBeGreaterThanOrEqual(4.5);
-    expect(ratioExpired).toBeGreaterThanOrEqual(4.5);
-  });
+      expect(ratioOk).toBeGreaterThanOrEqual(4.5);
+      expect(ratioSoon).toBeGreaterThanOrEqual(4.5);
+      expect(ratioExpired).toBeGreaterThanOrEqual(4.5);
+    });
 
-  it("recipe section and badges must achieve >= 4.5:1 contrast", () => {
-    const ratioRecipeText = getContrastRatio(tokens.recipeText, tokens.recipeBg);
-    const ratioBadgeText = getContrastRatio(tokens.recipeBadgeText, tokens.recipeBadgeBg);
+    it("dark recipe section and badges must achieve >= 4.5:1 contrast", () => {
+      const ratioRecipeText = getContrastRatio(darkTokens.recipeText, darkTokens.recipeBg);
+      const ratioBadgeText = getContrastRatio(darkTokens.recipeBadgeText, darkTokens.recipeBadgeBg);
 
-    expect(ratioRecipeText).toBeGreaterThanOrEqual(4.5);
-    expect(ratioBadgeText).toBeGreaterThanOrEqual(4.5);
+      expect(ratioRecipeText).toBeGreaterThanOrEqual(4.5);
+      expect(ratioBadgeText).toBeGreaterThanOrEqual(4.5);
+    });
   });
 });
