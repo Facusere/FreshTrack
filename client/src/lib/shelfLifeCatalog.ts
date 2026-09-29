@@ -13,8 +13,12 @@
  * Si el usuario realiza una corrección, se guarda localmente y se prioriza como "Con tu ajuste anterior".
  */
 
+import { addDaysISO, daysUntil, todayISO } from "./dates";
+import type { StoredProduct } from "@/types/product";
+
 export type ShelfLifeState = "cerrado" | "abierto";
 export type ShelfLifeConfidence = "specific" | "user-correction" | "category-estimate";
+export type FreshCondition = "fresco" | "pasado";
 
 export type ShelfLifeEntry = {
   id: string;
@@ -22,6 +26,7 @@ export type ShelfLifeEntry = {
   category: string;
   closedDays: number;
   openDays: number;
+  agingDays?: number;
   aliases: string[];
   notes?: string;
 };
@@ -40,10 +45,12 @@ export type ShelfLifeEstimate = {
   days: number;
   closedDays: number;
   openDays: number;
+  agingDays?: number;
   state: ShelfLifeState;
   confidence: ShelfLifeConfidence;
   source: "base" | "user-correction" | "category-minimum";
   label?: string;
+  isFreshProduce?: boolean;
 };
 
 export const normalizeSlug = (value: string): string =>
@@ -300,6 +307,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 5,
     openDays: 2,
+    agingDays: 2,
     aliases: ["espinaca", "espinaco", "hojas de espinaca"],
     notes: "Sensibles a la humedad y marchitamiento rápido",
   },
@@ -309,6 +317,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 5,
     openDays: 2,
+    agingDays: 2,
     aliases: ["acelga", "lechuga", "rucula", "radicheta", "hojas verdes"],
   },
   {
@@ -317,6 +326,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 7,
     openDays: 3,
+    agingDays: 2,
     aliases: ["tomate cherry", "tomate", "tomates", "tomate perita", "tomate redondo"],
   },
   {
@@ -325,6 +335,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 21,
     openDays: 10,
+    agingDays: 5,
     aliases: ["zanahoria", "zanahorias"],
   },
   {
@@ -333,6 +344,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 30,
     openDays: 14,
+    agingDays: 7,
     aliases: ["papa", "papas", "cebolla", "cebollas", "ajo", "batata"],
   },
   {
@@ -341,6 +353,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 10,
     openDays: 4,
+    agingDays: 3,
     aliases: ["morron", "morron rojo", "morron verde", "pimiento"],
   },
   {
@@ -349,6 +362,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 7,
     openDays: 3,
+    agingDays: 2,
     aliases: ["zapallito", "zucchini", "berenjena", "zapallito verde"],
   },
   {
@@ -357,6 +371,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 30,
     openDays: 5,
+    agingDays: 5,
     aliases: ["calabaza", "zapallo", "zapallo anco", "calabacin"],
   },
   {
@@ -365,6 +380,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Verduras frescas",
     closedDays: 4,
     openDays: 2,
+    agingDays: 1,
     aliases: ["champinon", "champinones", "hongos", "portobello"],
   },
 
@@ -375,6 +391,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Frutas frescas",
     closedDays: 4,
     openDays: 2,
+    agingDays: 1,
     aliases: ["frutilla", "frutillas", "arandanos", "frambuesas", "moras"],
   },
   {
@@ -383,6 +400,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Frutas frescas",
     closedDays: 5,
     openDays: 2,
+    agingDays: 2,
     aliases: ["banana", "platano"],
   },
   {
@@ -391,6 +409,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Frutas frescas",
     closedDays: 21,
     openDays: 7,
+    agingDays: 5,
     aliases: ["manzana", "manzana roja", "manzana verde", "pera"],
   },
   {
@@ -399,6 +418,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Frutas frescas",
     closedDays: 21,
     openDays: 7,
+    agingDays: 4,
     aliases: ["naranja", "mandarina", "limon", "pomelo"],
   },
   {
@@ -407,6 +427,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Frutas frescas",
     closedDays: 5,
     openDays: 2,
+    agingDays: 2,
     aliases: ["palta", "aguacate"],
   },
 
@@ -477,6 +498,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Panadería",
     closedDays: 2,
     openDays: 1,
+    agingDays: 1,
     aliases: ["pan frances", "baguette", "pan mignon", "pan felipe", "pan de panaderia"],
   },
   {
@@ -485,6 +507,7 @@ export const SPECIFIC_PRODUCTS: ShelfLifeEntry[] = [
     category: "Panadería",
     closedDays: 2,
     openDays: 1,
+    agingDays: 1,
     aliases: ["facturas", "medialunas", "medialuna"],
   },
 
@@ -775,64 +798,167 @@ export function findSpecificProduct(productName: string): ShelfLifeEntry | undef
  * 2. Valores específicos del producto según FoodKeeper / ANMAT
  * 3. Mínimo conservador de la categoría ("Estimado por categoría, verificá la fecha del envase")
  */
+export function isFreshProduceCategory(category?: string): boolean {
+  if (!category) return false;
+  const c = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return c.includes("verdura") || c.includes("fruta") || c.includes("panaderia");
+}
+
+/**
+ * Estima la vida útil para un producto, considerando:
+ * 1. Ajustes manuales previos del usuario ("Con tu ajuste anterior")
+ * 2. Valores específicos del producto según FoodKeeper / ANMAT
+ * 3. Mínimo conservador de la categoría ("Estimado por categoría, verificá la fecha del envase")
+ * 4. Condición de perecederos frescos (fresco vs pasado)
+ */
 export function estimateShelfLife(
   productName: string,
   state: ShelfLifeState = "cerrado",
-  category?: string
+  category?: string,
+  freshCondition?: FreshCondition
 ): ShelfLifeEstimate | undefined {
   const cleanName = productName.trim();
+  const isProduce = isFreshProduceCategory(category);
 
   // 1. Prioridad: corrección previa del usuario
   const userCorrection = getShelfLifeCorrection(cleanName);
   if (userCorrection) {
-    const days = state === "abierto" ? userCorrection.openDays : userCorrection.closedDays;
+    let days: number;
+    if (freshCondition === "pasado") {
+      days = userCorrection.openDays;
+    } else if (freshCondition === "fresco") {
+      days = userCorrection.closedDays;
+    } else {
+      days = state === "abierto" ? userCorrection.openDays : userCorrection.closedDays;
+    }
     return {
       name: cleanName,
       category: category || "General",
       days,
       closedDays: userCorrection.closedDays,
       openDays: userCorrection.openDays,
+      agingDays: userCorrection.openDays,
       state,
       confidence: "user-correction",
       source: "user-correction",
       label: "Con tu ajuste anterior",
+      isFreshProduce: isProduce,
     };
   }
 
   // 2. Coincidencia específica en catálogo
   const specific = findSpecificProduct(cleanName);
   if (specific) {
-    const days = state === "abierto" ? specific.openDays : specific.closedDays;
+    const produceItem = isProduce || isFreshProduceCategory(specific.category);
+    let days: number;
+    if (freshCondition === "pasado") {
+      days = specific.agingDays ?? specific.openDays;
+    } else if (freshCondition === "fresco") {
+      days = specific.closedDays;
+    } else {
+      days = state === "abierto" ? specific.openDays : specific.closedDays;
+    }
     return {
       name: specific.name,
       category: specific.category,
       days,
       closedDays: specific.closedDays,
       openDays: specific.openDays,
+      agingDays: specific.agingDays ?? specific.openDays,
       state,
       confidence: "specific",
       source: "base",
+      isFreshProduce: produceItem,
+      label: freshCondition === "pasado" ? "Calculado para producto ya maduro o pasado" : undefined,
     };
   }
 
   // 3. Fallback conservador por categoría
   if (category) {
     const conservative = getCategoryConservativeMinimum(category);
-    const days = state === "abierto" ? conservative.openDays : conservative.closedDays;
+    let days: number;
+    if (freshCondition === "pasado") {
+      days = conservative.openDays;
+    } else if (freshCondition === "fresco") {
+      days = conservative.closedDays;
+    } else {
+      days = state === "abierto" ? conservative.openDays : conservative.closedDays;
+    }
     return {
       name: cleanName || `Producto de ${category}`,
       category,
       days,
       closedDays: conservative.closedDays,
       openDays: conservative.openDays,
+      agingDays: conservative.openDays,
       state,
       confidence: "category-estimate",
       source: "category-minimum",
       label: "Estimado por categoría, verificá la fecha del envase",
+      isFreshProduce: isProduce,
     };
   }
 
   return undefined;
+}
+
+export type OpenProductResult = {
+  updatedProduct: StoredProduct;
+  newExpiryDate: string;
+  previousExpiryDate: string;
+  newDays: number;
+  previousDays: number;
+  openDays: number;
+  confidence: ShelfLifeConfidence;
+  warningNotice?: string;
+};
+
+/**
+ * Recalcula el vencimiento de un producto al marcarlo como abierto:
+ * - openedAt = hoy
+ * - expiryDate = min(expiryDate actual, hoy + openDays) — nunca alarga la fecha
+ * - Si es estimación por categoría, incluye warningNotice
+ */
+export function calculateOpenProduct(
+  product: StoredProduct,
+  today: Date = new Date()
+): OpenProductResult {
+  const estimate = estimateShelfLife(product.name, "abierto", product.category as string);
+  const openDays = estimate?.openDays ?? 3;
+  const calculatedExpiry = addDaysISO(openDays, today);
+
+  // min(expiryDate actual, hoy + openDays del catálogo) — nunca alargues una fecha
+  const newExpiryDate =
+    product.expiryDate && product.expiryDate < calculatedExpiry
+      ? product.expiryDate
+      : calculatedExpiry;
+
+  const previousDays = daysUntil(product.expiryDate, today);
+  const newDays = daysUntil(newExpiryDate, today);
+  const confidence = estimate?.confidence || "category-estimate";
+
+  let warningNotice: string | undefined;
+  if (confidence === "category-estimate") {
+    warningNotice = `Estimado por categoría: dura ~${openDays} días abierto, puede variar.`;
+  }
+
+  const updatedProduct: StoredProduct = {
+    ...product,
+    state: "abierto",
+    openedAt: todayISO(today),
+    expiryDate: newExpiryDate,
+  };
+
+  return {
+    updatedProduct,
+    newExpiryDate,
+    previousExpiryDate: product.expiryDate,
+    newDays,
+    previousDays,
+    openDays,
+    confidence,
+    warningNotice,
+  };
 }
 
 export function findShelfLife(productName: string, category?: string): ShelfLifeEntry | undefined {

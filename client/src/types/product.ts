@@ -3,6 +3,7 @@ import { ProductCategory } from "@/lib/categories";
 import { DateLabel } from "@/lib/dateRecognition";
 
 export type ProductStatus = "ok" | "soon" | "expired";
+export type ProductState = "cerrado" | "abierto";
 
 export interface StoredProduct {
   id: number;
@@ -15,6 +16,8 @@ export interface StoredProduct {
   estimated?: boolean;
   dateLabel?: DateLabel;
   corrected?: boolean;
+  state?: ProductState;
+  openedAt?: string; // ISO date string (YYYY-MM-DD)
   [key: string]: unknown;
 }
 
@@ -22,6 +25,8 @@ export type Product = StoredProduct & {
   days: number;
   status: ProductStatus;
   expiry: string; // Display text e.g. "18 sep" or "12 ago 27"
+  state?: ProductState;
+  openedAt?: string;
 };
 
 export function deriveProduct(stored: StoredProduct, today: Date = new Date()): Product {
@@ -33,5 +38,7 @@ export function deriveProduct(stored: StoredProduct, today: Date = new Date()): 
     days,
     status,
     expiry,
+    state: stored.state || "cerrado",
+    openedAt: stored.openedAt,
   };
 }

@@ -100,6 +100,16 @@ import { todayISO } from "./dates";
 
 const LAST_NOTIFICATION_DATE_KEY = "freshtrack-last-notification-date";
 
+export function clearNotificationDailyLimit() {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(LAST_NOTIFICATION_DATE_KEY);
+    } catch {
+      // ignore in environments without localStorage
+    }
+  }
+}
+
 export type ExpiringProductAlert = {
   name: string;
   days: number;

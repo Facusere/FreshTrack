@@ -58,10 +58,14 @@ export function groupNotifications(
   preferences = defaultNotificationPreferences,
   today: Date = new Date()
 ): NotificationGroup[] {
-  if (!preferences.enabled) return [];
-  const actionable = items.filter((item) => item.status === "expired" || item.days <= (preferences.categoryLeadDays[item.category] || 3));
-  const grouped = new Map<string, Product[]>();
+  const actionable = items.filter((item) => {
+    if (item.status === "expired") return true;
+    if (item.state === "abierto" && item.days <= 2) return true;
+    const leadDays = preferences.categoryLeadDays[item.category] || 3;
+    return item.days <= leadDays;
+  });
 
+  const grouped = new Map<string, Product[]>();
   actionable.forEach((item) => {
     const dateKey = item.expiryDate;
     grouped.set(dateKey, [...(grouped.get(dateKey) || []), item]);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  AlertTriangle,
   BarChart3,
   Bell,
   CalendarDays,
@@ -26,7 +27,15 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
-import { estimateShelfLife, getCatalogSize, ShelfLifeState, saveShelfLifeCorrection } from "@/lib/shelfLifeCatalog";
+import {
+  estimateShelfLife,
+  getCatalogSize,
+  ShelfLifeState,
+  saveShelfLifeCorrection,
+  calculateOpenProduct,
+  isFreshProduceCategory,
+  FreshCondition,
+} from "@/lib/shelfLifeCatalog";
 import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import {
   getRecipeDetails,
@@ -66,6 +75,7 @@ import {
 } from "@/components/home";
 import { recordExpiredItem } from "@/lib/reportsData";
 import {
+  clearNotificationDailyLimit,
   getNotificationPermission,
   notifyExpiringProducts,
   promptPWAInstall,
@@ -76,7 +86,7 @@ import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shopping
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
-import { addDaysISO, daysUntil, formatRelativeDays, SOON_THRESHOLD_DAYS, useToday } from "@/lib/dates";
+import { addDaysISO, daysUntil, formatRelativeDays, SOON_THRESHOLD_DAYS, todayISO, useToday } from "@/lib/dates";
 import {
   loadStoredProducts,
   saveStoredProducts,
@@ -392,7 +402,9 @@ function AddProductModal({
   const [expiryDate, setExpiryDate] = useState(() => initialProduct?.expiryDate || addDaysISO(7, today));
   const [isCustomExpiry, setIsCustomExpiry] = useState(false);
   const [dateLabel, setDateLabel] = useState<DateLabel>(initialProduct?.dateLabel || "vencimiento");
-  const [shelfState, setShelfState] = useState<ShelfLifeState>("cerrado");
+  const isProduce = isFreshProduceCategory(category);
+  const [freshCondition, setFreshCondition] = useState<FreshCondition>("fresco");
+  const [shelfState, setShelfState] = useState<ShelfLifeState>(initialProduct?.state || "cerrado");
   const [shelfDays, setShelfDays] = useState(() => {
     if (initialProduct?.expiryDate) {
       return Math.max(1, daysUntil(initialProduct.expiryDate, today));
@@ -402,12 +414,14 @@ function AddProductModal({
   const isEditing = Boolean(initialProduct);
 
   const shelfEstimate = useMemo(() => {
-    return name.trim() ? estimateShelfLife(name, shelfState, category) : undefined;
-  }, [name, shelfState, category]);
+    return name.trim()
+      ? estimateShelfLife(name, shelfState, category, isProduce ? freshCondition : undefined)
+      : undefined;
+  }, [name, shelfState, category, isProduce, freshCondition]);
 
   const handleNameChange = (val: string) => {
     setName(val);
-    const estimate = estimateShelfLife(val, shelfState, category);
+    const estimate = estimateShelfLife(val, shelfState, category, isProduce ? freshCondition : undefined);
     if (estimate) {
       setShelfDays(estimate.days);
       if (!isCustomExpiry && !isEditing) {
@@ -418,7 +432,19 @@ function AddProductModal({
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
-    const estimate = estimateShelfLife(name, shelfState, val);
+    const produce = isFreshProduceCategory(val);
+    const estimate = estimateShelfLife(name, shelfState, val, produce ? freshCondition : undefined);
+    if (estimate) {
+      setShelfDays(estimate.days);
+      if (!isCustomExpiry && !isEditing) {
+        setExpiryDate(addDaysISO(estimate.days, today));
+      }
+    }
+  };
+
+  const handleFreshConditionChange = (val: FreshCondition) => {
+    setFreshCondition(val);
+    const estimate = estimateShelfLife(name, shelfState, category, val);
     if (estimate) {
       setShelfDays(estimate.days);
       if (!isCustomExpiry && !isEditing) {
@@ -457,6 +483,8 @@ function AddProductModal({
     if (initialProduct && onCorrection) {
       onCorrection(initialProduct, dateLabel, category, expiryDate);
     } else {
+      const finalState = isProduce ? "cerrado" : shelfState;
+      const openedAt = (!isProduce && shelfState === "abierto") ? todayISO(today) : undefined;
       onAdd({
         id: Date.now(),
         name: name.trim(),
@@ -466,6 +494,8 @@ function AddProductModal({
         icon: detectProductIcon(name, category),
         dateLabel,
         location: inferLocation(category),
+        state: finalState,
+        openedAt,
       });
     }
     onClose();
@@ -542,18 +572,34 @@ function AddProductModal({
               <div>
                 <p className="text-xs font-bold text-brand-text">Vida útil estimada</p>
                 <p className="mt-0.5 text-xs text-content-body font-medium">
-                  {shelfEstimate?.label || (shelfState === "abierto" ? "Calculado para envase abierto." : "Calculado según guías de conservación.")}
+                  {shelfEstimate?.label || (
+                    isProduce
+                      ? (freshCondition === "pasado" ? "Calculado para producto maduro o ya pasado." : "Calculado para producto fresco recién comprado.")
+                      : (shelfState === "abierto" ? "Calculado para envase abierto." : "Calculado según guías de conservación.")
+                  )}
                 </p>
               </div>
-              <select
-                aria-label="Estado del envase"
-                value={shelfState}
-                onChange={(e) => handleShelfStateChange(e.target.value as ShelfLifeState)}
-                className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-semibold text-brand-text"
-              >
-                <option value="cerrado">Cerrado</option>
-                <option value="abierto">Abierto</option>
-              </select>
+              {isProduce ? (
+                <select
+                  aria-label="Condición del producto"
+                  value={freshCondition}
+                  onChange={(e) => handleFreshConditionChange(e.target.value as FreshCondition)}
+                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-semibold text-brand-text"
+                >
+                  <option value="fresco">Recién comprado</option>
+                  <option value="pasado">Ya un poco pasado</option>
+                </select>
+              ) : (
+                <select
+                  aria-label="Estado del envase"
+                  value={shelfState}
+                  onChange={(e) => handleShelfStateChange(e.target.value as ShelfLifeState)}
+                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-semibold text-brand-text"
+                >
+                  <option value="cerrado">Cerrado</option>
+                  <option value="abierto">Abierto</option>
+                </select>
+              )}
             </div>
             <div className="mt-3 flex items-center gap-2">
               <input
@@ -616,6 +662,7 @@ export default function Home() {
   const [mobileNav, setMobileNav] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productToOpen, setProductToOpen] = useState<Product | null>(null);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(() => loadNotificationPreferences());
   const [notificationModal, setNotificationModal] = useState(false);
   const [pantryView, setPantryView] = useState<"list" | "calendar">("list");
@@ -850,6 +897,19 @@ export default function Home() {
       ...current,
     ]);
     toast.success(`${newProduct.name} agregado a tu despensa`, { description: learning ? "Aplicamos una regla aprendida de usos anteriores." : "La fecha queda lista para revisar." });
+  };
+
+  const handleConfirmOpen = (product: Product | StoredProduct) => {
+    const calc = calculateOpenProduct(product, today);
+    setStoredProducts((current) =>
+      current.map((item) => (item.id === product.id ? calc.updatedProduct : item))
+    );
+    if (calc.newDays <= 2) {
+      clearNotificationDailyLimit();
+    }
+    toast.success(`Marcaste “${product.name}” como abierto`, {
+      description: `Nueva fecha: ${calc.newExpiryDate} (${calc.newDays} ${calc.newDays === 1 ? "día restante" : "días restantes"}).`,
+    });
   };
 
   const suggestShelfLife = (productName: string, _category: string, state: ShelfLifeState, days: number) => {
@@ -1240,6 +1300,7 @@ export default function Home() {
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
               onEditProduct={setSelectedProduct}
+              onOpenProduct={setProductToOpen}
               onLoadDemoProducts={() => {
                 const demo = buildDemoProducts(today);
                 setStoredProducts(demo);
@@ -1441,25 +1502,98 @@ export default function Home() {
               <p className="mt-1 text-xs text-content-muted">{formatRelativeDays(selectedProduct.days)}</p>
               {selectedProduct.corrected && <p className="mt-2 text-xs font-semibold text-brand-text">✓ Corrección aplicada a futuras detecciones</p>}
             </div>
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }}
-                className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2.5 text-xs font-bold text-content-body hover:bg-surface-elevated"
-              >
-                <Pencil size={14} /> Corregir
-              </button>
-              <button
-                type="button"
-                onClick={removeSelected}
-                className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-status-expired-bg border border-status-expired-border px-3 py-2.5 text-xs font-bold text-status-expired-text hover:opacity-90"
-              >
-                <Trash2 size={14} /> Eliminar
-              </button>
+            <div className="mt-4 flex flex-col gap-2">
+              {selectedProduct.state === "cerrado" && !isFreshProduceCategory(selectedProduct.category) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const prod = selectedProduct;
+                    setSelectedProduct(null);
+                    setProductToOpen(prod);
+                  }}
+                  className="w-full min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-500/20"
+                >
+                  <PackageOpen size={15} /> Marcar como abierto
+                </button>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }}
+                  className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2.5 text-xs font-bold text-content-body hover:bg-surface-elevated"
+                >
+                  <Pencil size={14} /> Corregir
+                </button>
+                <button
+                  type="button"
+                  onClick={removeSelected}
+                  className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-status-expired-bg border border-status-expired-border px-3 py-2.5 text-xs font-bold text-status-expired-text hover:opacity-90"
+                >
+                  <Trash2 size={14} /> Eliminar
+                </button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
+      {productToOpen && (() => {
+        const calc = calculateOpenProduct(productToOpen, today);
+        return (
+          <Dialog open={Boolean(productToOpen)} onOpenChange={(open) => { if (!open) setProductToOpen(null); }}>
+            <DialogContent className="max-w-[400px] p-5">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <PackageOpen className="text-amber-600 dark:text-amber-400" size={20} />
+                  ¿Marcar como abierto?
+                </DialogTitle>
+                <DialogDescription className="text-xs">
+                  {productToOpen.name} · {productToOpen.category}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-3 rounded-xl border border-line bg-surface-subtle p-3.5 space-y-2">
+                <p className="text-sm font-semibold text-content-heading">
+                  Al abrirlo, vence en{" "}
+                  <span className="text-amber-600 dark:text-amber-400 font-bold">
+                    {calc.newDays} {calc.newDays === 1 ? "día" : "días"}
+                  </span>{" "}
+                  en vez de {calc.previousDays} {calc.previousDays === 1 ? "día" : "días"}.
+                </p>
+                <p className="text-xs text-content-muted">
+                  Nueva fecha: <span className="font-semibold text-content-body">{calc.newExpiryDate}</span>
+                </p>
+
+                {calc.warningNotice && (
+                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200">
+                    <AlertTriangle size={15} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+                    <span>{calc.warningNotice}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setProductToOpen(null)}
+                  className="flex-1 min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-xs font-bold text-content-body hover:bg-surface-elevated"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleConfirmOpen(productToOpen);
+                    setProductToOpen(null);
+                  }}
+                  className="flex-1 min-h-[44px] rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white hover:bg-amber-700 shadow-xs"
+                >
+                  Confirmar y abrir
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 }

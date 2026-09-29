@@ -41,6 +41,7 @@ export interface PantrySectionProps {
   onOpenScan: () => void;
   onOpenAdd: () => void;
   onEditProduct: (product: Product) => void;
+  onOpenProduct?: (product: Product) => void;
   onLoadDemoProducts: () => void;
   onNavigateToReports?: () => void;
 }
@@ -71,6 +72,7 @@ export function PantrySection({
   onOpenScan,
   onOpenAdd,
   onEditProduct,
+  onOpenProduct,
   onLoadDemoProducts,
   onNavigateToReports,
 }: PantrySectionProps) {
@@ -257,7 +259,12 @@ export function PantrySection({
 
             <div className="mt-1">
               {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 5)).map((product) => (
-                <ProductRow key={product.id} product={product} onEdit={onEditProduct} />
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  onEdit={onEditProduct}
+                  onOpen={onOpenProduct}
+                />
               ))}
               {filteredProducts.length > 5 && (
                 <button
