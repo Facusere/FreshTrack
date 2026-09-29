@@ -1,0 +1,5164 @@
+[
+  {
+    "id": "guiso-lentejas",
+    "name": "Guiso de lentejas casero",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "lentejas",
+        "quantity": "400 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "300 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Picar la cebolla, cortar la zanahoria en cubos y dorarlas en una cacerola con aceite.",
+      "Incorporar la carne y dorar durante 5 minutos.",
+      "Agregar las papas en cubos, el tomate triturado y las lentejas.",
+      "Cubrir con agua o caldo y cocinar a fuego medio durante 35 minutos hasta tiernizar.",
+      "Condimentar con sal, pimentón y orégano antes de servir caliente."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "guiso",
+      "caliente",
+      "invierno",
+      "carne"
+    ]
+  },
+  {
+    "id": "guiso-fideos-monito",
+    "name": "Guiso de fideos moñito y carne",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "carne",
+        "quantity": "350 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar la carne en cubos y dorarla en cacerola con el aceite caliente.",
+      "Añadir la cebolla, el morrón y la zanahoria picados.",
+      "Sumar el tomate picado y 1 litro de agua caliente.",
+      "Cocinar 20 minutos e incorporar los fideos moñito hasta que estén al dente.",
+      "Dejar reposar 3 minutos antes de servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "guiso",
+      "pasta",
+      "carne",
+      "clasico"
+    ]
+  },
+  {
+    "id": "guiso-arroz-pollo",
+    "name": "Guiso de arroz con pollo",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "300 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1 taza"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar las presas de pollo en una olla con aceite caliente.",
+      "Agregar la cebolla, el morrón y la zanahoria picados.",
+      "Rehogar 5 minutos y agregar el arroz para nacararlo.",
+      "Verter el doble de caldo caliente que de arroz.",
+      "Cocinar tapado a fuego bajo por 18 minutos, sumar arvejas al final y servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "arroz",
+      "pollo",
+      "guiso",
+      "familiar"
+    ]
+  },
+  {
+    "id": "locro-criollo",
+    "name": "Locro criollo tradicional",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "porotos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "calabaza",
+        "quantity": "500 g"
+      },
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dejar en remojo los porotos la noche previa.",
+      "En una olla grande con agua, hervir los porotos con la carne cortada.",
+      "Rallar o cortar la calabaza en cubos pequeños para que se deshaga y espese el caldo.",
+      "Cocinar a fuego lento durante 2 horas revolviendo con cuchara de madera.",
+      "Preparar un sofrito con cebolla, morrón y pimentón para verter encima al servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "patrio",
+      "criollo",
+      "tradicional",
+      "calabaza"
+    ]
+  },
+  {
+    "id": "carbonada-criolla",
+    "name": "Carbonada criolla en zapallo",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "calabaza",
+        "quantity": "400 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "choclo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar la carne en cubos con el aceite en una cacerola.",
+      "Añadir la cebolla picada y el tomate.",
+      "Sumar las papas, la calabaza en cubos y el choclo en rodajas.",
+      "Cubrir con caldo y cocinar a fuego suave hasta que las verduras estén tiernas.",
+      "Servir espeso y dulce."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "criollo",
+      "calabaza",
+      "choclo",
+      "carne"
+    ]
+  },
+  {
+    "id": "estofado-carne-papas",
+    "name": "Estofado de carne vacuna con papas",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "500 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "ajo",
+        "quantity": "2 dientes"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Sellar la carne en trozos en una olla caliente con aceite.",
+      "Agregar la cebolla, el ajo y la zanahoria cortada en rodajas finas.",
+      "Incorporar el tomate triturado y cocinar a fuego medio durante 30 minutos.",
+      "Añadir las papas cortadas en cubos medianos y cocinar 20 minutos más hasta que estén suaves.",
+      "Servir con perejil fresco picado."
+    ],
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "estofado",
+      "carne",
+      "papas",
+      "casero"
+    ]
+  },
+  {
+    "id": "cazuela-pollo-verduras",
+    "name": "Cazuela de pollo con verduras",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "zapallito",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Trocear el pollo y dorarlo en una cacerola con aceite de oliva.",
+      "Agregar la cebolla en juliana, la zanahoria en rodajas y las papas.",
+      "Añadir agua hasta cubrir a la mitad y cocinar 20 minutos.",
+      "Sumar los zapallitos en cubos en los últimos 10 minutos para que no se deshagan.",
+      "Servir con su caldo aromático."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pollo",
+      "verduras",
+      "liviano",
+      "cazuela"
+    ]
+  },
+  {
+    "id": "guiso-carrero",
+    "name": "Guiso carrero criollo",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "fideos",
+        "quantity": "250 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "calabaza",
+        "quantity": "200 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar la carne en cubitos pequeños en una olla con aceite.",
+      "Rehogar la cebolla y agregar las papas y la calabaza.",
+      "Verter abundante agua caliente y hervir 15 minutos.",
+      "Agregar los fideos soperos y cocinar hasta que estén tiernos.",
+      "Servir espeso y bien caliente."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "guiso",
+      "carne",
+      "fideos",
+      "economico"
+    ]
+  },
+  {
+    "id": "guiso-porotos-colorados",
+    "name": "Guiso de porotos colorados",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "porotos",
+        "quantity": "350 g"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "250 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cocinar los porotos previamente remojados en agua hasta ablandar.",
+      "En otra olla, hacer un sofrito con cebolla, morrón y la carne picada.",
+      "Incorporar el tomate triturado y verter los porotos con su agua de cocción.",
+      "Cocinar todo junto 20 minutos a fuego suave para integrar sabores.",
+      "Servir con ají molido y orégano."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "legumbres",
+      "porotos",
+      "invierno",
+      "economico"
+    ]
+  },
+  {
+    "id": "cazuela-arroz-pescado",
+    "name": "Cazuela de arroz con pescado",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "pescado",
+        "quantity": "400 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "ajo",
+        "quantity": "2 dientes"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Rehogar cebolla, ajo y morrón picados en una cazuela.",
+      "Agregar el tomate triturado y el arroz, mezclando 2 minutos.",
+      "Añadir caldo caliente y cocinar por 12 minutos.",
+      "Colocar los trozos de pescado por encima y cocinar tapado 8 minutos más.",
+      "Servir con jugo de limón."
+    ],
+    "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pescado",
+      "arroz",
+      "cazuela",
+      "saludable"
+    ]
+  },
+  {
+    "id": "estofado-pollo-vino",
+    "name": "Estofado de pollo al vino y tomate",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "600 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar el pollo en una sartén profunda con aceite.",
+      "Añadir cebolla y zanahoria picadas.",
+      "Incorporar el tomate licuado o picado fino y medio vaso de líquido.",
+      "Cocinar 25 minutos e incorporar las papas en cubos hasta que estén cocidas.",
+      "Servir con laurel y pimienta negra."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pollo",
+      "estofado",
+      "familiar"
+    ]
+  },
+  {
+    "id": "guiso-lentejas-vegetariano",
+    "name": "Guiso de lentejas vegetariano",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "lentejas",
+        "quantity": "400 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "calabaza",
+        "quantity": "250 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Rehogar en aceite la cebolla, el morrón y la zanahoria.",
+      "Agregar las papas y la calabaza en dados pequeños.",
+      "Sumar las lentejas y cubrir con caldo de verduras casero.",
+      "Cocinar a fuego moderado por 35 minutos hasta ablandar las lentejas.",
+      "Servir con hojas de perejil picado."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "vegetariano",
+      "lentejas",
+      "saludable",
+      "sin carne"
+    ]
+  },
+  {
+    "id": "tarta-pascualina",
+    "name": "Tarta pascualina de espinaca y huevo",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Lavar y blanquear la espinaca, escurrirla muy bien y picarla.",
+      "Rehogar la cebolla y mezclarla con la espinaca, el queso cremoso y 2 huevos batidos.",
+      "Forrar una tartera con masa casera (harina, aceite y agua).",
+      "Rellenar y hacer dos huecos para colocar los huevos restantes enteros.",
+      "Hornear a 180°C durante 30 a 35 minutos hasta dorar la masa."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "espinaca",
+      "vegetariana",
+      "clasico"
+    ]
+  },
+  {
+    "id": "tarta-jamon-queso",
+    "name": "Tarta clásica de jamón y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "jamon",
+        "quantity": "200 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "50 g"
+      }
+    ],
+    "instructions": [
+      "Armar la masa arenando harina con manteca y un poco de agua fría.",
+      "Forrar un molde y disponer fetas de jamón y dados de queso en capas.",
+      "Batir los huevos con la leche, una pizca de nuez moscada y verter sobre el relleno.",
+      "Cocinar en horno medio durante 30 minutos hasta gratinar.",
+      "Dejar entibiar antes de cortar."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "jamon",
+      "queso",
+      "rapido"
+    ]
+  },
+  {
+    "id": "tarta-zapallitos",
+    "name": "Tarta suave de zapallitos y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "zapallito",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar los zapallitos en cubos y saltearlos con la cebolla picada hasta que suelten agua.",
+      "Escurrir en colador para eliminar el exceso de líquido.",
+      "Mezclar con los huevos batidos y dados de queso.",
+      "Colocar sobre masa en molde para tarta.",
+      "Llevar al horno a 190°C por 30 minutos hasta que el ligue esté firme."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "zapallito",
+      "vegetariana",
+      "liviano"
+    ]
+  },
+  {
+    "id": "tarta-choclo-humita",
+    "name": "Tarta de choclo cremosa (humita)",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "choclo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "150 ml"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      }
+    ],
+    "instructions": [
+      "Desgranar y procesar parte del choclo con la leche.",
+      "Rehogar cebolla y morrón finamente picados.",
+      "Unir el choclo cremoso, los granos enteros y cocinar 5 minutos.",
+      "Agregar los huevos batidos y queso rallado.",
+      "Verter en la masa y hornear 30 minutos a fuego medio."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "choclo",
+      "humita",
+      "vegetariana"
+    ]
+  },
+  {
+    "id": "tarta-pollo-morron",
+    "name": "Tarta de pollo desmenuzado y morrón",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir o dorar el pollo y desmenuzarlo en hebras.",
+      "Saltear la cebolla y el morrón en tiras con aceite.",
+      "Mezclar el pollo con las verduras salteadas, huevos y queso.",
+      "Distribuir en la tarta y cubrir con masa o dejar abierta.",
+      "Hornear a 200°C durante 25 minutos."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "pollo",
+      "morron",
+      "casero"
+    ]
+  },
+  {
+    "id": "tarta-calabaza-queso",
+    "name": "Tarta de calabaza asada y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "600 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hornear la calabaza en rodajas hasta que esté tierna y hacer un puré seco.",
+      "Saltear la cebolla picada y mezclar con el puré de calabaza.",
+      "Sumar los huevos y cubos generosos de queso cremoso.",
+      "Colocar sobre la base de masa y cocinar al horno 30 minutos.",
+      "Dejar reposar 10 minutos antes de servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "calabaza",
+      "queso",
+      "vegetariana"
+    ]
+  },
+  {
+    "id": "tarta-atun-cebolla",
+    "name": "Tarta gallega rápida de atún y tomate",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "atun",
+        "quantity": "2 latas"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      }
+    ],
+    "instructions": [
+      "Rehogar cebolla y morrón picados en aceite hasta que doren.",
+      "Agregar el tomate picado y cocinar 5 minutos.",
+      "Retirar del fuego e incorporar el atún escurrido y huevos duros picados.",
+      "Rellenar la masa y tapar con una segunda masa pinchada con tenedor.",
+      "Hornear 30 minutos a 190°C hasta dorar la superficie."
+    ],
+    "image": "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tarta",
+      "atun",
+      "pescado",
+      "rapido"
+    ]
+  },
+  {
+    "id": "empanadas-carne-horno",
+    "name": "Empanadas de carne criollas al horno",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "500 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "400 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "50 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Rehogar mucha cebolla en cubitos hasta que quede transparente y dulce.",
+      "Agregar la carne picada y cocinar rápidamente para que quede jugosa.",
+      "Condimentar con comino, pimentón dulce y sal. Dejar enfriar bien.",
+      "Agregar huevo duro picado al relleno frío.",
+      "Armar las empanadas con discos caseros, repulgar y hornear a 220°C durante 15 minutos."
+    ],
+    "image": "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "empanadas",
+      "carne",
+      "criollo",
+      "tradicional"
+    ]
+  },
+  {
+    "id": "empanadas-jamon-queso",
+    "name": "Empanadas de jamón y queso cremoso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "jamon",
+        "quantity": "250 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "300 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "harina",
+        "quantity": "350 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "40 g"
+      }
+    ],
+    "instructions": [
+      "Picar el jamón y el queso en dados homogéneos.",
+      "Armar la masa con harina, manteca fundida y agua templada.",
+      "Rellenar cada disco con la mezcla y cerrar presionando bien los bordes.",
+      "Pintar con huevo batido por encima.",
+      "Cocinar en horno bien caliente a 220°C durante 12 minutos hasta que doren."
+    ],
+    "image": "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "empanadas",
+      "jamon",
+      "queso",
+      "rapido"
+    ]
+  },
+  {
+    "id": "milanesas-carne-pure",
+    "name": "Milanesas de carne con puré de papas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "500 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "pan",
+        "quantity": "200 g"
+      },
+      {
+        "name": "ajo",
+        "quantity": "2 dientes"
+      },
+      {
+        "name": "papa",
+        "quantity": "1 kg"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "30 g"
+      }
+    ],
+    "instructions": [
+      "Batir los huevos con ajo y perejil picados, sal y pimienta.",
+      "Pasar los bifes por el batido y luego rebozar con pan rallado presionando con fuerza.",
+      "Hervir las papas peladas en agua con sal hasta que estén bien tiernas.",
+      "Pisar las papas calientes con leche tibia y manteca para lograr un puré cremoso.",
+      "Cocinar las milanesas al horno con un hilo de aceite o freír y servir con puré."
+    ],
+    "image": "https://images.unsplash.com/photo-1599921841143-819025a25774?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "milanesa",
+      "carne",
+      "pure",
+      "clasico",
+      "favorito"
+    ]
+  },
+  {
+    "id": "milanesas-napolitana",
+    "name": "Milanesas a la napolitana al horno",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "500 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "pan",
+        "quantity": "200 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "jamon",
+        "quantity": "150 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      }
+    ],
+    "instructions": [
+      "Rebozar la carne con huevo batido y pan rallado.",
+      "Cocinar las milanesas al horno 10 minutos.",
+      "Retirar y colocar salsa de tomate por encima, fetas de jamón y láminas de queso fresco.",
+      "Gratinar en el horno fuerte hasta que el queso se derrita y burbujee.",
+      "Espolvorear con orégano y servir caliente."
+    ],
+    "image": "https://images.unsplash.com/photo-1599921841143-819025a25774?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "milanesa",
+      "napolitana",
+      "queso",
+      "clasico"
+    ]
+  },
+  {
+    "id": "supremas-pollo-limon",
+    "name": "Supremas de pollo al limón",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "limon",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "ajo",
+        "quantity": "2 dientes"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      }
+    ],
+    "instructions": [
+      "Marinar las pechugas de pollo con jugo de limón, ajo picado y aceite por 15 minutos.",
+      "Cortar las papas en rodajas y dorarlas en una sartén con aceite.",
+      "Cocinar las supremas a fuego medio 6 minutos por lado hasta que estén doradas y jugosas.",
+      "Verter el jugo de la marinada al final para formar la salsa.",
+      "Servir con las papas doradas."
+    ],
+    "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pollo",
+      "limon",
+      "rapido",
+      "saludable"
+    ]
+  },
+  {
+    "id": "pastel-de-papa",
+    "name": "Pastel de papa tradicional",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "500 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "1 kg"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "30 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Hacer un puré de papas con manteca, leche, sal y nuez moscada.",
+      "Saltear la cebolla picada y sumar la carne hasta dorar.",
+      "Agregar huevos duros picados a la carne y disponer en una fuente para horno.",
+      "Cubrir con el puré de papas y rallar queso por encima.",
+      "Llevar a horno fuerte a 220°C hasta dorar la superficie."
+    ],
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pastel",
+      "papa",
+      "carne",
+      "clasico",
+      "familiar"
+    ]
+  },
+  {
+    "id": "albondigas-tuco-arroz",
+    "name": "Albóndigas con tuco casero y arroz",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "500 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "pan",
+        "quantity": "50 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Mezclar la carne picada con huevo, pan rallado, sal y perejil picado.",
+      "Formar bolitas y dorarlas en una cacerola con aceite.",
+      "Agregar la cebolla picada y el tomate triturado para hacer el tuco.",
+      "Cocinar tapado durante 25 minutos a fuego suave.",
+      "Hervir el arroz en agua con sal y servir como colchón para las albóndigas."
+    ],
+    "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "albondigas",
+      "carne",
+      "tuco",
+      "arroz"
+    ]
+  },
+  {
+    "id": "pollo-horno-papas",
+    "name": "Pollo al horno con papas y cebolla",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "800 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Colocar las presas de pollo en una asadera grande.",
+      "Cortar las papas y cebollas en gajos y distribuirlas alrededor.",
+      "Rociar todo con aceite, jugo de limón, sal, orégano y pimentón.",
+      "Cocinar en horno a 200°C durante 45 minutos hasta que la piel esté crocante y las papas doradas.",
+      "Servir con los jugos de cocción."
+    ],
+    "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pollo",
+      "horno",
+      "papas",
+      "domingo"
+    ]
+  },
+  {
+    "id": "pollo-a-la-portuguesa",
+    "name": "Pollo a la portuguesa con morrones",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "600 g"
+      },
+      {
+        "name": "morron",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar el pollo en una sartén grande con aceite.",
+      "Cortar cebollas y morrones en juliana gruesa y agregar al pollo.",
+      "Incorporar tomates triturados y medio vaso de caldo.",
+      "Cocinar a fuego bajo 30 minutos hasta tiernizar.",
+      "Acompañar con papas al natural o arroz blanco."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pollo",
+      "portuguesa",
+      "morron",
+      "guisado"
+    ]
+  },
+  {
+    "id": "bife-a-la-criolla",
+    "name": "Bife a la criolla con huevos fritos",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar la cebolla y los tomates en rodajas finas.",
+      "En una sartén grande hacer capas: carne, cebolla y tomate.",
+      "Tapar y cocinar a fuego suave por 20 minutos hasta que la carne esté tierna.",
+      "Freír las papas en bastones y freír los huevos.",
+      "Servir el bife con sus verduras y coronar con el huevo frito a caballo."
+    ],
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "carne",
+      "criollo",
+      "huevo",
+      "clasico"
+    ]
+  },
+  {
+    "id": "tortilla-de-papas",
+    "name": "Tortilla de papas clásica babé",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "5 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "4 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Pelar las papas y cortarlas en rodajas finas.",
+      "Cocinar las papas con la cebolla en aceite a fuego suave hasta tiernizar sin tostar.",
+      "Escurrir y mezclar las papas calientes con los huevos batidos y sal.",
+      "Calentar una sartén con unas gotas de aceite y volcar la mezcla.",
+      "Cocinar 2 minutos, dar vuelta con plato y cocinar 1 minuto más para que quede jugosa."
+    ],
+    "image": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tortilla",
+      "papas",
+      "huevo",
+      "babe",
+      "clasico"
+    ]
+  },
+  {
+    "id": "tortilla-acelga-queso",
+    "name": "Tortilla de acelga y queso cremoso",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir o saltear la verdura, escurrir con fuerza y picar fina.",
+      "Rehogar la cebolla y mezclarla con la verdura picada y los huevos batidos.",
+      "Volcar la mitad en sartén caliente con aceite, poner dados de queso en el centro.",
+      "Tapar con el resto de la mezcla y cocinar a fuego medio.",
+      "Dar vuelta y dorar 3 minutos más."
+    ],
+    "image": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tortilla",
+      "verdura",
+      "queso",
+      "saludable"
+    ]
+  },
+  {
+    "id": "tortilla-zapallitos",
+    "name": "Tortilla rápida de zapallitos",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "zapallito",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "80 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar los zapallitos en cubitos chicos y saltear con la cebolla.",
+      "Escurrir el exceso de líquido con colador.",
+      "Batir los huevos con queso rallado, sumar los zapallitos y condimentar.",
+      "Cuajar en sartén caliente 4 minutos por lado hasta dorar.",
+      "Servir tibia o fría con ensalada."
+    ],
+    "image": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0bdd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "tortilla",
+      "zapallito",
+      "rapido",
+      "liviano"
+    ]
+  },
+  {
+    "id": "revuelto-gramajo",
+    "name": "Revuelto Gramajo tradicional",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "jamon",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1/2 taza"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar las papas en bastones finos tipo pay y freírlas hasta que queden crocantes.",
+      "Cortar el jamón en tiritas y dorarlo ligeramente en sartén con manteca.",
+      "Sumar las arvejas y las papas pay calientes.",
+      "Cascar los huevos directamente encima y revolver suavemente para que queden cremosos.",
+      "Servir de inmediato para conservar lo crocante de las papas."
+    ],
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "gramajo",
+      "papas",
+      "huevo",
+      "bodegon",
+      "clasico"
+    ]
+  },
+  {
+    "id": "omelette-jamon-queso",
+    "name": "Omelette jugoso de jamón y queso",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "jamon",
+        "quantity": "60 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "80 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "1 cucharada"
+      }
+    ],
+    "instructions": [
+      "Batir los huevos enérgicamente con una pizca de sal y pimienta.",
+      "Derretir manteca en sartén antiadherente a fuego medio.",
+      "Volcar los huevos y remover con espátula los primeros segundos.",
+      "Colocar el jamón y el queso sobre una mitad cuando el fondo empiece a cuajar.",
+      "Plegar la otra mitad y servir caliente con el queso fundido."
+    ],
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "omelette",
+      "huevo",
+      "desayuno",
+      "cena",
+      "rapido"
+    ]
+  },
+  {
+    "id": "huevos-revueltos-tomate",
+    "name": "Huevos revueltos con tomate y cebolla",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "1 cucharada"
+      },
+      {
+        "name": "pan",
+        "quantity": "2 rodajas"
+      }
+    ],
+    "instructions": [
+      "Saltear la cebolla picada y el tomate en cubos en aceite.",
+      "Batir los huevos ligeramente y agregarlos a la sartén a fuego bajo.",
+      "Revolver lentamente con espátula para lograr una textura cremosa.",
+      "Retirar antes de que se sequen.",
+      "Servir sobre tostadas de pan casero."
+    ],
+    "image": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "huevos",
+      "desayuno",
+      "tomate",
+      "rapido"
+    ]
+  },
+  {
+    "id": "fideos-tuco-carne",
+    "name": "Fideos caseros con tuco de carne",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "400 g"
+      },
+      {
+        "name": "carne",
+        "quantity": "300 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Picar la cebolla y rallar la zanahoria.",
+      "Dorar la carne en trozos o picada con aceite y sumar los vegetales.",
+      "Añadir el tomate triturado y cocinar a fuego lento durante 40 minutos.",
+      "Hervir los fideos en abundante agua con sal hasta que estén al dente.",
+      "Servir la pasta bañada con el tuco caliente y queso rallado encima."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "fideos",
+      "tuco",
+      "domingo",
+      "clasico"
+    ]
+  },
+  {
+    "id": "fideos-manteca-queso",
+    "name": "Fideos con manteca y queso rallado",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "50 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "120 g"
+      }
+    ],
+    "instructions": [
+      "Hervir los fideos en agua hirviendo con sal gruesa según el tiempo del paquete.",
+      "Colar reservando media taza del agua de cocción.",
+      "Volver la pasta a la olla caliente, añadir la manteca en dados y mezclar hasta fundir.",
+      "Sumar abundante queso rallado y un chorrito del agua caliente para crear una emulsión cremosa.",
+      "Servir de inmediato con pimienta negra molida."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "rapido",
+      "economico",
+      "confort"
+    ]
+  },
+  {
+    "id": "noquis-de-papa",
+    "name": "Ñoquis de papa caseros del 29",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "1 kg"
+      },
+      {
+        "name": "harina",
+        "quantity": "300 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Hervir las papas con piel, pelar en caliente y pisar muy bien sin grumos.",
+      "Dejar enfriar, agregar el huevo, sal y la harina de a poco uniendo sin amasar demasiado.",
+      "Hacer rollitos de masa y cortar en bocados de 2 cm.",
+      "Pasar por la ñoquera o tenedor.",
+      "Cocinar en agua hirviendo con sal hasta que suban a la superficie y servir con salsa de tomate y queso."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "noquis",
+      "papa",
+      "tradicion",
+      "29",
+      "casero"
+    ]
+  },
+  {
+    "id": "ravioles-salsa-mixta",
+    "name": "Ravioles con salsa mixta casera",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "pasta",
+        "quantity": "500 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "200 ml"
+      },
+      {
+        "name": "harina",
+        "quantity": "2 cucharadas"
+      },
+      {
+        "name": "manteca",
+        "quantity": "30 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Hacer una salsa de tomate simple cocinando tomates con ajo y albahaca.",
+      "Preparar salsa blanca derritiendo manteca, sumando harina y revolviendo con leche caliente.",
+      "Hervir los ravioles en agua con sal hasta que estén al dente.",
+      "Mezclar ambas salsas (fileto y bechamel) para crear la salsa rosa o mixta.",
+      "Salsear los ravioles calientes y terminar con queso parmesano rallado."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "ravioles",
+      "salsa mixta",
+      "domingo"
+    ]
+  },
+  {
+    "id": "canelones-verdura-blanca",
+    "name": "Canelones de espinaca con salsa blanca y queso",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "leche",
+        "quantity": "400 ml"
+      },
+      {
+        "name": "harina",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "40 g"
+      }
+    ],
+    "instructions": [
+      "Hacer panqueques finos con harina, huevo y leche.",
+      "Saltear la espinaca bien escurrida y mezclar con ricota o queso cremoso.",
+      "Rellenar cada panqueque y enrollar formando los canelones.",
+      "Disponer en una fuente y cubrir con salsa bechamel bien caliente y queso rallado.",
+      "Gratinar al horno a 220°C durante 15 minutos hasta dorar."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "canelones",
+      "espinaca",
+      "gratinado"
+    ]
+  },
+  {
+    "id": "fideos-salteados-pollo",
+    "name": "Fideos salteados con vegetales y pollo",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "pollo",
+        "quantity": "300 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir los fideos y colar al dente.",
+      "En sartén o wok caliente dorar tiras de pechuga de pollo con aceite.",
+      "Agregar cebolla, morrón y zanahoria cortados en juliana fina.",
+      "Saltear a fuego vivo 5 minutos manteniendo las verduras crocantes.",
+      "Sumar los fideos, mezclar 1 minuto y servir caliente."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "wok",
+      "pollo",
+      "rapido",
+      "salteado"
+    ]
+  },
+  {
+    "id": "fideos-atun-tomate",
+    "name": "Fideos rápidos con atún y tomate",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "atun",
+        "quantity": "2 latas"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      },
+      {
+        "name": "ajo",
+        "quantity": "1 diente"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Saltear ajo y cebolla picados en una sartén con aceite.",
+      "Agregar los tomates triturados y cocinar 10 minutos.",
+      "Apagar el fuego y sumar el atún desmenuzado.",
+      "Mezclar con los fideos recién colados.",
+      "Servir con pimienta negra recién molida."
+    ],
+    "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pasta",
+      "atun",
+      "rapido",
+      "economico"
+    ]
+  },
+  {
+    "id": "ensalada-rusa",
+    "name": "Ensalada rusa tradicional",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1 taza"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Pelar y cortar las papas y zanahorias en cubos parejos pequeños.",
+      "Hervir en agua con sal hasta que estén cocidas pero firmes.",
+      "Hervir los huevos 10 minutos y picar.",
+      "Mezclar las papas y zanahorias frías con las arvejas y el huevo duro.",
+      "Aderezar con mayonesa a gusto y refrigerar antes de servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "papas",
+      "zanahoria",
+      "clasico",
+      "fiesta"
+    ]
+  },
+  {
+    "id": "ensalada-mixta",
+    "name": "Ensalada mixta clásica",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Lavar bien las hojas verdes y escurrir.",
+      "Cortar los tomates en gajos y la cebolla en pluma fina.",
+      "Disponer en una ensaladera amplia.",
+      "Condimentar en el momento de servir con aceite de oliva, jugo de limón y sal fina.",
+      "Mezclar suavemente."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "tomate",
+      "fresco",
+      "guarnicion"
+    ]
+  },
+  {
+    "id": "ensalada-fideos-frios-atun",
+    "name": "Ensalada de fideos fríos, atún y tomate",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "250 g"
+      },
+      {
+        "name": "atun",
+        "quantity": "2 latas"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir fideos cortos (tirabuzón o moñito) y enfriar bajo agua corriente.",
+      "Cortar el tomate en cubos y los huevos duros en cuartos.",
+      "Mezclar los fideos con el atún escurrido, los tomates y el huevo.",
+      "Aliñar con aceite de oliva, sal y gotas de limón.",
+      "Ideal para llevar en vianda o días calurosos."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "fideos",
+      "atun",
+      "verano",
+      "fresco"
+    ]
+  },
+  {
+    "id": "ensalada-arroz-choclo-huevo",
+    "name": "Ensalada de arroz, choclo y huevo",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "choclo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir el arroz en agua con sal y enfriar.",
+      "Desgranar el choclo cocido y rallar la zanahoria.",
+      "Picar los huevos duros.",
+      "Unir todos los ingredientes en un bol grande.",
+      "Aderezar con aceite, sal y unas gotas de vinagre o limón."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "arroz",
+      "choclo",
+      "huevo",
+      "economico"
+    ]
+  },
+  {
+    "id": "ensalada-calabaza-rucula-queso",
+    "name": "Ensalada tibia de calabaza asada y queso",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "500 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar la calabaza en cubos y asar al horno con aceite y sal hasta dorar.",
+      "Asar también la cebolla en gajos.",
+      "Disponer en una fuente amplia junto a hojas frescas.",
+      "Agregar dados de queso fresco o semi duro por encima.",
+      "Servir tibia con un hilo de aceite de oliva."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "calabaza",
+      "queso",
+      "tibia",
+      "gourmet"
+    ]
+  },
+  {
+    "id": "ensalada-caprese-criolla",
+    "name": "Ensalada Caprese con queso y albahaca",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar los tomates maduros en rodajas gruesas.",
+      "Cortar el queso fresco o muzzarella en láminas similares.",
+      "Intercalar rodajas de tomate y queso en un plato playo.",
+      "Decorar con hojas de albahaca fresca.",
+      "Rociar con abundante aceite de oliva y sal en escamas."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "tomate",
+      "queso",
+      "fresco",
+      "rapido"
+    ]
+  },
+  {
+    "id": "ensalada-lentejas-huevo",
+    "name": "Ensalada fresca de lentejas y huevo duro",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "lentejas",
+        "quantity": "300 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir las lentejas hasta que estén al dente y enfriar.",
+      "Picar la cebolla fina y cortar los tomates en dados.",
+      "Mezclar las lentejas con los tomates, la cebolla y los huevos picados.",
+      "Aliñar con vinagreta de limón, aceite y sal.",
+      "Servir fresca como plato principal proteico."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "lentejas",
+      "proteina",
+      "vegetariana"
+    ]
+  },
+  {
+    "id": "ensalada-palta-tomate",
+    "name": "Ensalada fresca de palta, tomate y cebolla",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "palta",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Cortar las paltas en cubos y rociarlas con jugo de limón para evitar que se oxiden.",
+      "Cortar los tomates en cubos y la cebolla en pluma.",
+      "Mezclar con suavidad en un bol.",
+      "Condimentar con aceite de oliva y sal al gusto.",
+      "Servir fresca."
+    ],
+    "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "ensalada",
+      "palta",
+      "tomate",
+      "saludable"
+    ]
+  },
+  {
+    "id": "sopa-crema-calabaza",
+    "name": "Sopa crema reconfortante de calabaza",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "700 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "leche",
+        "quantity": "150 ml"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Saltear la cebolla picada con manteca en una cacerola.",
+      "Agregar la calabaza pelada y cortada en trozos grandes.",
+      "Cubrir con agua o caldo caliente y hervir 20 minutos hasta que esté muy blanda.",
+      "Procesar con minipimer agregando la leche y nuez moscada.",
+      "Servir bien caliente con trocitos de queso derretido adentro."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "sopa",
+      "calabaza",
+      "crema",
+      "invierno"
+    ]
+  },
+  {
+    "id": "sopa-verduras-fideos",
+    "name": "Sopa de verduras y fideos soperos",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "zapallito",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "fideos",
+        "quantity": "150 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "1 cucharada"
+      }
+    ],
+    "instructions": [
+      "Cortar todas las verduras en cubos parejos.",
+      "Colocar en una olla con abundante agua con sal y un chorrito de aceite.",
+      "Hervir a fuego medio durante 25 minutos hasta que el caldo tome sabor.",
+      "Añadir los fideos soperos (municiones o cabellos de ángel) y cocinar 6 minutos.",
+      "Servir con queso rallado encima."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "sopa",
+      "verduras",
+      "fideos",
+      "liviano",
+      "casero"
+    ]
+  },
+  {
+    "id": "caldo-pollo-arroz",
+    "name": "Caldo casero de pollo con arroz",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "120 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "ajo",
+        "quantity": "1 diente"
+      }
+    ],
+    "instructions": [
+      "Hervir el pollo con huesos, la cebolla, el ajo y la zanahoria en 1.5 litros de agua por 40 minutos.",
+      "Colar el caldo y desmenuzar la carne del pollo.",
+      "Volver el caldo a la olla, agregar el arroz y cocinar 15 minutos.",
+      "Reincorporar el pollo desmenuzado.",
+      "Servir caliente con perejil fresco."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "caldo",
+      "pollo",
+      "arroz",
+      "reconstituyente"
+    ]
+  },
+  {
+    "id": "sopa-crema-espinaca",
+    "name": "Sopa crema suave de espinacas",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "papa",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "leche",
+        "quantity": "150 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Rehogar la cebolla y la papa en rodajas con manteca.",
+      "Agregar 500 ml de caldo y cocinar hasta que la papa esté tierna.",
+      "Sumar las hojas de espinaca lavadas y cocinar 3 minutos.",
+      "Licuar todo con la leche hasta lograr una crema verde homogénea.",
+      "Servir con cubos de pan tostado (croutons)."
+    ],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "sopa",
+      "espinaca",
+      "crema",
+      "vegetariana"
+    ]
+  },
+  {
+    "id": "arroz-queso-manteca",
+    "name": "Arroz con queso cremoso y manteca",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "40 g"
+      }
+    ],
+    "instructions": [
+      "Cocinar el arroz en abundante agua hirviendo con sal hasta que esté al dente.",
+      "Colar y volver a la olla a fuego mínimo.",
+      "Agregar la manteca y revolver enérgicamente.",
+      "Sumar dados de queso fresco o mantecoso y tapar 2 minutos para que funda.",
+      "Mezclar y servir de inmediato."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "arroz",
+      "queso",
+      "rapido",
+      "economico"
+    ]
+  },
+  {
+    "id": "arroz-primavera",
+    "name": "Arroz primavera con verduras salteadas",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "300 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1 taza"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Hervir el arroz y reservar.",
+      "En una sartén grande, saltear cebolla, morrón y zanahoria picados.",
+      "Hacer un huevo revuelto aparte y picarlo.",
+      "Integrar el arroz cocido con los vegetales, arvejas y el huevo.",
+      "Saltear todo junto 2 minutos con un hilo de aceite y servir."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "arroz",
+      "vegetales",
+      "salteado",
+      "primavera"
+    ]
+  },
+  {
+    "id": "arroz-atun-mayonesa",
+    "name": "Torre de arroz con atún y tomate",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "300 g"
+      },
+      {
+        "name": "atun",
+        "quantity": "2 latas"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "1 cucharada"
+      }
+    ],
+    "instructions": [
+      "Cocinar el arroz al dente y enfriar por completo.",
+      "Mezclar el arroz con el atún desmenuzado.",
+      "En una budinera forrada con film, armar capas de arroz con atún, rodajas de tomate y huevo duro picado.",
+      "Comprimir y desmoldar en plato.",
+      "Decorar y servir frío."
+    ],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "arroz",
+      "atun",
+      "frio",
+      "clasico"
+    ]
+  },
+  {
+    "id": "pan-casero-campo",
+    "name": "Pan casero de campo crujiente",
+    "category": "Panadería",
+    "ingredients": [
+      {
+        "name": "harina",
+        "quantity": "500 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Formar una corona con la harina y colocar en el centro levadura disuelta en agua tibia y el aceite.",
+      "Amasar durante 10 minutos hasta obtener una masa suave y elástica.",
+      "Dejar leudar tapada en lugar tibio hasta duplicar su volumen (45 min).",
+      "Dar forma de hogaza, hacer cortes superficiales y dejar descansar 20 minutos.",
+      "Hornear a 200°C durante 30 a 35 minutos hasta que suene hueco al golpearlo por debajo."
+    ],
+    "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "pan",
+      "casero",
+      "harina",
+      "artesanal"
+    ]
+  },
+  {
+    "id": "tostadas-francesas",
+    "name": "Tostadas francesas doradas",
+    "category": "Desayunos",
+    "ingredients": [
+      {
+        "name": "pan",
+        "quantity": "4 rodajas"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "25 g"
+      }
+    ],
+    "instructions": [
+      "Batir los huevos con la leche y una pizca de canela o azúcar.",
+      "Pasar las rodajas de pan del día anterior por la mezcla dejando que absorban bien.",
+      "Derretir la manteca en una sartén a fuego medio.",
+      "Dorar las tostadas 2 a 3 minutos por lado hasta que estén caramelizadas y crocantes.",
+      "Servir calientes con miel o fruta fresca."
+    ],
+    "image": "https://images.unsplash.com/photo-1484723091739-0045e0d4d7a8?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "desayuno",
+      "pan",
+      "huevo",
+      "leche",
+      "dulce"
+    ]
+  },
+  {
+    "id": "budin-de-pan",
+    "name": "Budín de pan tradicional con caramelo",
+    "category": "Postres",
+    "ingredients": [
+      {
+        "name": "pan",
+        "quantity": "300 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "600 ml"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      }
+    ],
+    "instructions": [
+      "Cortar el pan duro en trozos y dejarlo remojando en la leche tibia durante 30 minutos.",
+      "Acaramelar una flanera con azúcar a fuego directo.",
+      "Procesar el pan con la leche, los huevos y azúcar a gusto.",
+      "Verter en la flanera acaramelada.",
+      "Cocinar a baño maría en el horno a 170°C durante 50 minutos hasta que al pinchar salga limpio."
+    ],
+    "image": "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "postre",
+      "pan",
+      "leche",
+      "clasico",
+      "bodegon"
+    ]
+  },
+  {
+    "id": "panqueques-manzana",
+    "name": "Panqueques tibios de manzana y canela",
+    "category": "Postres",
+    "ingredients": [
+      {
+        "name": "manzana",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "150 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "200 ml"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Pelar y cortar las manzanas en rodajas muy finas.",
+      "Batir la harina con el huevo y la leche para hacer una masa líquida de panqueques.",
+      "En sartén caliente con manteca, dorar las rodajas de manzana con azúcar.",
+      "Verter un cucharón de masa cubriendo las manzanas.",
+      "Cocinar 2 minutos por lado y servir tibio."
+    ],
+    "image": "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "panqueques",
+      "manzana",
+      "merienda",
+      "dulce"
+    ]
+  },
+  {
+    "id": "milanesas-pollo-pure",
+    "name": "Milanesas de pollo (supremas) con puré de papas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "pan",
+        "quantity": "200 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "1 kg"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "30 g"
+      }
+    ],
+    "instructions": [
+      "Rebozar pechugas con huevo y pan rallado.",
+      "Cocinar al horno hasta dorar.",
+      "Acompañar con puré casero de papas."
+    ],
+    "tags": [
+      "pollo",
+      "milanesa",
+      "pure",
+      "clasico"
+    ]
+  },
+  {
+    "id": "milanesas-berenjenas-napolitana",
+    "name": "Milanesas de berenjena a la napolitana",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "pan",
+        "quantity": "200 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Rebozar rodajas con huevo y pan rallado.",
+      "Dorar en asadera con aceite.",
+      "Cubrir con salsa de tomate y queso fundido."
+    ],
+    "tags": [
+      "vegetariano",
+      "berenjena",
+      "milanesa",
+      "napolitana"
+    ]
+  },
+  {
+    "id": "guiso-garbanzos-carne",
+    "name": "Guiso de garbanzos criollo con carne",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "350 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Dorar la carne en cubos en olla con aceite.",
+      "Agregar cebolla, zanahoria y tomate triturado.",
+      "Cocinar con los garbanzos y papas hasta que todo esté tierno."
+    ],
+    "tags": [
+      "guiso",
+      "legumbres",
+      "carne",
+      "invierno"
+    ]
+  },
+  {
+    "id": "tortilla-fideos-reutilizados",
+    "name": "Tortilla de fideos casera",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Rehogar la cebolla picada.",
+      "Mezclar los fideos cocidos con los huevos batidos, cebolla y queso rallado.",
+      "Cuajar en sartén caliente dorando ambos lados."
+    ],
+    "tags": [
+      "tortilla",
+      "fideos",
+      "aprovechamiento",
+      "rapido"
+    ]
+  },
+  {
+    "id": "wok-fideos-vegetales",
+    "name": "Fideos salteados al wok con vegetales",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zapallito",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Saltear vegetales en juliana fina a fuego vivo con aceite.",
+      "Sumar los fideos cocidos.",
+      "Saltear 2 minutos y servir."
+    ],
+    "tags": [
+      "vegetariano",
+      "fideos",
+      "wok",
+      "saludable"
+    ]
+  },
+  {
+    "id": "empanadas-humita-choclo",
+    "name": "Empanadas norteñas de humita",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "choclo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      },
+      {
+        "name": "harina",
+        "quantity": "300 g"
+      },
+      {
+        "name": "manteca",
+        "quantity": "30 g"
+      }
+    ],
+    "instructions": [
+      "Cocinar el choclo con cebolla rehogada y leche hasta espesar.",
+      "Agregar dados de queso.",
+      "Rellenar discos y hornear a 200°C."
+    ],
+    "tags": [
+      "empanadas",
+      "choclo",
+      "humita",
+      "vegetariana"
+    ]
+  },
+  {
+    "id": "pescado-horno-papas-tomate",
+    "name": "Filet de pescado al horno con papas y tomate",
+    "category": "Pescados",
+    "ingredients": [
+      {
+        "name": "pescado",
+        "quantity": "500 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Armar un colchón de papas y cebollas en rodajas finas.",
+      "Colocar los filetes de pescado encima.",
+      "Cubrir con rodajas de tomate, jugo de limón y aceite.",
+      "Hornear a 190°C por 25 minutos."
+    ],
+    "tags": [
+      "pescado",
+      "horno",
+      "papas",
+      "saludable"
+    ]
+  },
+  {
+    "id": "croquetas-arroz-queso",
+    "name": "Croquetas crocantes de arroz y queso",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "300 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "120 g"
+      },
+      {
+        "name": "pan",
+        "quantity": "150 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Mezclar arroz cocido frío con 1 huevo y queso rallado.",
+      "Armar bolitas colocando un cubo de queso fresco en el corazón.",
+      "Pasar por huevo batido, pan rallado y dorar al horno o fritas."
+    ],
+    "tags": [
+      "arroz",
+      "croquetas",
+      "aprovechamiento",
+      "queso"
+    ]
+  },
+  {
+    "id": "pastel-calabaza-carne",
+    "name": "Pastel de calabaza y carne picada",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "800 g"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "500 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Hacer puré con calabaza asada.",
+      "Saltear cebolla con la carne picada y huevo duro.",
+      "Disponer la carne en una fuente, tapar con el puré de calabaza y gratinar con queso."
+    ],
+    "tags": [
+      "pastel",
+      "calabaza",
+      "carne",
+      "familiar"
+    ]
+  },
+  {
+    "id": "tarta-tricolor",
+    "name": "Tarta tricolor de espinaca, calabaza y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "1 atado"
+      },
+      {
+        "name": "calabaza",
+        "quantity": "400 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      }
+    ],
+    "instructions": [
+      "Hacer puré de calabaza con 1 huevo.",
+      "Saltear espinaca con 1 huevo.",
+      "Colocar en molde masa de tarta, capa de espinaca, dados de queso y capa de calabaza.",
+      "Hornear 35 minutos."
+    ],
+    "tags": [
+      "tarta",
+      "vegetales",
+      "espinaca",
+      "calabaza"
+    ]
+  },
+  {
+    "id": "receta-auto-1",
+    "name": "Pechuguitas salteadas con arroz y cebolla",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, arroz, cebolla, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-2",
+    "name": "Salteado criollo de carne con papas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne, papa, cebolla, morron.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-3",
+    "name": "Bocaditos de espinaca y queso al horno",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "100 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "80 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: espinaca, huevo, harina, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-4",
+    "name": "Tortilla de zanahoria y queso",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "zanahoria",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: zanahoria, huevo, cebolla, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-5",
+    "name": "Pollo a la cacerola con zanahorias y papas",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, zanahoria, papa, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-6",
+    "name": "Fideos al pesto casero con queso",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "ajo",
+        "quantity": "2 dientes"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, ajo, queso, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-7",
+    "name": "Bifes a la plancha con papas doradas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "400 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne, papa, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-8",
+    "name": "Huevos al plato con puré de papas",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: huevo, papa, leche, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-9",
+    "name": "Sopa crema de zanahorias y papa",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "zanahoria",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: zanahoria, papa, cebolla, leche.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-10",
+    "name": "Arroz con queso cremoso y huevo frito",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, queso, huevo, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-11",
+    "name": "Milanesas de pollo a caballo",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "pan",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, pan, huevo, papa.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-12",
+    "name": "Tortilla paisana con cebolla y morrón",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, cebolla, morron, huevo.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-13",
+    "name": "Guiso de papas con carne molida",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "350 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne picada, papa, cebolla, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-14",
+    "name": "Canelones de jamón y queso con tuco",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "jamon",
+        "quantity": "200 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "250 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "150 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "200 ml"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: jamon, queso, harina, leche, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-15",
+    "name": "Tarta de ricota y espinaca",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "queso",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: espinaca, queso, huevo, harina.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-16",
+    "name": "Ensalada de papa, huevo y mayonesa",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, huevo, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-17",
+    "name": "Ensalada de remolacha y huevo duro",
+    "category": "Ensaladas",
+    "ingredients": [
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: huevo, cebolla, aceite, limon.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-18",
+    "name": "Ñoquis de calabaza con manteca y queso",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "600 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "manteca",
+        "quantity": "40 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: calabaza, harina, huevo, manteca, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-19",
+    "name": "Pollo grille con ensalada mixta",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, tomate, cebolla, limon.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-20",
+    "name": "Albóndigas con puré de papas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "400 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "pan",
+        "quantity": "50 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne picada, papa, huevo, pan, leche.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-21",
+    "name": "Hamburguesas caseras con huevo a la plancha",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "400 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "pan",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne picada, huevo, cebolla, pan.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-22",
+    "name": "Chop suey criollo de carne y vegetales",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne",
+        "quantity": "350 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "arroz",
+        "quantity": "200 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne, zanahoria, cebolla, morron, arroz.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-23",
+    "name": "Croquetas de papa y queso",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "pan",
+        "quantity": "150 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, queso, huevo, pan.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-24",
+    "name": "Caldo de verduras con fideos cabello de ángel",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "150 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "zapallito",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, zanahoria, cebolla, zapallito.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-25",
+    "name": "Pollo desmenuzado con arroz primavera",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "350 g"
+      },
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1 taza"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, arroz, zanahoria, arvejas.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-26",
+    "name": "Filet de merluza al limón con puré",
+    "category": "Pescados",
+    "ingredients": [
+      {
+        "name": "pescado",
+        "quantity": "450 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "limon",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pescado, papa, limon, leche.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-27",
+    "name": "Pescado a la romana frito",
+    "category": "Pescados",
+    "ingredients": [
+      {
+        "name": "pescado",
+        "quantity": "500 g"
+      },
+      {
+        "name": "harina",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pescado, harina, huevo, limon.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-28",
+    "name": "Sopa de arroz con huevo y queso",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "80 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1/2 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, huevo, queso, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-29",
+    "name": "Tortilla de arroz y acelga",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "200 g"
+      },
+      {
+        "name": "espinaca",
+        "quantity": "1 atado"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "80 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, espinaca, huevo, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-30",
+    "name": "Tarta de berenjenas, cebolla y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: cebolla, queso, huevo, harina.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-31",
+    "name": "Fideos con salsa de tomate rápida y albahaca",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "ajo",
+        "quantity": "1 diente"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, tomate, ajo, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-32",
+    "name": "Pechugas rellenas de jamón y queso",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "jamon",
+        "quantity": "100 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, jamon, queso, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-33",
+    "name": "Guiso de arroz con carne picada y arvejas",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "300 g"
+      },
+      {
+        "name": "arvejas",
+        "quantity": "1 taza"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, carne picada, arvejas, tomate, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-34",
+    "name": "Colchón de arvejas con huevos",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "arvejas",
+        "quantity": "2 tazas"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arvejas, huevo, cebolla, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-35",
+    "name": "Zapallitos rellenos con carne picada",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "zapallito",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "300 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: zapallito, carne picada, cebolla, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-36",
+    "name": "Calabazas rellenas con choclo y queso",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "choclo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: calabaza, choclo, queso, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-37",
+    "name": "Tortilla de papas y jamón",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "jamon",
+        "quantity": "100 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, jamon, huevo, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-38",
+    "name": "Puré de papas con huevos poche",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "25 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, huevo, leche, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-39",
+    "name": "Fideos con salsa cuatro quesos",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "150 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, queso, leche, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-40",
+    "name": "Guisito express de fideos y salchichas",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "250 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "queso",
+        "quantity": "60 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, tomate, cebolla, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-41",
+    "name": "Papas al horno con queso gratinado",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "4 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, queso, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-42",
+    "name": "Pollo salteado con cebolla y morrón",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "400 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "morron",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, cebolla, morron, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-43",
+    "name": "Torta de manzana casera",
+    "category": "Postres",
+    "ingredients": [
+      {
+        "name": "manzana",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "100 ml"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: manzana, harina, huevo, leche.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-44",
+    "name": "Chipá casero tradicional",
+    "category": "Panadería",
+    "ingredients": [
+      {
+        "name": "queso",
+        "quantity": "250 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "40 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: queso, huevo, leche, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-45",
+    "name": "Arroz con leche casero",
+    "category": "Postres",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "200 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "1 litro"
+      },
+      {
+        "name": "limon",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, leche, limon.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-46",
+    "name": "Crepes de espinaca con salsa de tomate",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "1 atado"
+      },
+      {
+        "name": "harina",
+        "quantity": "150 g"
+      },
+      {
+        "name": "leche",
+        "quantity": "200 ml"
+      },
+      {
+        "name": "huevo",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: espinaca, harina, leche, huevo, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-47",
+    "name": "Revuelto de zapallitos con queso",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "zapallito",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "100 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: zapallito, cebolla, huevo, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-48",
+    "name": "Bocaditos de acelga fritos",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "espinaca",
+        "quantity": "2 atados"
+      },
+      {
+        "name": "harina",
+        "quantity": "120 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "60 ml"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: espinaca, harina, huevo, leche, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-49",
+    "name": "Tortilla de zanahoria y papa",
+    "category": "Tortillas",
+    "ingredients": [
+      {
+        "name": "zanahoria",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: zanahoria, papa, huevo, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-50",
+    "name": "Sopa crema de tomate y albahaca",
+    "category": "Sopas",
+    "ingredients": [
+      {
+        "name": "tomate",
+        "quantity": "5 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "ajo",
+        "quantity": "1 diente"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: tomate, cebolla, ajo, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-51",
+    "name": "Arroz salteado con atún y cebolla",
+    "category": "Arroces",
+    "ingredients": [
+      {
+        "name": "arroz",
+        "quantity": "250 g"
+      },
+      {
+        "name": "atun",
+        "quantity": "2 latas"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "1 cucharada"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: arroz, atun, cebolla, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-52",
+    "name": "Bifes de pollo a la plancha con puré",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "450 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "leche",
+        "quantity": "80 ml"
+      },
+      {
+        "name": "manteca",
+        "quantity": "20 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, papa, leche, manteca.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-53",
+    "name": "Pollo a la mostaza con papas rústicas",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "papa",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, papa, cebolla, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-54",
+    "name": "Tarta de puerro y queso",
+    "category": "Tartas",
+    "ingredients": [
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "harina",
+        "quantity": "250 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: cebolla, queso, huevo, harina.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-55",
+    "name": "Lasaña casera de carne y espinaca",
+    "category": "Pastas",
+    "ingredients": [
+      {
+        "name": "pasta",
+        "quantity": "300 g"
+      },
+      {
+        "name": "carne picada",
+        "quantity": "400 g"
+      },
+      {
+        "name": "espinaca",
+        "quantity": "1 atado"
+      },
+      {
+        "name": "tomate",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "200 g"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pasta, carne picada, espinaca, tomate, queso.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-56",
+    "name": "Papas aplastadas al horno con romero y queso",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "papa",
+        "quantity": "5 unidades"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "aceite",
+        "quantity": "3 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: papa, queso, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-57",
+    "name": "Calabaza rellena con arroz y queso",
+    "category": "Vegetarianas",
+    "ingredients": [
+      {
+        "name": "calabaza",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "arroz",
+        "quantity": "200 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: calabaza, arroz, queso, cebolla.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-58",
+    "name": "Guiso de fideos codito con verduras",
+    "category": "Guisos",
+    "ingredients": [
+      {
+        "name": "fideos",
+        "quantity": "300 g"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "papa",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "1 unidad"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: fideos, zanahoria, papa, cebolla, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-59",
+    "name": "Revuelto de carne con cebolla y huevo",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "carne picada",
+        "quantity": "350 g"
+      },
+      {
+        "name": "cebolla",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "huevo",
+        "quantity": "3 unidades"
+      },
+      {
+        "name": "aceite",
+        "quantity": "2 cucharadas"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: carne picada, cebolla, huevo, aceite.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  },
+  {
+    "id": "receta-auto-60",
+    "name": "Milanesas de pollo napolitanas al plato",
+    "category": "Carnes",
+    "ingredients": [
+      {
+        "name": "pollo",
+        "quantity": "500 g"
+      },
+      {
+        "name": "pan",
+        "quantity": "200 g"
+      },
+      {
+        "name": "huevo",
+        "quantity": "2 unidades"
+      },
+      {
+        "name": "jamon",
+        "quantity": "100 g"
+      },
+      {
+        "name": "queso",
+        "quantity": "150 g"
+      },
+      {
+        "name": "tomate",
+        "quantity": "2 unidades"
+      }
+    ],
+    "instructions": [
+      "Preparar los ingredientes: pollo, pan, huevo, jamon, queso, tomate.",
+      "Cocinar en sartén o cacerola siguiendo los pasos tradicionales argentinos.",
+      "Condimentar a gusto con sal, pimienta y hierbas.",
+      "Servir caliente y disfrutar en familia."
+    ],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    "tags": [
+      "casero",
+      "cotidiano",
+      "freshtrack"
+    ]
+  }
+]

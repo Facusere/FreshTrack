@@ -82,7 +82,7 @@ import {
   requestNotificationPermission,
   subscribeToInstallPrompt,
 } from "@/lib/pwaAndNotifications";
-import { loadShoppingList, saveShoppingList, ShoppingItem } from "@/lib/shoppingList";
+import { loadShoppingList, saveShoppingList, ShoppingItem, addRecipeMissingToShoppingList } from "@/lib/shoppingList";
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
@@ -1325,6 +1325,19 @@ export default function Home() {
               setRecipeLimit={setRecipeLimit}
               onOpenRecipeDetail={openRecipeDetail}
               onInitiateConsumption={initiateRecipeConsumption}
+              pantryProducts={products}
+              onAddMissingToShoppingList={(recipeTitle, missing) => {
+                setShoppingList((prev) =>
+                  addRecipeMissingToShoppingList(prev, recipeTitle, missing)
+                );
+                toast.success(`Faltantes de “${recipeTitle}” agregados a la lista de compras`, {
+                  description: `Se sumaron ${missing.length} ${
+                    missing.length === 1 ? "ingrediente" : "ingredientes"
+                  } con el motivo "Lo necesitás para ${recipeTitle}".`,
+                });
+              }}
+              onOpenAdd={() => setModal("add")}
+              onOpenScan={() => setModal("scan")}
             />
 
             <ShoppingSection
