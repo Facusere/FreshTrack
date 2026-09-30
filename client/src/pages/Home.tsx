@@ -6,18 +6,14 @@ import {
   Bell,
   CalendarDays,
   Check,
-  CircleHelp,
   Home as HomeIcon,
   Leaf,
   Menu,
   Moon,
   PackageOpen,
-  PanelLeftClose,
-  PanelLeftOpen,
   Pencil,
   ScanLine,
   Search,
-  Settings2,
   ShoppingCart,
   Smartphone,
   Sun,
@@ -120,16 +116,6 @@ export function buildDemoProducts(today: Date = new Date()): StoredProduct[] {
     { id: 6, name: "Leche entera", category: "Lácteos", expiryDate: addDaysISO(-1, today), quantity: "2 litros", icon: "🥛" },
     { id: 7, name: "Pasta seca", category: "Almacén seco", expiryDate: addDaysISO(331, today), quantity: "2 paquetes", icon: "🍝" },
   ];
-}
-
-function formatToday() {
-  const now = new Date();
-  const formatted = now.toLocaleDateString("es-AR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 function detectProductIcon(name: string, category: string): string {
@@ -698,15 +684,8 @@ export default function Home() {
     return subscribeToInstallPrompt(setCanInstallPWA);
   }, []);
 
-  // Theme & Collapsible Sidebar state
+  // Theme state
   const { theme, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
-    const saved = localStorage.getItem("freshtrack_sidebar_open");
-    return saved !== null ? saved === "true" : true;
-  });
-  useEffect(() => {
-    localStorage.setItem("freshtrack_sidebar_open", String(sidebarOpen));
-  }, [sidebarOpen]);
 
   // Automatic background notification check for products expiring in 1 or 2 days
   useEffect(() => {
@@ -981,273 +960,218 @@ export default function Home() {
           </div>
         </div>
       )}
-      <div className="flex min-h-screen">
-        <aside
-          className={`fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col bg-content px-4 py-5 text-brand-subtle transition-all duration-300 ease-in-out md:flex ${
-            sidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
-          }`}
-        >
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-[13px] bg-accent-lime text-accent-lime-fg shadow-xs">
-                <Leaf size={20} strokeWidth={2.4} />
+      {/* Tomorro Floating Pill Navigation Bar */}
+      <header className="sticky top-3 sm:top-5 z-40 w-full max-w-[1200px] mx-auto px-2.5 sm:px-4">
+        <div className="tomorro-pill-nav px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 text-white border border-[#273f2b] shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
+          {/* Brand Wordmark & Status Beacon Pill */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => navigateToModule("Resumen")}
+              className="flex items-center gap-2 text-left transition hover:opacity-90"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#68ef3f] text-[#30322a]">
+                <Leaf size={15} strokeWidth={2.4} />
               </span>
-              <div>
-                <p className="font-serif text-[21px] font-bold leading-none tracking-[-0.03em]">freshtrack</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.17em] text-brand-subtle">menos desperdicio</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Ocultar barra lateral"
-              title="Ocultar barra lateral"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-brand-subtle hover:bg-brand/60 hover:text-white transition"
-            >
-              <PanelLeftClose size={18} />
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white">freshtrack</span>
             </button>
+            <span className="tomorro-tag-beacon hidden sm:inline-flex">
+              v1.0 Activo
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setModal("scan")}
-            className="btn-3d-accent mt-9 flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent-lime px-3 py-3 text-xs font-bold text-accent-lime-fg"
-          >
-            <ScanLine size={16} /> Escanear compra
-          </button>
-          {canInstallPWA && (
-            <button
-              type="button"
-              onClick={() => promptPWAInstall()}
-              className="mt-2.5 flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-brand-border/40 bg-brand px-3 py-2 text-xs font-bold text-brand-subtle transition hover:bg-brand-hover"
-            >
-              <Smartphone size={14} /> Instalar app en tu celu
-            </button>
-          )}
-          <p className="mb-2 mt-9 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle">Tu espacio</p>
-          <nav className="space-y-1">
-            {currentNavItems.map(({ label, icon: Icon, count }) => (
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navegación principal">
+            {currentNavItems.map(({ label, count }) => (
               <button
                 key={label}
                 type="button"
                 onClick={() => navigateToModule(label)}
-                className={`flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition ${
-                  activeNav === label ? "bg-brand text-white shadow-xs" : "text-brand-subtle hover:bg-brand/50 hover:text-white"
+                className={`flex min-h-[38px] items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                  activeNav === label
+                    ? "bg-[#273f2b] text-white shadow-xs border border-[#38563d]"
+                    : "text-[#b7bda5] hover:text-white hover:bg-white/10"
                 }`}
               >
-                <span className="flex items-center gap-3">
-                  <Icon size={16} strokeWidth={1.8} />
-                  {label}
-                </span>
+                <span>{label}</span>
                 {count && (
-                  <span className={`rounded-md px-1.5 py-0.5 text-xs ${activeNav === label ? "bg-brand-hover text-white" : "bg-brand/60 text-brand-subtle"}`}>
+                  <span className="rounded-full bg-[#68ef3f]/20 px-1.5 py-0.2 text-[10px] font-bold text-[#68ef3f]">
                     {count}
                   </span>
                 )}
               </button>
             ))}
           </nav>
-          <p className="mb-2 mt-8 px-2 text-xs font-bold uppercase tracking-[0.16em] text-brand-subtle">Cuenta</p>
-          <nav className="space-y-1">
+
+          {/* Controls Right */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Omnibar Search */}
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#273f2b] bg-[#162b19]/80 px-3 py-1.5 text-xs text-[#b7bda5] focus-within:border-[#68ef3f] focus-within:ring-1 focus-within:ring-[#68ef3f]">
+              <Search size={14} className="text-[#b7bda5]" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar en tu despensa"
+                className="w-[120px] md:w-[150px] bg-transparent text-xs text-white outline-none placeholder:text-[#5c6351]"
+              />
+            </div>
+
+            {canInstallPWA && (
+              <button
+                type="button"
+                onClick={() => promptPWAInstall()}
+                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-[#273f2b] bg-[#162b19]/80 px-3 py-1 text-xs font-semibold text-[#b7bda5] hover:text-white transition"
+              >
+                <Smartphone size={13} /> App
+              </button>
+            )}
+
+            {/* Dark Mode Switcher */}
             <button
               type="button"
+              aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               onClick={toggleTheme}
-              className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-[#b7bda5] hover:text-white hover:border-[#b7bda5] transition"
             >
-              <span className="flex items-center gap-3">
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                Modo oscuro
-              </span>
-              <span className={`flex h-5 w-9 items-center rounded-full p-0.5 transition ${theme === "dark" ? "bg-accent-lime justify-end" : "bg-brand justify-start"}`}>
-                <span className={`h-4 w-4 rounded-full shadow-xs ${theme === "dark" ? "bg-accent-lime-fg" : "bg-white"}`} />
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setNotificationModal(true)}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
-            >
-              <Bell size={16} strokeWidth={1.8} />Notificaciones
-              {notificationGroups.length > 0 && (
-                <span className="ml-auto flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-accent-lime" />
-                  <span className="text-xs font-bold text-accent-lime">{notificationGroups.length}</span>
-                </span>
+              {theme === "dark" ? (
+                <Sun size={15} className="text-[#68ef3f]" />
+              ) : (
+                <Moon size={15} className="text-[#b7bda5]" />
               )}
             </button>
+
+            {/* Notification Bell */}
             <button
               type="button"
+              aria-label="Notificaciones"
               onClick={() => setNotificationModal(true)}
-              className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold text-brand-subtle transition hover:bg-brand/50 hover:text-white"
+              className="relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-[#b7bda5] hover:text-white hover:border-[#b7bda5] transition"
             >
-              <Settings2 size={16} strokeWidth={1.8} />Configuración
+              <Bell size={15} />
+              {notificationGroups.length > 0 && (
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#68ef3f]" />
+              )}
             </button>
-          </nav>
-          <div className="mt-auto rounded-2xl bg-brand/40 p-3.5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-lime text-xs font-extrabold text-accent-lime-fg">
-                FT
+
+            {/* Primary CTA pill */}
+            <button
+              type="button"
+              onClick={() => setModal("scan")}
+              className="tomorro-btn-primary hidden sm:inline-flex min-h-[38px] text-xs px-3.5 sm:px-4"
+            >
+              <ScanLine size={15} strokeWidth={2.4} />
+              <span className="hidden sm:inline">Escanear compra</span>
+            </button>
+
+            {/* Mobile Drawer Toggle */}
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-white lg:hidden"
+              onClick={() => setMobileNav(!mobileNav)}
+              aria-label="Menú principal"
+            >
+              <Menu size={16} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Drawer */}
+      {mobileNav && (
+        <div
+          className="fixed inset-0 z-50 bg-[#122314]/80 backdrop-blur-md lg:hidden"
+          onClick={() => setMobileNav(false)}
+        >
+          <div
+            className="h-full w-[280px] bg-[#162b19] border-r border-[#273f2b] p-6 text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#68ef3f] text-[#30322a]">
+                  <Leaf size={15} strokeWidth={2.4} />
+                </span>
+                <p className="font-display text-lg font-bold text-white">freshtrack</p>
               </div>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-white">Despensa local</p>
-                <p className="text-xs text-brand-subtle">Datos en tu dispositivo</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => setMobileNav(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#b7bda5] hover:text-white"
+                aria-label="Cerrar menú"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setModal("scan");
+                setMobileNav(false);
+              }}
+              className="tomorro-btn-primary mt-6 min-h-[44px] w-full text-xs"
+            >
+              <ScanLine size={16} /> Escanear compra
+            </button>
+
+            <div className="mt-6 space-y-1.5">
+              {currentNavItems.map(({ label, icon: Icon, count }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    navigateToModule(label);
+                    setMobileNav(false);
+                  }}
+                  className={`flex min-h-[42px] w-full items-center justify-between rounded-full px-4 py-2.5 text-left text-xs font-semibold transition ${
+                    activeNav === label
+                      ? "bg-[#273f2b] text-white"
+                      : "text-[#b7bda5] hover:text-white"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <Icon size={16} />
+                    {label}
+                  </span>
+                  {count && (
+                    <span className="rounded-full bg-[#68ef3f]/20 px-2 py-0.5 text-[10px] font-bold text-[#68ef3f]">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-8 border-t border-[#273f2b] pt-4 space-y-2">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex min-h-[40px] w-full items-center justify-between rounded-full px-4 py-2 text-xs font-semibold text-[#b7bda5] hover:text-white"
+              >
+                <span className="flex items-center gap-3">
+                  {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                  Modo {theme === "dark" ? "claro" : "oscuro"}
+                </span>
+                <span className="h-2 w-2 rounded-full bg-[#68ef3f]" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNotificationModal(true);
+                  setMobileNav(false);
+                }}
+                className="flex min-h-[40px] w-full items-center gap-3 rounded-full px-4 py-2 text-xs font-semibold text-[#b7bda5] hover:text-white"
+              >
+                <Bell size={15} /> Notificaciones
+              </button>
             </div>
           </div>
-        </aside>
+        </div>
+      )}
 
-        <main
-          id="main-content"
-          className={`min-w-0 flex-1 pb-24 md:pb-0 transition-all duration-300 ease-in-out ${
-            sidebarOpen ? "md:ml-[260px]" : "md:ml-0"
-          }`}
-        >
-          <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-line bg-surface-subtle/90 px-4 backdrop-blur-xl sm:px-6 lg:px-10">
-            <div className="flex items-center gap-3">
-              {/* Mobile drawer toggle */}
-              <button
-                type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-content-body hover:bg-surface-elevated md:hidden"
-                onClick={() => setMobileNav(!mobileNav)}
-                aria-label="Menú principal"
-              >
-                <Menu size={19} />
-              </button>
-              
-              {/* Desktop Collapsible Sidebar Toggle */}
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                aria-label={sidebarOpen ? "Ocultar barra lateral" : "Mostrar barra lateral"}
-                title={sidebarOpen ? "Ocultar barra lateral" : "Mostrar barra lateral"}
-                className="hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-content-body transition hover:bg-surface-elevated md:flex"
-              >
-                {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-              </button>
-
-              <div className="md:hidden">
-                <p className="font-serif text-xl font-bold tracking-[-0.04em] text-content">freshtrack</p>
-              </div>
-              
-              {!sidebarOpen && (
-                <div className="hidden items-center gap-2 md:flex">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-lime text-accent-lime-fg">
-                    <Leaf size={15} strokeWidth={2.4} />
-                  </span>
-                  <span className="font-serif text-lg font-bold tracking-tight text-content">freshtrack</span>
-                </div>
-              )}
-
-              <div className="hidden items-center gap-2 text-xs text-content-muted sm:flex">
-                <CalendarDays size={14} />{formatToday()}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              {canInstallPWA && (
-                <button
-                  type="button"
-                  onClick={() => promptPWAInstall()}
-                  className="hidden min-h-[40px] items-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text shadow-xs transition hover:bg-brand-subtle/80 sm:flex"
-                >
-                  <Smartphone size={14} /> Instalar PWA
-                </button>
-              )}
-
-              {/* Omnibar Search */}
-              <div className="hidden items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-content-muted transition focus-within:border-brand-focus focus-within:ring-1 focus-within:ring-brand-focus sm:flex">
-                <Search size={15} />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar en tu despensa"
-                  className="w-[150px] bg-transparent text-xs outline-none placeholder:text-content-muted lg:w-[190px]"
-                />
-              </div>
-
-              <button
-                type="button"
-                aria-label="Buscar"
-                onClick={() => document.querySelector<HTMLInputElement>("input[placeholder='Buscar en tu despensa']")?.focus()}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface p-2 text-content-muted sm:hidden"
-              >
-                <Search size={16} />
-              </button>
-
-              {/* Dark Mode Toggle Button */}
-              <button
-                type="button"
-                aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-                title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-                onClick={toggleTheme}
-                className="btn-3d flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-content-body transition hover:bg-surface-elevated active:scale-95"
-              >
-                {theme === "dark" ? (
-                  <Sun size={17} className="text-accent-lime transition-transform duration-300 hover:rotate-45" />
-                ) : (
-                  <Moon size={17} className="text-content-heading transition-transform duration-300 hover:-rotate-12" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                aria-label="Ayuda"
-                onClick={() => toast("¿Necesitás ayuda?", { description: "Escaneá un ticket y FreshTrack hace el resto." })}
-                className="hidden h-10 w-10 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated sm:flex"
-              >
-                <CircleHelp size={17} />
-              </button>
-
-              <button
-                type="button"
-                aria-label="Notificaciones"
-                onClick={() => setNotificationModal(true)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-xl text-content-muted transition hover:bg-surface-elevated"
-              >
-                <Bell size={17} />
-                {notificationGroups.length > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-status-soon-dot" />}
-              </button>
-
-              <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-accent-lime text-xs font-extrabold text-accent-lime-fg sm:flex" title="Despensa local">
-                FT
-              </div>
-            </div>
-          </header>
-
-          {mobileNav && (
-            <div className="fixed inset-0 z-40 bg-surface-overlay md:hidden" onClick={() => setMobileNav(false)}>
-              <div className="h-full w-[260px] bg-content p-5 text-white" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-2">
-                  <Leaf size={19} className="text-accent-lime" />
-                  <p className="font-serif text-xl">freshtrack</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setModal("scan"); setMobileNav(false); }}
-                  className="mt-8 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-accent-lime px-3 py-3 text-xs font-bold text-accent-lime-fg"
-                >
-                  <ScanLine size={16} /> Escanear compra
-                </button>
-                <div className="mt-6 space-y-1">
-                  {currentNavItems.map(({ label, icon: Icon, count }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => { navigateToModule(label); setMobileNav(false); }}
-                      className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-3 py-3 text-left text-xs font-semibold text-brand-subtle/80 hover:text-white"
-                    >
-                      <span className="flex items-center gap-3">
-                        <Icon size={16} />
-                        {label}
-                      </span>
-                      {count && <span>{count}</span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mx-auto max-w-[1400px] px-4 py-7 sm:px-6 lg:px-10 lg:py-9">
+      {/* Centered Max-Width 1200px Page Layout */}
+      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-10 sm:space-y-14 pb-24 md:pb-12 overflow-x-hidden">
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
@@ -1356,15 +1280,13 @@ export default function Home() {
               onUndoConsumption={undoConsumption}
             />
 
-            <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-content-muted sm:flex-row sm:items-center sm:justify-between">
+            <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-[#5c6351] dark:text-[#b7bda5] sm:flex-row sm:items-center sm:justify-between border-t border-[#d9deca]/50 dark:border-[#273f2b]">
               <p>FreshTrack · Menos desperdicio, más tranquilidad.</p>
               <p className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-status-ok-dot" /> Datos guardados localmente
+                <span className="h-1.5 w-1.5 rounded-full bg-[#26a200] dark:bg-[#68ef3f]" /> Datos guardados localmente
               </p>
             </footer>
-          </div>
         </main>
-      </div>
 
       <MobileBottomNav
         onOpenScan={() => setModal("scan")}

@@ -5,28 +5,29 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] aria-invalid:ring-destructive/30 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs sm:text-sm font-semibold transition duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#68ef3f] focus-visible:ring-offset-2 active:scale-[0.98] cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-brand text-white shadow-xs hover:bg-brand-hover",
+        default:
+          "bg-[#68ef3f] text-[#30322a] rounded-full hover:bg-[#7cf457] shadow-xs font-semibold",
         destructive:
-          "bg-status-expired-bg text-status-expired-text border border-status-expired-border hover:bg-status-expired-border/40 focus-visible:ring-status-expired-dot shadow-xs",
+          "bg-[#fdf1ef] text-[#8e2b20] border border-[#f8c9c3] rounded-full hover:bg-[#fbdad4] dark:bg-[#2e1816] dark:text-[#f59c90] dark:border-[#4a2420]",
         outline:
-          "border border-line bg-surface text-content shadow-xs hover:bg-surface-elevated hover:border-line-strong",
+          "border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] text-[#122314] dark:text-white rounded-full hover:bg-[#f2f5eb] dark:hover:bg-[#1c331f]",
         secondary:
-          "bg-surface-elevated text-content-heading border border-line-subtle shadow-xs hover:bg-surface-muted",
+          "bg-[#f2f5eb] text-[#273f2b] border border-[#d9deca] rounded-full hover:bg-[#e7f9dd] dark:bg-[#1c331f] dark:text-white dark:border-[#273f2b]",
         ghost:
-          "text-content-body hover:bg-surface-elevated hover:text-content-heading",
-        link: "text-brand underline-offset-4 hover:underline",
+          "text-[#30322a] dark:text-white rounded-full hover:bg-[#e7f9dd]/70 dark:hover:bg-[#1c3520]",
+        link: "text-[#273f2b] dark:text-[#68ef3f] underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
-        "icon-sm": "size-8",
-        "icon-lg": "size-10",
+        default: "h-10 px-5 py-2 has-[>svg]:px-3.5",
+        sm: "h-8 rounded-full gap-1.5 px-3.5 text-xs has-[>svg]:px-2.5",
+        lg: "h-11 rounded-full px-6 has-[>svg]:px-4.5",
+        icon: "size-10 rounded-full",
+        "icon-sm": "size-8 rounded-full",
+        "icon-lg": "size-11 rounded-full",
       },
     },
     defaultVariants: {

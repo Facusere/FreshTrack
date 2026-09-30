@@ -34,16 +34,16 @@ export interface ReportsSectionProps {
   onUndoConsumption: (recordId: number) => void;
 }
 
-// Colors referencing theme CSS variables directly
+// Colors referencing Tomorro palette directly
 const PIE_COLORS = [
-  "var(--status-expired-dot)",
-  "var(--status-soon-dot)",
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-  "var(--brand)",
+  "#68ef3f", // Electric Sprout
+  "#26a200", // Deep Verdant
+  "#273f2b", // Moss Shadow
+  "#7e8371", // Lichen Sage
+  "#b7bda5", // Pale Fern
+  "#d97706", // Amber
+  "#dc2626", // Red
+  "#30322a", // Onyx Olive
 ];
 
 export function ReportsSection({
@@ -75,43 +75,42 @@ export function ReportsSection({
   return (
     <section id="module-reports" className="scroll-mt-24 mt-6 space-y-6">
       {/* Header and Summary stats banner */}
-      <div className="card-3d relative overflow-hidden rounded-[24px] border border-brand-border bg-brand-subtle/40 p-5 sm:p-7">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10" />
+      <div className="tomorro-card-bone relative overflow-hidden p-6 sm:p-8 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand-text">
-              <BarChart3 size={15} /> Estadísticas y Reportes
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#5c6351] dark:text-[#b7bda5]">
+              <BarChart3 size={15} className="text-[#26a200] dark:text-[#68ef3f]" /> Estadísticas y Reportes
             </p>
-            <h2 className="mt-2 font-serif text-2xl sm:text-[28px] font-semibold tracking-[-0.035em] text-content-heading">
+            <h2 className="mt-2 font-display text-2xl sm:text-[28px] font-bold tracking-tight text-[#122314] dark:text-white">
               Tu impacto en números y tendencias
             </h2>
-            <p className="mt-1 max-w-[560px] text-xs sm:text-sm leading-5 text-content-body">
+            <p className="mt-1 max-w-[560px] text-xs sm:text-sm leading-5 text-[#5c6351] dark:text-[#b7bda5]">
               Monitoreá el desperdicio evitado, los pesos recuperados y descubrí qué categorías requieren mayor atención en tus compras.
             </p>
           </div>
-          <div className="rounded-2xl bg-surface/90 border border-line px-4 py-3 text-right shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-content-muted">Acciones registradas</p>
-            <p className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-brand-text">{impact.actions}</p>
-            <p className="text-xs text-content-muted">este mes</p>
+          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] px-4 py-3 text-right shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#5c6351] dark:text-[#b7bda5]">Acciones registradas</p>
+            <p className="mt-1 font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-[#68ef3f]">{impact.actions}</p>
+            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">este mes</p>
           </div>
         </div>
 
         {/* 3 Metric Cards */}
-        <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          <div className="rounded-2xl bg-surface/90 border border-line p-3.5 shadow-sm">
-            <p className="text-xs font-semibold text-content-muted">Comida salvada</p>
-            <p className="mt-1 text-2xl font-semibold text-brand-text">{impact.kgSaved} kg</p>
-            <p className="text-xs text-content-muted">estimado acumulado</p>
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
+            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Comida salvada</p>
+            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{impact.kgSaved} kg</p>
+            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">estimado acumulado</p>
           </div>
-          <div className="rounded-2xl bg-surface/90 border border-line p-3.5 shadow-sm">
-            <p className="text-xs font-semibold text-content-muted">Valor recuperado</p>
-            <p className="mt-1 text-2xl font-semibold text-brand-text">{formatMoney(impact.moneySaved)}</p>
-            <p className="text-xs text-content-muted">estimado acumulado</p>
+          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
+            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Valor recuperado</p>
+            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{formatMoney(impact.moneySaved)}</p>
+            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">estimado acumulado</p>
           </div>
-          <div className="rounded-2xl bg-surface/90 border border-line p-3.5 shadow-sm">
-            <p className="text-xs font-semibold text-content-muted">Comidas posibles</p>
-            <p className="mt-1 text-2xl font-semibold text-brand-text">{impact.mealsSaved}</p>
-            <p className="text-xs text-content-muted">porciones aprovechadas</p>
+          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
+            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Comidas posibles</p>
+            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{impact.mealsSaved}</p>
+            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">porciones aprovechadas</p>
           </div>
         </div>
       </div>

@@ -72,7 +72,7 @@ export function RecipesSection({
   onOpenScan,
 }: RecipesSectionProps) {
   // Tabs: "¿Qué puedo cocinar?" (Instant local matching) vs "Aprovechar por vencer" (TheMealDB)
-  const [activeTab, setActiveTab] = useState<"whatCanICook" | "rescueExpiring">("whatCanICook");
+  const [activeTab, setActiveTab] = useState<"whatCanICook" | "rescueExpiring">("rescueExpiring");
 
   // Online recipes state for "¿Qué puedo cocinar?"
   const [onlineRecipes, setOnlineRecipes] = useState<LocalRecipe[]>([]);
@@ -127,21 +127,21 @@ export function RecipesSection({
 
   return (
     <section id="module-recipes" className="scroll-mt-24 mt-6">
-      <div className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_12px_35px_rgba(55,63,48,0.04)] sm:p-8">
+      <div className="tomorro-card-bone relative overflow-hidden p-6 sm:p-8 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         {/* Navigation Tabs between "¿Qué puedo cocinar?" and "Aprovechar por vencer" */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9deca] dark:border-[#273f2b] pb-4">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("whatCanICook")}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+              className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                 activeTab === "whatCanICook"
-                  ? "bg-brand text-white shadow-sm ring-1 ring-brand-focus"
-                  : "border border-line bg-surface-subtle text-content-body hover:bg-surface-elevated"
+                  ? "bg-[#122314] text-white dark:bg-[#68ef3f] dark:text-[#30322a] shadow-xs"
+                  : "border border-[#d9deca] dark:border-[#273f2b] bg-white/80 dark:bg-[#122314] text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
               }`}
             >
               <ChefHat size={16} /> ¿Qué puedo cocinar?
-              <span className="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              <span className="tomorro-tag-beacon">
                 Instantáneo
               </span>
             </button>
@@ -149,10 +149,10 @@ export function RecipesSection({
             <button
               type="button"
               onClick={() => setActiveTab("rescueExpiring")}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+              className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                 activeTab === "rescueExpiring"
-                  ? "bg-brand text-white shadow-sm ring-1 ring-brand-focus"
-                  : "border border-line bg-surface-subtle text-content-body hover:bg-surface-elevated"
+                  ? "bg-[#122314] text-white dark:bg-[#68ef3f] dark:text-[#30322a] shadow-xs"
+                  : "border border-[#d9deca] dark:border-[#273f2b] bg-white/80 dark:bg-[#122314] text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
               }`}
             >
               <Hourglass size={15} /> Aprovechar por vencer
@@ -164,7 +164,7 @@ export function RecipesSection({
               type="button"
               disabled={onlineLoading}
               onClick={handleSearchOnline}
-              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text transition hover:bg-brand-border/40 disabled:opacity-50"
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] px-4 py-1.5 text-xs font-bold text-[#122314] dark:text-white transition hover:bg-[#e7f9dd] hover:text-[#1c3e21] dark:hover:bg-[#1c3520] dark:hover:text-[#68ef3f] disabled:opacity-50"
             >
               {onlineLoading ? (
                 <>
@@ -241,6 +241,7 @@ export function RecipesSection({
                         return (
                           <div
                             key={match.recipe.id}
+                            data-testid="recipe-card"
                             className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[22px] border border-status-ok-border bg-surface p-4 shadow-sm transition hover:border-brand-border hover:bg-surface-elevated"
                           >
                             <div>
@@ -318,6 +319,7 @@ export function RecipesSection({
                         return (
                           <div
                             key={match.recipe.id}
+                            data-testid="recipe-card"
                             className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[22px] border border-status-soon-border bg-surface p-4 shadow-sm transition hover:border-brand-border hover:bg-surface-elevated"
                           >
                             <div>
@@ -493,11 +495,11 @@ export function RecipesSection({
           <div className="mt-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-5">
               <div>
-                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-brand">
-                  <ChefHat size={15} /> Cocina de rescate
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#5c6351] dark:text-[#b7bda5]">
+                  <ChefHat size={15} className="text-[#26a200] dark:text-[#68ef3f]" /> Cocina de rescate
                 </p>
-                <h3 className="mt-1 font-serif text-2xl font-semibold tracking-[-0.035em] text-content-heading">
-                  Recetas con lo que vence primero
+                <h3 className="mt-1 font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-white">
+                  Recetas con lo que vence primero.
                 </h3>
                 <p className="mt-1 text-xs text-content-muted">
                   {recipesLoading
@@ -570,10 +572,10 @@ export function RecipesSection({
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") onOpenRecipeDetail(recipe);
                   }}
-                  className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[22px] border border-line bg-surface p-4 shadow-sm transition hover:border-brand-border hover:bg-surface-elevated"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#162b19] p-4 shadow-sm transition hover:border-[#68ef3f] hover:-translate-y-1"
                 >
                   <div>
-                    <div className="relative h-40 w-full overflow-hidden rounded-xl bg-surface-muted">
+                    <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-[#f2f5eb] dark:bg-[#122314]">
                       <img
                         src={recipe.image || getRecipeFallbackImage(recipe.title, recipe.category)}
                         onError={(e) => {
@@ -588,32 +590,32 @@ export function RecipesSection({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                       {recipe.pantryMatchRatio && (
-                        <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-lg bg-surface/90 px-2 py-1 text-xs font-bold text-brand-text shadow-sm backdrop-blur-md">
-                          <Sparkles size={12} className="text-accent-lime-fg" />
-                          {recipe.pantryMatchRatio.matched} de {recipe.pantryMatchRatio.total} en tu despensa
+                        <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-white/95 dark:bg-[#122314]/95 px-2.5 py-1 text-[11px] font-bold text-[#122314] dark:text-white shadow-sm backdrop-blur-md">
+                          <Sparkles size={12} className="text-[#26a200] dark:text-[#68ef3f]" />
+                          {recipe.pantryMatchRatio.matched} de {recipe.pantryMatchRatio.total} en despensa
                         </span>
                       )}
 
                       {(recipe.isLocalFallback || recipe.source === "FreshTrack") && (
-                        <span className="absolute right-2.5 top-2.5 rounded-md border border-brand-border/60 bg-brand/90 px-2 py-0.5 text-xs font-bold text-white shadow-xs backdrop-blur-xs">
+                        <span className="tomorro-tag-beacon absolute right-2.5 top-2.5">
                           Sugerencia local
                         </span>
                       )}
                     </div>
 
                     <div className="mt-3.5">
-                      <h3 className="line-clamp-1 text-sm font-bold text-content-heading transition group-hover:text-brand">
+                      <h3 className="line-clamp-1 font-display text-base font-bold text-[#122314] dark:text-white transition group-hover:text-[#26a200] dark:group-hover:text-[#68ef3f]">
                         {recipe.title}
                       </h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-content-muted">
+                      <p className="mt-1 line-clamp-2 text-xs text-[#5c6351] dark:text-[#b7bda5]">
                         Usa: {recipe.matchedIngredients.join(", ") || "Ingredientes sugeridos"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-line/60 pt-3">
-                    <span className="text-xs font-semibold text-brand hover:underline">
-                      Ver pasos e ingredientes
+                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#d9deca]/60 dark:border-[#273f2b] pt-3">
+                    <span className="text-xs font-semibold text-[#122314] dark:text-white hover:underline">
+                      Ver receta
                     </span>
                     <button
                       type="button"
@@ -621,7 +623,7 @@ export function RecipesSection({
                         event.stopPropagation();
                         onInitiateConsumption(recipe);
                       }}
-                      className="btn-3d-accent flex min-h-[38px] items-center gap-1.5 rounded-xl bg-accent-lime px-3 py-1.5 text-xs font-bold text-accent-lime-fg"
+                      className="tomorro-btn-primary min-h-[36px] text-xs px-3.5 py-1.5"
                     >
                       <Check size={14} strokeWidth={2.6} /> Aproveché
                     </button>
