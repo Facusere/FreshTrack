@@ -127,7 +127,7 @@ export function RecipesSection({
 
   return (
     <section id="module-recipes" className="scroll-mt-24 mt-6">
-      <div className="tomorro-card-bone relative overflow-hidden p-6 sm:p-8 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
+      <div className="tomorro-card-bone relative overflow-hidden p-5 sm:p-6 lg:p-7 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         {/* Navigation Tabs between "¿Qué puedo cocinar?" and "Aprovechar por vencer" */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9deca] dark:border-[#273f2b] pb-4">
           <div className="flex flex-wrap items-center gap-2">

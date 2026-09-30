@@ -126,7 +126,7 @@ export function PantrySection({
 
         {storedProducts.length === 0 ? (
           <div className="py-12 text-center">
-            <PackageOpen className="mx-auto text-[#7e8371]" size={40} />
+            <PackageOpen className="mx-auto text-[#5c6351] dark:text-[#b7bda5]" size={38} />
             <p className="mt-3 text-base font-bold text-[#122314] dark:text-white">Tu despensa está vacía</p>
             <p className="mx-auto mt-1 max-w-sm text-xs text-[#5c6351] dark:text-[#b7bda5]">
               Escaneá un ticket de supermercado o agregá productos manualmente para empezar a controlar vencimientos.
@@ -162,7 +162,7 @@ export function PantrySection({
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#d9deca] dark:border-[#273f2b] pb-3.5">
               {/* Search bar inside 24px radius input */}
               <div className="relative flex-1 min-w-[200px]">
-                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7e8371]" />
+                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5c6351]" />
                 <input
                   type="text"
                   placeholder="Buscar en despensa..."
@@ -212,7 +212,7 @@ export function PantrySection({
               {/* Advanced Filters */}
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <div className="flex items-center gap-1">
-                  <SlidersHorizontal size={13} className="text-[#7e8371]" />
+                  <SlidersHorizontal size={13} className="text-[#5c6351] dark:text-[#b7bda5]" />
                   <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
@@ -229,7 +229,7 @@ export function PantrySection({
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <ArrowUpDown size={13} className="text-[#7e8371]" />
+                  <ArrowUpDown size={13} className="text-[#5c6351] dark:text-[#b7bda5]" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
@@ -281,7 +281,7 @@ export function PantrySection({
               )}
               {filteredProducts.length === 0 && (
                 <div className="py-10 text-center">
-                  <PackageOpen className="mx-auto text-[#7e8371]" size={30} />
+                  <PackageOpen className="mx-auto text-[#5c6351] dark:text-[#b7bda5]" size={30} />
                   <p className="mt-2 text-sm font-semibold text-[#122314] dark:text-white">
                     No encontramos alimentos con los filtros actuales
                   </p>
@@ -314,7 +314,7 @@ export function PantrySection({
                 type="button"
                 onClick={onNavigateToReports}
                 aria-label="Ver reportes"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-[#7e8371] hover:text-[#122314] dark:hover:text-white hover:bg-white dark:hover:bg-[#1c331f]"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-[#5c6351] hover:text-[#122314] dark:hover:text-white hover:bg-white dark:hover:bg-[#1c331f]"
               >
                 <MoreHorizontal size={17} />
               </button>

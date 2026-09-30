@@ -75,7 +75,7 @@ export function ReportsSection({
   return (
     <section id="module-reports" className="scroll-mt-24 mt-6 space-y-6">
       {/* Header and Summary stats banner */}
-      <div className="tomorro-card-bone relative overflow-hidden p-6 sm:p-8 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
+      <div className="tomorro-card-bone relative overflow-hidden p-5 sm:p-6 lg:p-7 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#5c6351] dark:text-[#b7bda5]">

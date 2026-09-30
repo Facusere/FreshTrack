@@ -67,7 +67,6 @@ import {
   RecipesSection,
   MobileBottomNav,
   MiniStatus,
-  InteractiveExperience,
 } from "@/components/home";
 import { recordExpiredItem } from "@/lib/reportsData";
 import {
@@ -1171,13 +1170,14 @@ export default function Home() {
       )}
 
       {/* Centered Max-Width 1200px Page Layout */}
-      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-10 sm:space-y-14 pb-24 md:pb-12 overflow-x-hidden">
+      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-24 md:pb-12 overflow-x-hidden">
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
               lastScan={lastScan}
               today={today}
               catalogSize={getCatalogSize()}
+              products={products}
             />
 
             <StatsSection
@@ -1187,15 +1187,6 @@ export default function Home() {
               moneySaved={impact.moneySaved}
               kgSaved={impact.kgSaved}
               soonThresholdDays={SOON_THRESHOLD_DAYS}
-            />
-
-            <InteractiveExperience
-              products={products}
-              onOpenScan={() => setModal("scan")}
-              onConsume={(product) => {
-                setStoredProducts((current) => current.filter((item) => item.id !== product.id));
-                toast.success(`${product.name} marcado como consumido`);
-              }}
             />
 
             <PantrySection

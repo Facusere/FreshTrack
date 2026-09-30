@@ -131,7 +131,7 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
         <button
           aria-label={`Acciones para ${product.name}`}
           onClick={() => onEdit(product)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[#7e8371] hover:text-[#122314] dark:hover:text-white hover:bg-[#e7f9dd] dark:hover:bg-[#1c3520] opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-[#5c6351] hover:text-[#122314] dark:hover:text-white hover:bg-[#e7f9dd] dark:hover:bg-[#1c3520] opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
         >
           <MoreHorizontal size={16} />
         </button>

@@ -8,4 +8,3 @@ export * from "./RecipesSection";
 export * from "./ShoppingSection";
 export * from "./MobileBottomNav";
 export * from "./ReportsSection";
-export * from "./InteractiveExperience";
