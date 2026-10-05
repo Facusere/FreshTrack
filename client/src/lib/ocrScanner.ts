@@ -16,6 +16,7 @@ export type ScannedProductResult = {
   estimated: boolean;
   dateLabel: DateLabel;
   confidence: number;
+  location?: string;
 };
 
 export type OCRProgressCallback = (info: { status: string; progress: number }) => void;

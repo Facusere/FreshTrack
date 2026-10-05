@@ -2,13 +2,17 @@ import React from "react";
 import {
   ArrowUpDown,
   CalendarDays,
+  Check,
+  CheckSquare,
   MoreHorizontal,
   PackageOpen,
   Plus,
   ScanLine,
   Search,
+  ShoppingCart,
   SlidersHorizontal,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { Product, ProductStatus, StoredProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
@@ -32,6 +36,8 @@ export interface PantrySectionProps {
   setFilter: (filter: "all" | ProductStatus) => void;
   categoryFilter: string;
   setCategoryFilter: (category: string) => void;
+  locationFilter?: string;
+  setLocationFilter?: (loc: string) => void;
   sortBy: "expiry-asc" | "expiry-desc" | "name-asc" | "name-desc" | "category";
   setSortBy: (sort: "expiry-asc" | "expiry-desc" | "name-asc" | "name-desc" | "category") => void;
   search: string;
@@ -42,8 +48,18 @@ export interface PantrySectionProps {
   onOpenAdd: () => void;
   onEditProduct: (product: Product) => void;
   onOpenProduct?: (product: Product) => void;
+  onQuickConsume?: (product: Product) => void;
   onLoadDemoProducts: () => void;
   onNavigateToReports?: () => void;
+  // Batch actions
+  selectedIds?: number[];
+  onToggleSelectProduct?: (product: Product) => void;
+  onSelectAllFiltered?: () => void;
+  onClearSelection?: () => void;
+  onBatchConsume?: () => void;
+  onBatchAddToShoppingList?: () => void;
+  onBatchMoveLocation?: (loc: string) => void;
+  onBatchDelete?: () => void;
 }
 
 export function PantrySection({
@@ -63,6 +79,8 @@ export function PantrySection({
   setFilter,
   categoryFilter,
   setCategoryFilter,
+  locationFilter = "all",
+  setLocationFilter,
   sortBy,
   setSortBy,
   search,
@@ -73,9 +91,22 @@ export function PantrySection({
   onOpenAdd,
   onEditProduct,
   onOpenProduct,
+  onQuickConsume,
   onLoadDemoProducts,
   onNavigateToReports,
+  selectedIds = [],
+  onToggleSelectProduct,
+  onSelectAllFiltered,
+  onClearSelection,
+  onBatchConsume,
+  onBatchAddToShoppingList,
+  onBatchMoveLocation,
+  onBatchDelete,
 }: PantrySectionProps) {
+  const isAllSelected =
+    filteredProducts.length > 0 &&
+    filteredProducts.every((p) => selectedIds.includes(p.id));
+
   return (
     <section id="module-pantry" className="scroll-mt-24 grid gap-5 xl:grid-cols-[1.45fr_0.75fr]">
       {/* Main Pantry List / Calendar */}
@@ -129,7 +160,7 @@ export function PantrySection({
             <PackageOpen className="mx-auto text-content-muted" size={38} />
             <p className="mt-3 text-base font-bold text-content-heading">Tu despensa está vacía</p>
             <p className="mx-auto mt-1 max-w-sm text-xs text-content-muted">
-              Escaneá un ticket de supermercado o agregá productos manualmente para empezar a controlar vencimientos.
+              Escaneá un ticket de supermercado, código de barras o agregá productos manualmente para empezar a controlar vencimientos.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
@@ -159,116 +190,165 @@ export function PantrySection({
           <WeekCalendar products={products} />
         ) : (
           <>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3.5">
-              {/* Search bar inside 24px radius input */}
-              <div className="relative flex-1 min-w-[200px]">
-                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
-                <input
-                  type="text"
-                  placeholder="Buscar en despensa..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-[24px] border border-line bg-surface py-2 pl-9 pr-3.5 text-xs text-content-heading outline-none focus:border-brand-focus focus:ring-1 focus:ring-brand-focus transition"
-                />
-              </div>
-
-              {/* Status Tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto">
-                <button
-                  type="button"
-                  onClick={() => setFilter("all")}
-                  className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                    filter === "all"
-                      ? "bg-emerald-600 text-white shadow-xs"
-                      : "text-content-muted hover:bg-surface-muted"
-                  }`}
-                >
-                  Todos ({products.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter("soon")}
-                  className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                    filter === "soon"
-                      ? "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
-                      : "text-content-muted hover:bg-surface-muted"
-                  }`}
-                >
-                  Por vencer ({soonCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter("expired")}
-                  className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                    filter === "expired"
-                      ? "bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
-                      : "text-content-muted hover:bg-surface-muted"
-                  }`}
-                >
-                  Vencidos ({expiredCount})
-                </button>
-              </div>
-
-              {/* Advanced Filters */}
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <SlidersHorizontal size={13} className="text-content-muted" />
-                  <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="min-h-[38px] rounded-[20px] border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
-                    aria-label="Filtrar por categoría"
-                  >
-                    <option value="all">Todas las categorías</option>
-                    {ALL_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+            {/* Search, Status and Location Tabs */}
+            <div className="mt-5 space-y-3 border-b border-line pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {/* Search bar */}
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
+                  <input
+                    type="text"
+                    placeholder="Buscar en despensa..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-[24px] border border-line bg-surface py-2 pl-9 pr-3.5 text-xs text-content-heading outline-none focus:border-brand-focus focus:ring-1 focus:ring-brand-focus transition"
+                  />
                 </div>
 
-                <div className="flex items-center gap-1">
-                  <ArrowUpDown size={13} className="text-content-muted" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="min-h-[38px] rounded-[20px] border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
-                    aria-label="Ordenar productos"
-                  >
-                    <option value="expiry-asc">Vencimiento: más próximo</option>
-                    <option value="expiry-desc">Vencimiento: más lejano</option>
-                    <option value="name-asc">Nombre: A → Z</option>
-                    <option value="name-desc">Nombre: Z → A</option>
-                    <option value="category">Categoría</option>
-                  </select>
-                </div>
-
-                {(categoryFilter !== "all" || sortBy !== "expiry-asc") && (
+                {/* Status Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto">
                   <button
                     type="button"
-                    onClick={() => {
-                      setCategoryFilter("all");
-                      setSortBy("expiry-asc");
-                    }}
-                    className="min-h-[38px] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline"
+                    onClick={() => setFilter("all")}
+                    className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                      filter === "all"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-content-muted hover:bg-surface-muted"
+                    }`}
                   >
-                    Restablecer
+                    Todos ({products.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("soon")}
+                    className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                      filter === "soon"
+                        ? "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
+                        : "text-content-muted hover:bg-surface-muted"
+                    }`}
+                  >
+                    Por vencer ({soonCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("expired")}
+                    className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                      filter === "expired"
+                        ? "bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
+                        : "text-content-muted hover:bg-surface-muted"
+                    }`}
+                  >
+                    Vencidos ({expiredCount})
+                  </button>
+                </div>
+              </div>
+
+              {/* Location Compartments Filter */}
+              {setLocationFilter && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pt-1">
+                  {[
+                    { id: "all", label: "Toda la cocina" },
+                    { id: "heladera", label: "❄️ Heladera" },
+                    { id: "freezer", label: "🧊 Freezer" },
+                    { id: "alacena", label: "🥫 Alacena" },
+                    { id: "cajon", label: "🥬 Cajón verduras" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setLocationFilter(tab.id)}
+                      className={`shrink-0 min-h-[32px] rounded-full px-3 py-1 text-xs font-semibold transition ${
+                        locationFilter === tab.id
+                          ? "bg-brand text-white shadow-xs font-bold"
+                          : "text-content-muted hover:bg-surface-muted border border-line/60"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Advanced Category & Sorting Filters */}
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <SlidersHorizontal size={13} className="text-content-muted" />
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="min-h-[36px] rounded-[20px] border border-line bg-surface px-3 py-1 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
+                      aria-label="Filtrar por categoría"
+                    >
+                      <option value="all">Todas las categorías</option>
+                      {ALL_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <ArrowUpDown size={13} className="text-content-muted" />
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="min-h-[36px] rounded-[20px] border border-line bg-surface px-3 py-1 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
+                      aria-label="Ordenar productos"
+                    >
+                      <option value="expiry-asc">Vencimiento: más próximo</option>
+                      <option value="expiry-desc">Vencimiento: más lejano</option>
+                      <option value="name-asc">Nombre: A → Z</option>
+                      <option value="name-desc">Nombre: Z → A</option>
+                      <option value="category">Categoría</option>
+                    </select>
+                  </div>
+
+                  {(categoryFilter !== "all" || sortBy !== "expiry-asc" || locationFilter !== "all") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryFilter("all");
+                        setSortBy("expiry-asc");
+                        setLocationFilter?.("all");
+                      }}
+                      className="min-h-[36px] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline"
+                    >
+                      Restablecer filtros
+                    </button>
+                  )}
+                </div>
+
+                {/* Batch selection quick button */}
+                {onSelectAllFiltered && (
+                  <button
+                    type="button"
+                    onClick={isAllSelected ? onClearSelection : onSelectAllFiltered}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
+                  >
+                    <CheckSquare size={13} />
+                    {isAllSelected ? "Deseleccionar todos" : "Seleccionar todos"}
                   </button>
                 )}
               </div>
             </div>
 
+            {/* Products List */}
             <div className="mt-2 divide-y divide-line/40">
-              {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 5)).map((product) => (
+              {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 7)).map((product) => (
                 <ProductRow
                   key={product.id}
                   product={product}
                   onEdit={onEditProduct}
                   onOpen={onOpenProduct}
+                  onQuickConsume={onQuickConsume}
+                  selected={selectedIds.includes(product.id)}
+                  onToggleSelect={onToggleSelectProduct}
+                  showCheckbox={selectedIds.length > 0}
                 />
               ))}
-              {filteredProducts.length > 5 && (
+              {filteredProducts.length > 7 && (
                 <button
                   type="button"
                   onClick={() => setShowAllPantry((prev) => !prev)}
@@ -286,11 +366,73 @@ export function PantrySection({
                     No encontramos alimentos con los filtros actuales
                   </p>
                   <p className="mt-1 text-xs text-content-muted">
-                    Probá cambiar el filtro de estado o tu término de búsqueda.
+                    Probá cambiar el compartimento, estado o término de búsqueda.
                   </p>
                 </div>
               )}
             </div>
+
+            {/* Floating Batch Actions Bar */}
+            {selectedIds.length > 0 && (
+              <div className="sticky bottom-3 z-30 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-border bg-surface/95 p-3 shadow-xl backdrop-blur-md animate-in slide-in-from-bottom-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-xs font-bold text-white">
+                    {selectedIds.length}
+                  </span>
+                  <span className="text-xs font-bold text-content-heading">seleccionados</span>
+                  {onClearSelection && (
+                    <button
+                      type="button"
+                      onClick={onClearSelection}
+                      className="text-[11px] text-content-muted hover:underline ml-1"
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {onBatchConsume && (
+                    <button
+                      type="button"
+                      onClick={onBatchConsume}
+                      className="btn-3d flex min-h-[38px] items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+                    >
+                      <Check size={14} strokeWidth={2.4} /> Consumir
+                    </button>
+                  )}
+                  {onBatchAddToShoppingList && (
+                    <button
+                      type="button"
+                      onClick={onBatchAddToShoppingList}
+                      className="flex min-h-[38px] items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-content hover:bg-surface-muted"
+                    >
+                      <ShoppingCart size={13} /> Comprar
+                    </button>
+                  )}
+                  {onBatchMoveLocation && (
+                    <button
+                      type="button"
+                      onClick={() => onBatchMoveLocation("Freezer")}
+                      className="flex min-h-[38px] items-center gap-1 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-xs font-semibold text-content hover:bg-surface-muted"
+                      title="Mover a Freezer (extiende vencimiento)"
+                    >
+                      🧊 Al Freezer
+                    </button>
+                  )}
+                  {onBatchDelete && (
+                    <button
+                      type="button"
+                      onClick={onBatchDelete}
+                      className="flex min-h-[38px] items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900"
+                      title="Eliminar seleccionados"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

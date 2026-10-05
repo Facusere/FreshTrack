@@ -5,7 +5,7 @@ import {
   BarChart3,
   Bell,
   CalendarDays,
-  Check,
+  HardDrive,
   Home as HomeIcon,
   Leaf,
   Menu,
@@ -22,6 +22,18 @@ import {
   X,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { BackupModal } from "@/components/BackupModal";
+import { playChimeSound, triggerHaptic } from "@/lib/feedback";
+
+function scaleMeasure(measure: string, factor: number): string {
+  if (factor === 1 || !measure) return measure;
+  return measure.replace(/(\d+(?:[.,]\d+)?)/g, (match) => {
+    const num = parseFloat(match.replace(",", "."));
+    if (isNaN(num)) return match;
+    const scaled = Math.round(num * factor * 10) / 10;
+    return String(scaled);
+  });
+}
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import {
   estimateShelfLife,
@@ -383,6 +395,8 @@ function AddProductModal({
 }) {
   const [name, setName] = useState(initialProduct?.name || "");
   const [category, setCategory] = useState(initialProduct?.category || "Almacén seco");
+  const [location, setLocation] = useState(initialProduct?.location || inferLocation(initialProduct?.category || "Almacén seco"));
+  const [isCustomLocation, setIsCustomLocation] = useState(Boolean(initialProduct?.location));
   const [quantity, setQuantity] = useState(initialProduct?.quantity || "1 unidad");
   const [expiryDate, setExpiryDate] = useState(() => initialProduct?.expiryDate || addDaysISO(7, today));
   const [isCustomExpiry, setIsCustomExpiry] = useState(false);
@@ -417,6 +431,9 @@ function AddProductModal({
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
+    if (!isCustomLocation) {
+      setLocation(inferLocation(val));
+    }
     const produce = isFreshProduceCategory(val);
     const estimate = estimateShelfLife(name, shelfState, val, produce ? freshCondition : undefined);
     if (estimate) {
@@ -478,7 +495,7 @@ function AddProductModal({
         quantity: quantity.trim() || "1 unidad",
         icon: detectProductIcon(name, category),
         dateLabel,
-        location: inferLocation(category),
+        location,
         state: finalState,
         openedAt,
       });
@@ -520,15 +537,31 @@ function AddProductModal({
               </select>
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Cantidad</span>
-              <input
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Ej. 2 unidades, 500g"
-                className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-              />
+              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Ubicación</span>
+              <select
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  setIsCustomLocation(true);
+                }}
+                className="w-full appearance-none rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
+              >
+                <option value="Heladera">❄️ Heladera</option>
+                <option value="Freezer">🧊 Freezer</option>
+                <option value="Alacena">🥫 Alacena</option>
+                <option value="Cajón verduras">🥬 Cajón verduras</option>
+              </select>
             </label>
           </div>
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Cantidad</span>
+            <input
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="Ej. 2 unidades, 500g"
+              className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
+            />
+          </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Fecha de vencimiento</span>
@@ -686,6 +719,12 @@ export default function Home() {
   // Theme state
   const { theme, toggleTheme } = useTheme();
 
+  // Location filter & Batch Selection & Backup & Recipe Portions states
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [backupModalOpen, setBackupModalOpen] = useState(false);
+  const [recipePortions, setRecipePortions] = useState<number>(2);
+
   // Automatic background notification check for products expiring in 1 or 2 days
   useEffect(() => {
     if (notificationPreferences.enabled && getNotificationPermission() === "granted") {
@@ -701,7 +740,11 @@ export default function Home() {
     const result = products.filter((product) => {
       const matchesFilter = filter === "all" || product.status === filter;
       const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
-      if (!matchesFilter || !matchesCategory) return false;
+      const prodLoc = (product.location || inferLocation(product.category)).toLowerCase();
+      const matchesLocation =
+        locationFilter === "all" ||
+        prodLoc.includes(locationFilter.toLowerCase());
+      if (!matchesFilter || !matchesCategory || !matchesLocation) return false;
       if (!term) return true;
       return (
         normalizeSearch(product.name).includes(term) ||
@@ -719,7 +762,128 @@ export default function Home() {
     });
 
     return result;
-  }, [filter, products, search, categoryFilter, sortBy]);
+  }, [filter, products, search, categoryFilter, locationFilter, sortBy]);
+
+  const handleQuickConsume = (product: Product) => {
+    playChimeSound("success");
+    triggerHaptic();
+
+    const record: ConsumptionRecord = {
+      id: Date.now(),
+      title: product.name,
+      createdAt: todayISO(today),
+      category: product.category,
+      quantity: "1 unidad",
+      impact: { money: 1200, kg: 0.35 },
+    };
+    setConsumptionHistory((prev) => [...prev, record]);
+
+    const currentQtyNum = parseInt(product.quantity, 10);
+    if (!isNaN(currentQtyNum) && currentQtyNum > 1) {
+      const rest = product.quantity.replace(/^\d+\s*/, "");
+      const nextQty = `${currentQtyNum - 1} ${rest}`.trim();
+      setStoredProducts((prev) =>
+        prev.map((p) => (p.id === product.id ? { ...p, quantity: nextQty } : p))
+      );
+      toast.success(`Consumiste 1 unidad de ${product.name}`, {
+        description: `Quedan ${nextQty}.`,
+      });
+    } else {
+      setStoredProducts((prev) => prev.filter((p) => p.id !== product.id));
+      toast.success(`Consumiste ${product.name}`, {
+        description: "Se guardó en tu balance de ahorro.",
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            setStoredProducts((prev) => [...prev, product]);
+            setConsumptionHistory((prev) => prev.filter((h) => h.id !== record.id));
+            toast.info(`Se restauró ${product.name} a tu despensa`);
+          },
+        },
+      });
+    }
+  };
+
+  const handleToggleSelectProduct = (product: Product) => {
+    setSelectedProductIds((prev) =>
+      prev.includes(product.id) ? prev.filter((id) => id !== product.id) : [...prev, product.id]
+    );
+  };
+
+  const handleSelectAllFiltered = () => {
+    setSelectedProductIds(filteredProducts.map((p) => p.id));
+  };
+
+  const handleClearSelection = () => {
+    setSelectedProductIds([]);
+  };
+
+  const handleBatchConsume = () => {
+    if (selectedProductIds.length === 0) return;
+    playChimeSound("success");
+    triggerHaptic();
+
+    const consumed = products.filter((p) => selectedProductIds.includes(p.id));
+    const newRecords: ConsumptionRecord[] = consumed.map((p) => ({
+      id: Date.now() + Math.random(),
+      title: p.name,
+      createdAt: todayISO(today),
+      category: p.category,
+      quantity: p.quantity,
+      impact: { money: 1200, kg: 0.35 },
+    }));
+
+    setConsumptionHistory((prev) => [...prev, ...newRecords]);
+    setStoredProducts((prev) => prev.filter((p) => !selectedProductIds.includes(p.id)));
+    toast.success(`Consumiste ${consumed.length} alimentos por lote`, {
+      description: "¡Excelente aprovechamiento de tu cocina!",
+    });
+    setSelectedProductIds([]);
+  };
+
+  const handleBatchAddToShoppingList = () => {
+    if (selectedProductIds.length === 0) return;
+    playChimeSound("pop");
+    const items = products.filter((p) => selectedProductIds.includes(p.id));
+    items.forEach((item) => {
+      addItem({
+        name: item.name,
+        quantity: item.quantity,
+        category: item.category,
+        priority: "medium",
+      });
+    });
+    toast.success(`Agregaste ${items.length} alimentos a la lista de compras`);
+    setSelectedProductIds([]);
+  };
+
+  const handleBatchMoveLocation = (targetLocation: string) => {
+    if (selectedProductIds.length === 0) return;
+    playChimeSound("pop");
+    setStoredProducts((prev) =>
+      prev.map((p) => {
+        if (!selectedProductIds.includes(p.id)) return p;
+        let nextExpiry = p.expiryDate;
+        if (targetLocation === "Freezer" && p.location !== "Freezer") {
+          nextExpiry = addDaysISO(90, new Date(p.expiryDate));
+        }
+        return { ...p, location: targetLocation, expiryDate: nextExpiry };
+      })
+    );
+    toast.success(`Moviste ${selectedProductIds.length} alimentos a ${targetLocation}`, {
+      description: targetLocation === "Freezer" ? "Se extendió automáticamente el vencimiento estimado." : undefined,
+    });
+    setSelectedProductIds([]);
+  };
+
+  const handleBatchDelete = () => {
+    if (selectedProductIds.length === 0) return;
+    if (!window.confirm(`¿Seguro que querés eliminar ${selectedProductIds.length} alimentos?`)) return;
+    playChimeSound("delete");
+    setStoredProducts((prev) => prev.filter((p) => !selectedProductIds.includes(p.id)));
+    toast.info(`Se eliminaron ${selectedProductIds.length} alimentos`);
+    setSelectedProductIds([]);
+  };
 
   const soonCount = products.filter((p) => p.status === "soon").length;
   const expiredCount = products.filter((p) => p.status === "expired").length;
@@ -735,16 +899,51 @@ export default function Home() {
   const shownRecipes = visibleRecipes.slice(0, recipeLimit);
 
   const currentNavItems = [
-    { label: "Resumen", icon: HomeIcon },
-    { label: "Mi despensa", icon: PackageOpen, count: products.length > 0 ? String(products.length) : undefined },
-    { label: "Recetas", icon: Utensils, count: visibleRecipes.length > 0 ? String(visibleRecipes.length) : undefined },
-    { label: "Lista de compras", icon: ShoppingCart, count: pendingShoppingCount > 0 ? String(pendingShoppingCount) : undefined },
-    { label: "Reportes", icon: BarChart3 },
+    { id: "Resumen", label: "Resumen", fullLabel: "Resumen", icon: HomeIcon },
+    { id: "Despensa", label: "Despensa", fullLabel: "Mi despensa", icon: PackageOpen, count: products.length > 0 ? String(products.length) : undefined },
+    { id: "Recetas", label: "Recetas", fullLabel: "Recetas sugeridas", icon: Utensils, count: visibleRecipes.length > 0 ? String(visibleRecipes.length) : undefined },
+    { id: "Compras", label: "Compras", fullLabel: "Lista de compras", icon: ShoppingCart, count: pendingShoppingCount > 0 ? String(pendingShoppingCount) : undefined },
+    { id: "Reportes", label: "Reportes", fullLabel: "Reportes y balance", icon: BarChart3 },
   ];
 
   const notificationGroups = groupNotifications(products, notificationPreferences);
 
   useEffect(() => { saveStoredProducts(storedProducts); }, [storedProducts]);
+
+  useEffect(() => {
+    const sectionMap = [
+      { id: "module-summary", nav: "Resumen" },
+      { id: "module-pantry", nav: "Despensa" },
+      { id: "module-recipes", nav: "Recetas" },
+      { id: "module-shopping", nav: "Compras" },
+      { id: "module-reports", nav: "Reportes" },
+    ];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) {
+          visible.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          const matched = sectionMap.find((s) => s.id === visible[0].target.id);
+          if (matched) {
+            setActiveNav(matched.nav);
+          }
+        }
+      },
+      {
+        root: null,
+        rootMargin: "-100px 0px -40% 0px",
+        threshold: [0.1, 0.3, 0.6],
+      }
+    );
+
+    sectionMap.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const priorityKey = useMemo(() => {
     const valid = products.filter((p) => p.status !== "expired" && p.days > 0);
@@ -927,17 +1126,19 @@ export default function Home() {
     setSelectedProduct(null);
   };
 
-  const navigateToModule = (label: string) => {
-    setActiveNav(label);
-    if (label === "Mi despensa") setPantryView("calendar");
+  const navigateToModule = (key: string) => {
+    setActiveNav(key);
+    if (key === "Mi despensa" || key === "Despensa") setPantryView("calendar");
     const targets: Record<string, string> = {
       Resumen: "module-summary",
       "Mi despensa": "module-pantry",
+      Despensa: "module-pantry",
       Recetas: "module-recipes",
       "Lista de compras": "module-shopping",
+      Compras: "module-shopping",
       Reportes: "module-reports",
     };
-    document.getElementById(targets[label] || "module-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(targets[key] || "module-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -959,71 +1160,103 @@ export default function Home() {
           </div>
         </div>
       )}
-      {/* Adaptive Floating Pill Navigation Bar */}
-      <header className="sticky top-3 sm:top-5 z-40 w-full max-w-[1200px] mx-auto px-2.5 sm:px-4">
-        <div className="tomorro-pill-nav px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
-          {/* Brand Wordmark & Status Beacon Pill */}
-          <div className="flex items-center gap-2 sm:gap-3">
+      {/* Pinned Fixed Top Navigation Bar - Always visible on scroll without disappearing */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#070e0a]/95 backdrop-blur-xl border-b border-emerald-950/10 dark:border-emerald-800/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all">
+        <div className="w-full max-w-[1280px] mx-auto px-3 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-2.5 sm:gap-4">
+          {/* Brand Wordmark & Subtle Live Indicator */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => navigateToModule("Resumen")}
-              className="flex items-center gap-2 text-left transition hover:opacity-90"
+              className="flex items-center gap-2.5 text-left group transition hover:opacity-95"
+              aria-label="Ir a la portada de FreshTrack"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xs">
-                <Leaf size={15} strokeWidth={2.4} />
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs transition group-hover:scale-105">
+                <Leaf size={16} strokeWidth={2.4} />
               </span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-content-heading">freshtrack</span>
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-content-heading group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                freshtrack
+              </span>
             </button>
-            <span className="tomorro-tag-beacon hidden sm:inline-flex">
+            <span className="hidden xl:inline-flex tomorro-tag-beacon">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               v1.0 Activo
             </span>
           </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navegación principal">
-            {currentNavItems.map(({ label, count }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => navigateToModule(label)}
-                className={`flex min-h-[38px] items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                  activeNav === label
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-content-muted hover:text-content-heading hover:bg-surface-muted"
-                }`}
-              >
-                <span>{label}</span>
-                {count && (
-                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
-                    activeNav === label ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                  }`}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* Desktop Nav Links - Centered & Highly Legible */}
+          <nav className="hidden lg:flex items-center gap-1 p-1 rounded-full bg-surface-muted/60 dark:bg-emerald-950/20 border border-line" aria-label="Navegación principal">
+            {currentNavItems.map(({ id, label, fullLabel, count }) => {
+              const isActive =
+                activeNav === id ||
+                activeNav === label ||
+                (fullLabel && activeNav === fullLabel) ||
+                (id === "Despensa" && activeNav === "Mi despensa") ||
+                (id === "Compras" && activeNav === "Lista de compras");
+
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => navigateToModule(id)}
+                  className={`flex min-h-[36px] items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
+                    isActive
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-content-muted hover:text-content-heading hover:bg-surface/80"
+                  }`}
+                >
+                  <span>{label}</span>
+                  {count && (
+                    <span
+                      className={`inline-flex items-center justify-center min-w-[18px] h-4.5 px-1.5 rounded-full text-[10px] font-bold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Controls Right */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Omnibar Search */}
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-line bg-surface/70 px-3 py-1.5 text-xs text-content-muted focus-within:border-brand-focus focus-within:ring-1 focus-within:ring-brand-focus transition">
-              <Search size={14} className="text-content-muted" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar en tu despensa"
-                className="w-[120px] md:w-[150px] bg-transparent text-xs text-content outline-none placeholder:text-content-muted"
-              />
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Quick Search */}
+            <div className="hidden md:flex items-center relative">
+              <div className="flex items-center gap-2 rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] px-3 py-1.5 text-xs text-content-muted transition-all duration-200 focus-within:w-48 lg:focus-within:w-56 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 w-32 lg:w-40 shadow-xs">
+                <Search size={14} className="text-content-muted shrink-0" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar alimentos..."
+                  aria-label="Buscar en la despensa"
+                  className="w-full bg-transparent text-xs text-content outline-none placeholder:text-content-muted/80"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="text-content-muted hover:text-content shrink-0"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
             </div>
 
             {canInstallPWA && (
               <button
                 type="button"
                 onClick={() => promptPWAInstall()}
-                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-line bg-surface/80 px-3 py-1 text-xs font-semibold text-content hover:bg-surface-muted transition"
+                title="Instalar aplicación en tu dispositivo"
+                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] px-3 py-1 text-xs font-semibold text-content hover:bg-surface-muted hover:border-emerald-500/40 transition shadow-xs"
               >
-                <Smartphone size={13} /> App
+                <Smartphone size={13} className="text-emerald-500" />
+                <span>App</span>
               </button>
             )}
 
@@ -1033,7 +1266,7 @@ export default function Home() {
               aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content-muted hover:text-content hover:border-line-strong transition"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content-muted hover:text-content hover:border-emerald-500/40 hover:bg-surface-muted transition shadow-xs"
             >
               {theme === "dark" ? (
                 <Sun size={15} className="text-amber-400" />
@@ -1046,29 +1279,44 @@ export default function Home() {
             <button
               type="button"
               aria-label="Notificaciones"
+              title="Notificaciones de vencimiento"
               onClick={() => setNotificationModal(true)}
-              className="relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content-muted hover:text-content hover:border-line-strong transition"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content-muted hover:text-content hover:border-emerald-500/40 hover:bg-surface-muted transition shadow-xs"
             >
               <Bell size={15} />
               {notificationGroups.length > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow-xs">
+                  {notificationGroups.length}
+                </span>
               )}
+            </button>
+
+            {/* Backup & Export Modal Button */}
+            <button
+              type="button"
+              aria-label="Copia de seguridad y exportar"
+              title="Copia de seguridad y exportar"
+              onClick={() => setBackupModalOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content-muted hover:text-content hover:border-emerald-500/40 hover:bg-surface-muted transition shadow-xs"
+            >
+              <HardDrive size={15} />
             </button>
 
             {/* Primary CTA pill */}
             <button
               type="button"
               onClick={() => setModal("scan")}
-              className="tomorro-btn-primary hidden sm:inline-flex min-h-[38px] text-xs px-3.5 sm:px-4 font-semibold"
+              className="tomorro-btn-primary min-h-[38px] text-xs px-3 sm:px-4 font-semibold shadow-xs hover:shadow-md transition-all shrink-0"
             >
               <ScanLine size={15} strokeWidth={2.4} />
               <span className="hidden sm:inline">Escanear compra</span>
+              <span className="sm:hidden">Escanear</span>
             </button>
 
             {/* Mobile Drawer Toggle */}
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content lg:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content lg:hidden hover:bg-surface-muted transition shadow-xs"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Menú principal"
             >
@@ -1117,33 +1365,42 @@ export default function Home() {
             </button>
 
             <div className="mt-6 space-y-1.5">
-              {currentNavItems.map(({ label, icon: Icon, count }) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => {
-                    navigateToModule(label);
-                    setMobileNav(false);
-                  }}
-                  className={`flex min-h-[42px] w-full items-center justify-between rounded-full px-4 py-2.5 text-left text-xs font-semibold transition ${
-                    activeNav === label
-                      ? "bg-emerald-600 text-white shadow-xs"
-                      : "text-content-muted hover:text-content hover:bg-surface-muted"
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <Icon size={16} />
-                    {label}
-                  </span>
-                  {count && (
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      activeNav === label ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-                    }`}>
-                      {count}
+              {currentNavItems.map(({ id, label, fullLabel, icon: Icon, count }) => {
+                const isActive =
+                  activeNav === id ||
+                  activeNav === label ||
+                  (fullLabel && activeNav === fullLabel) ||
+                  (id === "Despensa" && activeNav === "Mi despensa") ||
+                  (id === "Compras" && activeNav === "Lista de compras");
+
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      navigateToModule(id);
+                      setMobileNav(false);
+                    }}
+                    className={`flex min-h-[42px] w-full items-center justify-between rounded-full px-4 py-2.5 text-left text-xs font-semibold transition ${
+                      isActive
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-content-muted hover:text-content hover:bg-surface-muted"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon size={16} />
+                      {fullLabel || label}
                     </span>
-                  )}
-                </button>
-              ))}
+                    {count && (
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        isActive ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="mt-8 border-t border-line pt-4 space-y-2">
@@ -1168,13 +1425,23 @@ export default function Home() {
               >
                 <Bell size={15} /> Notificaciones
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBackupModalOpen(true);
+                  setMobileNav(false);
+                }}
+                className="flex min-h-[40px] w-full items-center gap-3 rounded-full px-4 py-2 text-xs font-semibold text-content-muted hover:text-content hover:bg-surface-muted"
+              >
+                <HardDrive size={15} /> Copia de seguridad y exportar
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* Centered Max-Width 1200px Page Layout */}
-      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-24 md:pb-12 overflow-x-hidden">
+      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 pt-20 sm:pt-24 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-24 md:pb-12 overflow-x-hidden">
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
@@ -1210,6 +1477,8 @@ export default function Home() {
               setFilter={setFilter}
               categoryFilter={categoryFilter}
               setCategoryFilter={setCategoryFilter}
+              locationFilter={locationFilter}
+              setLocationFilter={setLocationFilter}
               sortBy={sortBy}
               setSortBy={setSortBy}
               search={search}
@@ -1220,6 +1489,15 @@ export default function Home() {
               onOpenAdd={() => setModal("add")}
               onEditProduct={setSelectedProduct}
               onOpenProduct={setProductToOpen}
+              onQuickConsume={handleQuickConsume}
+              selectedIds={selectedProductIds}
+              onToggleSelectProduct={handleToggleSelectProduct}
+              onSelectAllFiltered={handleSelectAllFiltered}
+              onClearSelection={handleClearSelection}
+              onBatchConsume={handleBatchConsume}
+              onBatchAddToShoppingList={handleBatchAddToShoppingList}
+              onBatchMoveLocation={handleBatchMoveLocation}
+              onBatchDelete={handleBatchDelete}
               onLoadDemoProducts={() => {
                 const demo = buildDemoProducts(today);
                 setStoredProducts(demo);
@@ -1349,7 +1627,7 @@ export default function Home() {
                     </span>
                   )}
                 </div>
-                <p className="font-serif text-2xl font-semibold text-white">{recipeDetail.title}</p>
+                <p className="font-display text-2xl font-bold tracking-tight text-white">{recipeDetail.title}</p>
                 <p className="mt-1 text-xs text-brand-subtle">
                   {recipeDetail.area || "Receta sugerida"}
                   {recipeDetail.category ? ` · ${recipeDetail.category}` : ""}
@@ -1362,15 +1640,69 @@ export default function Home() {
               <div className="p-5 sm:p-6">
                 <div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Ingredientes</p>
+                    <div className="flex items-center justify-between border-b border-line-subtle pb-2">
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Ingredientes</p>
+                      <div className="flex items-center gap-1.5 rounded-lg border border-line bg-surface-subtle px-2 py-0.5 text-xs">
+                        <span className="text-[11px] font-semibold text-content-muted">Porciones:</span>
+                        <button
+                          type="button"
+                          onClick={() => setRecipePortions((p) => Math.max(1, p - 1))}
+                          className="flex h-5 w-5 items-center justify-center rounded bg-surface hover:bg-surface-elevated font-bold text-content text-xs"
+                          title="Menos porciones"
+                        >
+                          -
+                        </button>
+                        <span className="font-bold text-brand min-w-[12px] text-center">{recipePortions}</span>
+                        <button
+                          type="button"
+                          onClick={() => setRecipePortions((p) => Math.min(12, p + 1))}
+                          className="flex h-5 w-5 items-center justify-center rounded bg-surface hover:bg-surface-elevated font-bold text-content text-xs"
+                          title="Más porciones"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                     <div className="mt-3 space-y-2">
                       {(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => (
                         <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-line-subtle pb-2 text-xs">
                           <span className="font-semibold text-content-heading">{ingredient.name}</span>
-                          <span className="text-right text-content-muted">{ingredient.measure}</span>
+                          <span className="text-right text-content-muted">
+                            {scaleMeasure(ingredient.measure, recipePortions / 2)}
+                          </span>
                         </div>
                       ))}
                     </div>
+
+                    {recipeDetail.ingredients && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const missing = recipeDetail.ingredients!.filter(
+                            (ing) => !recipeDetail.matchedIngredients.some((m) => m.toLowerCase().includes(ing.name.toLowerCase()) || ing.name.toLowerCase().includes(m.toLowerCase()))
+                          );
+                          if (missing.length === 0) {
+                            toast.info("¡Tenés todos los ingredientes en tu despensa!");
+                            return;
+                          }
+                          missing.forEach((m) => {
+                            addItem({
+                              name: m.name,
+                              quantity: scaleMeasure(m.measure, recipePortions / 2) || "1 unidad",
+                              category: "Almacén seco",
+                              priority: "medium",
+                            });
+                          });
+                          playChimeSound("pop");
+                          toast.success(`Agregaste ${missing.length} faltantes a tu lista de compras`, {
+                            description: `Cantidades adaptadas para ${recipePortions} porciones.`,
+                          });
+                        }}
+                        className="mt-3.5 flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text hover:bg-surface transition"
+                      >
+                        <ShoppingCart size={13} /> Agregar faltantes a la lista de compras
+                      </button>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Paso a paso</p>
@@ -1401,6 +1733,17 @@ export default function Home() {
         </Dialog>
       )}
       {notificationModal && <NotificationSettingsModal onClose={() => setNotificationModal(false)} products={products} preferences={notificationPreferences} onSave={savePreferences} />}
+      <BackupModal
+        isOpen={backupModalOpen}
+        onClose={() => setBackupModalOpen(false)}
+        products={products}
+        storedProducts={storedProducts}
+        onRestoreSuccess={() => {
+          setStoredProducts(loadStoredProducts(today));
+          setConsumptionHistory(loadConsumptionHistory());
+          setShoppingList(loadShoppingList());
+        }}
+      />
       {consumptionPlanToConfirm && (
         <ConsumptionConfirmDialog
           isOpen={true}
@@ -1433,6 +1776,42 @@ export default function Home() {
               {selectedProduct.corrected && <p className="mt-2 text-xs font-semibold text-brand-text">✓ Corrección aplicada a futuras detecciones</p>}
             </div>
             <div className="mt-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const prod = selectedProduct;
+                  setSelectedProduct(null);
+                  handleQuickConsume(prod);
+                }}
+                className="w-full min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+              >
+                <Check size={15} strokeWidth={2.4} /> Consumir 1 unidad
+              </button>
+
+              {selectedProduct.location !== "Freezer" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleBatchMoveLocation("Freezer");
+                    setSelectedProduct(null);
+                  }}
+                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-content hover:bg-surface-muted"
+                >
+                  🧊 Mover al Freezer (+90 días estimado)
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleBatchMoveLocation("Heladera");
+                    setSelectedProduct(null);
+                  }}
+                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-content hover:bg-surface-muted"
+                >
+                  ❄️ Pasar a Heladera
+                </button>
+              )}
+
               {selectedProduct.state === "cerrado" && !isFreshProduceCategory(selectedProduct.category) && (
                 <button
                   type="button"
@@ -1441,7 +1820,7 @@ export default function Home() {
                     setSelectedProduct(null);
                     setProductToOpen(prod);
                   }}
-                  className="w-full min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-500/20"
+                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-500/20"
                 >
                   <PackageOpen size={15} /> Marcar como abierto
                 </button>
@@ -1450,14 +1829,14 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }}
-                  className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2.5 text-xs font-bold text-content-body hover:bg-surface-elevated"
+                  className="flex-1 min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs font-bold text-content-body hover:bg-surface-elevated"
                 >
                   <Pencil size={14} /> Corregir
                 </button>
                 <button
                   type="button"
                   onClick={removeSelected}
-                  className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-status-expired-bg border border-status-expired-border px-3 py-2.5 text-xs font-bold text-status-expired-text hover:opacity-90"
+                  className="flex-1 min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-status-expired-bg border border-status-expired-border px-3 py-2 text-xs font-bold text-status-expired-text hover:opacity-90"
                 >
                   <Trash2 size={14} /> Eliminar
                 </button>

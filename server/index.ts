@@ -38,7 +38,7 @@ async function startServer() {
   app.use(express.static(staticPath));
 
   // Handle client-side routing - serve index.html for all SPA routes
-  app.get("{*path}", (_req, res) => {
+  app.use((_req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 

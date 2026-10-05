@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal, PackageOpen } from "lucide-react";
+import { Check, MoreHorizontal, PackageOpen } from "lucide-react";
 import { Product, ProductStatus } from "@/types/product";
 import { formatRelativeDays } from "@/lib/dates";
 import { isQuantityLow } from "@/lib/quantity";
@@ -33,13 +33,34 @@ export function MiniStatus({ status }: { status: ProductStatus }) {
   );
 }
 
+function getLocationIcon(loc?: string): string {
+  if (!loc) return "🥫";
+  const l = loc.toLowerCase();
+  if (l.includes("freezer")) return "🧊";
+  if (l.includes("heladera")) return "❄️";
+  if (l.includes("cajon") || l.includes("verdura")) return "🥬";
+  return "🥫";
+}
+
 export interface ProductRowProps {
   product: Product;
   onEdit: (product: Product) => void;
   onOpen?: (product: Product) => void;
+  onQuickConsume?: (product: Product) => void;
+  selected?: boolean;
+  onToggleSelect?: (product: Product) => void;
+  showCheckbox?: boolean;
 }
 
-export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
+export function ProductRow({
+  product,
+  onEdit,
+  onOpen,
+  onQuickConsume,
+  selected = false,
+  onToggleSelect,
+  showCheckbox = false,
+}: ProductRowProps) {
   const lowStock = isQuantityLow(product.quantity);
   const isOpenUrgent = product.state === "abierto" && product.days <= 2 && product.days >= 0;
   const alertTone =
@@ -53,16 +74,61 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
       ? "border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20"
       : "";
 
+  // Visual freshness gauge percentage
+  const freshnessPercent = Math.max(
+    0,
+    Math.min(
+      100,
+      product.days < 0
+        ? 0
+        : product.days === 0
+        ? 8
+        : product.days <= 2
+        ? 15 + product.days * 12
+        : product.days <= 7
+        ? 40 + (product.days - 2) * 8
+        : 75 + Math.min(25, (product.days - 7) * 2)
+    )
+  );
+
+  const gaugeColor =
+    product.status === "expired"
+      ? "bg-rose-500"
+      : product.status === "soon"
+      ? "bg-amber-500"
+      : "bg-emerald-500";
+
   return (
     <div
-      className={`group grid grid-cols-[minmax(0,1fr)_100px_90px_auto] items-center gap-3 border-b border-line/60 py-3.5 pl-3 pr-2 transition-all duration-150 hover:bg-emerald-50/40 dark:hover:bg-[#16241b] rounded-xl last:border-b-0 ${alertTone}`}
+      className={`group relative grid grid-cols-[minmax(0,1fr)_100px_90px_auto] items-center gap-3 border-b border-line/60 py-3 pl-3 pr-2 transition-all duration-150 hover:bg-emerald-50/40 dark:hover:bg-[#16241b] rounded-xl last:border-b-0 ${alertTone} ${
+        selected ? "bg-brand-subtle/70 ring-1 ring-brand-border" : ""
+      }`}
     >
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2.5">
+        {/* Selection Checkbox (always visible if showCheckbox or selected, otherwise visible on group hover) */}
+        {(showCheckbox || selected) ? (
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect?.(product)}
+            aria-label={`Seleccionar ${product.name}`}
+            className="h-4 w-4 rounded border-line text-brand accent-brand focus:ring-brand shrink-0 cursor-pointer"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => onToggleSelect?.(product)}
+            className="hidden group-hover:flex h-4 w-4 shrink-0 rounded border border-line bg-surface hover:border-brand cursor-pointer items-center justify-center transition"
+            aria-label={`Seleccionar ${product.name}`}
+            title="Seleccionar para lote"
+          />
+        )}
+
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface border border-line text-xl shadow-xs">
           {product.icon}
         </span>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
             <p className="truncate text-xs sm:text-sm font-semibold text-content-heading">
               {product.name}
             </p>
@@ -74,10 +140,32 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
                 <PackageOpen size={11} /> Abierto
               </span>
             )}
+            {product.location && (
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-line bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-content-muted">
+                <span>{getLocationIcon(product.location)}</span> {product.location}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 truncate text-[11px] text-content-muted">
             {product.quantity} · {product.category}
           </p>
+
+          {/* Freshness Gauge Progress Bar */}
+          <div className="mt-1.5 flex items-center gap-2">
+            <div
+              className="h-1.5 w-20 sm:w-28 overflow-hidden rounded-full bg-line/80 dark:bg-surface-muted"
+              title={`Frescura restante: ${freshnessPercent}%`}
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${gaugeColor}`}
+                style={{ width: `${freshnessPercent}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-medium text-content-muted">
+              {product.days <= 0 ? "0%" : `${Math.round(freshnessPercent)}% vida`}
+            </span>
+          </div>
+
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {isOpenUrgent && (
               <span className="inline-flex rounded-full bg-amber-100 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
@@ -113,6 +201,23 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
       <MiniStatus status={product.status} />
 
       <div className="relative flex items-center justify-end gap-1">
+        {/* Quick 1-click Consumed Button */}
+        {onQuickConsume && (
+          <button
+            type="button"
+            aria-label={`Consumir ${product.name}`}
+            title="Consumir 1 unidad"
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickConsume(product);
+            }}
+            className="flex h-8 items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2 text-[11px] font-bold text-emerald-800 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 transition"
+          >
+            <Check size={13} strokeWidth={2.4} />
+            <span className="hidden xl:inline">Consumir</span>
+          </button>
+        )}
+
         {onOpen && product.state === "cerrado" && !isFreshProduceCategory(product.category) && (
           <button
             type="button"

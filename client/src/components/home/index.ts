@@ -1,6 +1,5 @@
 export * from "./HeroSection";
 export * from "./StatsSection";
-export * from "./ImpactSection";
 export * from "./ProductRow";
 export * from "./PantrySection";
 export * from "./WeekCalendar";

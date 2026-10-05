@@ -37,16 +37,16 @@ export function HeroSection({
 
   return (
     <section id="module-summary" className="scroll-mt-24 space-y-4 w-full max-w-full overflow-hidden">
-      {/* Modern Emerald Canvas Stage */}
-      <div className="relative overflow-hidden rounded-[26px] sm:rounded-[32px] bg-gradient-to-br from-[#0a150e] via-[#0f2217] to-[#07130b] text-white border border-emerald-900/40 px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-9 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.22),0_12px_32px_rgba(0,0,0,0.35)]">
+      {/* Modern Adaptive Emerald Canvas Stage */}
+      <div className="relative overflow-hidden rounded-[26px] sm:rounded-[32px] bg-gradient-to-br from-[#e6f4ea] via-[#daf0e2] to-[#eaf6ee] dark:from-[#0a1710] dark:via-[#0f251a] dark:to-[#07140d] text-slate-900 dark:text-white border border-emerald-300/80 dark:border-emerald-900/50 px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-9 shadow-[0_16px_40px_-10px_rgba(16,185,129,0.15),0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-[0_24px_60px_-15px_rgba(16,185,129,0.22),0_12px_32px_rgba(0,0,0,0.35)] transition-colors duration-200">
         {/* Atmospheric Decorative Glow Orbs */}
         <div
           aria-hidden="true"
-          className="tomorro-orb absolute -right-20 -top-24 sm:-right-8 sm:-top-16 opacity-70"
+          className="tomorro-orb absolute -right-20 -top-24 sm:-right-8 sm:-top-16 opacity-60 dark:opacity-70"
         />
         <div
           aria-hidden="true"
-          className="tomorro-orb absolute -left-36 -bottom-36 opacity-30"
+          className="tomorro-orb absolute -left-36 -bottom-36 opacity-30 dark:opacity-30"
         />
 
         <div className="relative z-10 grid gap-7 sm:gap-9 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -57,32 +57,32 @@ export function HeroSection({
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="tomorro-announcement-pill max-w-full group cursor-pointer text-left text-xs sm:text-[13px] hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
+                className="tomorro-announcement-pill max-w-full group cursor-pointer text-left text-xs sm:text-[13px] hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all"
               >
-                <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                 <span className="truncate">
                   Motor OCR inteligente ·{" "}
-                  <span className="text-emerald-300 font-semibold">escaneo sin conexión</span>
+                  <span className="text-emerald-700 dark:text-emerald-300 font-bold">escaneo sin conexión</span>
                 </span>
                 <ChevronRight
                   size={14}
-                  className="shrink-0 text-emerald-200 transition-transform duration-200 group-hover:translate-x-0.5"
+                  className="shrink-0 text-emerald-600 dark:text-emerald-200 transition-transform duration-200 group-hover:translate-x-0.5"
                 />
               </button>
             </div>
 
             {/* Display Headline with Gradient Accent */}
-            <h1 className="font-display text-[32px] sm:text-[46px] lg:text-[54px] leading-[0.94] tracking-[-0.02em] text-white font-extrabold break-words">
+            <h1 className="font-display text-[32px] sm:text-[44px] lg:text-[52px] leading-[1.12] tracking-tight text-slate-900 dark:text-white font-extrabold break-words">
               Que nada rico termine en la{" "}
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-green-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-700 via-teal-600 to-emerald-600 dark:from-emerald-400 dark:via-teal-300 dark:to-green-300 bg-clip-text text-transparent font-extrabold">
                 basura.
               </span>
             </h1>
 
             {/* Body Paragraph */}
-            <p className="text-xs sm:text-base leading-[1.6] text-emerald-100/80 max-w-[480px]">
+            <p className="text-xs sm:text-base leading-[1.65] text-slate-700 dark:text-emerald-100/85 max-w-[500px] font-normal">
               FreshTrack digitaliza tus compras con{" "}
-              <span className="text-emerald-300 font-semibold">Reconocimiento OCR</span>, estima
+              <strong className="text-emerald-800 dark:text-emerald-300 font-bold">Reconocimiento OCR</strong>, estima
               vencimientos y te avisa a tiempo. Menos desperdicio, más tranquilidad.
             </p>
 
@@ -91,7 +91,7 @@ export function HeroSection({
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="tomorro-btn-primary min-h-[44px] text-xs sm:text-sm font-semibold"
+                className="tomorro-btn-primary min-h-[44px] text-xs sm:text-sm font-semibold shadow-xs hover:shadow-md transition-all"
               >
                 <ScanLine size={16} strokeWidth={2.4} />
                 <span>Escanear compra</span>
@@ -99,34 +99,34 @@ export function HeroSection({
               <button
                 type="button"
                 onClick={onOpenAdd}
-                className="tomorro-btn-ghost min-h-[44px] text-xs sm:text-sm border-white/25 hover:border-emerald-400 hover:bg-white/10"
+                className="tomorro-btn-ghost min-h-[44px] text-xs sm:text-sm shadow-2xs"
               >
-                <Plus size={15} strokeWidth={2.2} />
+                <Plus size={15} strokeWidth={2.4} />
                 <span>Agregar manual</span>
               </button>
             </div>
 
             {/* Micro Details */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-emerald-200/70">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-800/40 bg-emerald-950/60 px-3 py-1 text-white backdrop-blur-sm">
-                <Sparkles size={12} className="text-emerald-400" />
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-slate-600 dark:text-emerald-200/70 font-medium">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-white/80 dark:border-emerald-800/40 dark:bg-emerald-950/60 px-3 py-1 text-emerald-950 dark:text-white backdrop-blur-sm shadow-2xs font-semibold">
+                <Sparkles size={12} className="text-emerald-600 dark:text-emerald-400" />
                 {catalogSize} alimentos regionales
               </span>
               <span>·</span>
-              <span className="text-emerald-200/80">Vida útil abierto y cerrado</span>
+              <span className="text-slate-700 dark:text-emerald-200/80">Vida útil abierto y cerrado</span>
               <span>·</span>
-              <span className="flex items-center gap-1 text-emerald-200/80">
-                <ShieldCheck size={13} className="text-emerald-400" /> 100% privado
+              <span className="flex items-center gap-1 text-slate-700 dark:text-emerald-200/80">
+                <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" /> 100% privado
               </span>
             </div>
           </div>
 
           {/* Right Column: Floating Product Mockup Card */}
           <div className="tomorro-mockup-stack relative flex items-center justify-center pt-2 lg:pt-0">
-            {/* Rear Ambient Glow Layer */}
+            {/* Subtle soft ambient glow (radial, no sharp geometry or rotated triangles) */}
             <div
               aria-hidden="true"
-              className="hidden sm:block absolute -right-2 top-2 h-56 w-72 sm:w-84 -rotate-3 rounded-[24px] bg-emerald-900/25 border border-emerald-800/30 opacity-60 blur-[2px] pointer-events-none"
+              className="absolute -inset-3 rounded-full bg-emerald-500/15 blur-2xl pointer-events-none"
             />
 
             {/* Front Card: Crisp Interface Mockup with REAL Pantry Radar */}
@@ -141,12 +141,12 @@ export function HeroSection({
                   onOpenScan();
                 }
               }}
-              className="tomorro-mockup-card group relative z-20 w-full max-w-[400px] rotate-0 sm:-rotate-2 cursor-pointer p-4 sm:p-5 text-slate-800 dark:text-slate-100 bg-white/95 dark:bg-[#111a14]/95 backdrop-blur-md border border-white/70 dark:border-emerald-800/50 shadow-[0_24px_50px_rgba(0,0,0,0.35)]"
+              className="tomorro-mockup-card group relative z-20 w-full max-w-[420px] cursor-pointer p-4 sm:p-5 text-slate-800 dark:text-slate-100 bg-white dark:bg-[#111a14] backdrop-blur-md border border-emerald-200/90 dark:border-emerald-800/50 shadow-[0_16px_40px_rgba(15,23,19,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.38)]"
             >
               {/* Top card header */}
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-emerald-900/40 pb-3">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-emerald-900/40 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-300/80 dark:border-emerald-800/40 shadow-2xs">
                     <ScanLine size={16} strokeWidth={2.2} />
                   </span>
                   <div>
@@ -156,7 +156,7 @@ export function HeroSection({
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
                   En Vivo
                 </span>
@@ -168,10 +168,10 @@ export function HeroSection({
                   radarProducts.map((p) => {
                     const badgeClass =
                       p.status === "expired"
-                        ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50"
+                        ? "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50"
                         : p.status === "soon"
-                        ? "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50"
-                        : "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
+                        ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50"
+                        : "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
                     const badgeText =
                       p.status === "expired"
                         ? "Vencido"
@@ -182,12 +182,12 @@ export function HeroSection({
                     return (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-[#16241b] p-2.5 border border-slate-100 dark:border-emerald-900/30 transition hover:bg-emerald-50/50 dark:hover:bg-[#1b2d22]"
+                        className="flex items-center justify-between rounded-xl bg-slate-50/90 dark:bg-[#16241b] p-2.5 border border-slate-200/80 dark:border-emerald-900/30 transition hover:bg-emerald-50 dark:hover:bg-[#1b2d22]"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span className="text-xl shrink-0">{p.icon}</span>
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{p.name}</p>
+                            <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">{p.name}</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
                               {p.category} · {p.quantity}
                             </p>
@@ -200,7 +200,7 @@ export function HeroSection({
                     );
                   })
                 ) : (
-                  <div className="rounded-xl bg-slate-50 dark:bg-[#16241b] p-3.5 text-center border border-dashed border-slate-200 dark:border-emerald-900/40">
+                  <div className="rounded-xl bg-slate-50 dark:bg-[#16241b] p-3.5 text-center border border-dashed border-slate-300 dark:border-emerald-900/40">
                     <p className="text-xs font-bold text-slate-800 dark:text-white">Tu despensa está lista</p>
                     <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                       Escaneá un ticket para cargar alimentos y activar el radar de vencimientos.
@@ -210,7 +210,7 @@ export function HeroSection({
               </div>
 
               {/* Bottom actionable footer */}
-              <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 dark:border-emerald-900/30 pt-2.5">
+              <div className="mt-3.5 flex items-center justify-between border-t border-slate-200 dark:border-emerald-900/30 pt-2.5">
                 <div className="text-xs">
                   <p className="font-bold text-slate-900 dark:text-white">
                     {products.length > 0

@@ -124,7 +124,7 @@ export function ReportsSection({
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-subtle text-brand-text">
             <BarChart3 size={28} />
           </div>
-          <h3 className="mt-4 font-serif text-xl font-semibold text-content-heading">
+          <h3 className="mt-4 font-display text-xl font-semibold text-content-heading">
             Todavía no hay suficientes datos, volvé en unas semanas.
           </h3>
           <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-content-muted">
@@ -142,7 +142,7 @@ export function ReportsSection({
                 <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-content-muted">
                   <TrendingDown size={14} className="text-brand" /> Ahorro histórico
                 </p>
-                <h3 className="mt-1 font-serif text-xl font-semibold text-content-heading">
+                <h3 className="mt-1 font-display text-xl font-semibold text-content-heading">
                   Desperdicio evitado por mes
                 </h3>
               </div>
@@ -218,7 +218,7 @@ export function ReportsSection({
                 <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-status-expired-text">
                   <PieChartIcon size={14} /> Dónde se pierde más
                 </p>
-                <h3 className="mt-1 font-serif text-xl font-semibold text-content-heading">
+                <h3 className="mt-1 font-display text-xl font-semibold text-content-heading">
                   Categorías con más vencimientos
                 </h3>
               </div>
@@ -284,7 +284,7 @@ export function ReportsSection({
                 <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-status-expired-text">
                   <AlertOctagon size={14} /> Atención especial
                 </p>
-                <h3 className="mt-1 font-serif text-xl font-semibold text-content-heading">
+                <h3 className="mt-1 font-display text-xl font-semibold text-content-heading">
                   Top 5 productos que más se vencen
                 </h3>
               </div>
@@ -332,7 +332,7 @@ export function ReportsSection({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Historial reciente</p>
-              <h3 className="mt-1 font-serif text-xl font-semibold text-content-heading">Últimos consumos aprovechados</h3>
+              <h3 className="mt-1 font-display text-xl font-semibold text-content-heading">Últimos consumos aprovechados</h3>
             </div>
             <p className="text-xs text-content-muted">Podés deshacer acciones si te equivocaste</p>
           </div>

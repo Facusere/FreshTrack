@@ -188,7 +188,7 @@ export function RecipesSection({
               // C6: Empty state when < 3 non-expired products
               <div className="rounded-2xl border border-line bg-surface-subtle/50 py-12 px-4 text-center">
                 <PackageOpen className="mx-auto text-content-muted" size={38} />
-                <h3 className="mt-3 font-serif text-lg font-bold text-content-heading">
+                <h3 className="mt-3 font-display text-lg font-bold text-content-heading">
                   Tu despensa necesita al menos 3 alimentos
                 </h3>
                 <p className="mx-auto mt-1 max-w-md text-xs text-content-muted leading-relaxed">
@@ -222,7 +222,7 @@ export function RecipesSection({
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="h-2.5 w-2.5 rounded-full bg-status-ok-dot" />
-                    <h3 className="font-serif text-lg font-bold text-content-heading">
+                    <h3 className="font-display text-lg font-bold text-content-heading">
                       Podés hacer ahora
                     </h3>
                     <span className="rounded-full bg-status-ok-bg px-2.5 py-0.5 text-xs font-bold text-status-ok-text border border-status-ok-border">
@@ -264,7 +264,7 @@ export function RecipesSection({
                                 <span className="text-[11px] font-bold uppercase tracking-wider text-brand">
                                   {match.recipe.category}
                                 </span>
-                                <h4 className="mt-0.5 font-serif text-base font-bold text-content-heading line-clamp-1">
+                                <h4 className="mt-0.5 font-display text-base font-bold text-content-heading line-clamp-1">
                                   {match.recipe.name}
                                 </h4>
                                 <p className="mt-1 text-xs text-content-muted line-clamp-2">
@@ -300,7 +300,7 @@ export function RecipesSection({
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="h-2.5 w-2.5 rounded-full bg-status-soon-dot" />
-                    <h3 className="font-serif text-lg font-bold text-content-heading">
+                    <h3 className="font-display text-lg font-bold text-content-heading">
                       Te falta poco
                     </h3>
                     <span className="rounded-full bg-status-soon-bg px-2.5 py-0.5 text-xs font-bold text-status-soon-text border border-status-soon-border">
@@ -342,7 +342,7 @@ export function RecipesSection({
                                 <span className="text-[11px] font-bold uppercase tracking-wider text-brand">
                                   {match.recipe.category}
                                 </span>
-                                <h4 className="mt-0.5 font-serif text-base font-bold text-content-heading line-clamp-1">
+                                <h4 className="mt-0.5 font-display text-base font-bold text-content-heading line-clamp-1">
                                   {match.recipe.name}
                                 </h4>
 
@@ -404,7 +404,7 @@ export function RecipesSection({
                       ) : (
                         <ChevronDown size={16} className="text-content-muted" />
                       )}
-                      <h3 className="font-serif text-base font-bold text-content-heading">
+                      <h3 className="font-display text-base font-bold text-content-heading">
                         Necesitás comprar más
                       </h3>
                       <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-content-muted border border-line">
@@ -447,7 +447,7 @@ export function RecipesSection({
                               </div>
 
                               <div className="mt-2.5">
-                                <h4 className="font-serif text-sm font-bold text-content-heading line-clamp-1">
+                                <h4 className="font-display text-sm font-bold text-content-heading line-clamp-1">
                                   {match.recipe.name}
                                 </h4>
                                 <p className="mt-1 text-xs text-content-muted line-clamp-2">

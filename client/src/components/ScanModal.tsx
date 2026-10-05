@@ -7,7 +7,9 @@ import {
   Plus,
   ReceiptText,
   RefreshCw,
+  ScanBarcode,
   ScanLine,
+  Search,
   Sparkles,
   SwitchCamera,
   Trash2,
@@ -28,6 +30,12 @@ import { addDaysISO } from "@/lib/dates";
 import { saveLastScan } from "@/lib/storage";
 import { estimateShelfLife } from "@/lib/shelfLifeCatalog";
 import {
+  fetchProductByBarcode,
+  detectBarcodeFromImageSource,
+  isBarcodeDetectorSupported,
+} from "@/lib/barcodeScanner";
+import { playChimeSound, triggerHaptic } from "@/lib/feedback";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -44,8 +52,10 @@ type ScanInputMethod = "camera" | "upload" | "sample";
 
 export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps) {
   const [stage, setStage] = useState<"choose" | "scanning" | "results">("choose");
-  const [scanMode, setScanMode] = useState<"ticket" | "label">("ticket");
+  const [scanMode, setScanMode] = useState<"ticket" | "label" | "barcode">("ticket");
   const [inputMethod, setInputMethod] = useState<ScanInputMethod>("camera");
+  const [barcodeInput, setBarcodeInput] = useState("");
+  const [isSearchingBarcode, setIsSearchingBarcode] = useState(false);
 
   // Camera state
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -208,8 +218,81 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     }, 450);
   };
 
+  // Barcode lookup via OpenFoodFacts
+  const handleLookupBarcode = async (codeToLookup?: string) => {
+    const code = (codeToLookup || barcodeInput).trim();
+    if (!code) {
+      toast.error("Ingresá un código de barras");
+      return;
+    }
+    stopCameraStream();
+    setIsSearchingBarcode(true);
+    setStage("scanning");
+    setOcrProgress({ status: `Consultando base OpenFoodFacts (${code})...`, progress: 50 });
+
+    try {
+      const result = await fetchProductByBarcode(code);
+      if (result) {
+        playChimeSound("scan");
+        triggerHaptic();
+        setDetectedProducts([
+          {
+            id: Date.now(),
+            name: result.name,
+            category: result.category,
+            expiryDate: result.expiryDate,
+            quantity: result.quantity,
+            icon: result.icon,
+            location: result.location,
+            estimated: true,
+            dateLabel: "vencimiento",
+            confidence: 98,
+          },
+        ]);
+        toast.success("¡Producto reconocido!", {
+          description: `${result.name} · ${result.category}`,
+        });
+        setStage("results");
+      } else {
+        toast.error("Código no encontrado", {
+          description: "No se encontró en Open Food Facts. Podés ingresarlo manualmente.",
+        });
+        setStage("choose");
+      }
+    } catch {
+      toast.error("Error al consultar el código");
+      setStage("choose");
+    } finally {
+      setIsSearchingBarcode(false);
+    }
+  };
+
+  // Barcode live scan from camera stream
+  const handleScanBarcodeFromCamera = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const detectedCode = await detectBarcodeFromImageSource(canvas);
+    if (detectedCode) {
+      handleLookupBarcode(detectedCode);
+    } else {
+      toast("No se detectó un código en el recuadro", {
+        description: "Probá acercando más el código de barras o escribí los dígitos abajo.",
+        icon: "🔍",
+      });
+    }
+  };
+
   // Process extracted OCR text and transition to results
   const processOCRResult = (text: string) => {
+    playChimeSound("success");
+    triggerHaptic();
     const parsed = parseReceiptAndLabelText(text, detectIconFn);
 
     if (parsed.length === 0) {
@@ -293,10 +376,13 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
       expiryDate: p.expiryDate,
       quantity: p.quantity,
       icon: p.icon,
+      location: p.location,
       estimated: p.estimated,
       dateLabel: p.dateLabel,
     }));
 
+    playChimeSound("success");
+    triggerHaptic();
     saveLastScan({ at: new Date().toISOString(), count: finalProducts.length });
     onComplete(finalProducts);
     onClose();
@@ -327,12 +413,18 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <div>
-            <DialogTitle className="font-serif text-xl font-semibold text-content">
-              {stage === "results" ? "Revisar compra detectada" : "Escaneo OCR inteligente"}
+            <DialogTitle className="font-display text-xl font-bold tracking-tight text-content">
+              {stage === "results"
+                ? "Revisar compra detectada"
+                : scanMode === "barcode"
+                ? "Escanear código de barras"
+                : "Escaneo OCR inteligente"}
             </DialogTitle>
             <DialogDescription id="scan-modal-desc" className="mt-0.5 text-xs text-content-muted">
               {stage === "results"
                 ? "Verificá cantidades y fechas antes de guardar"
+                : scanMode === "barcode"
+                ? "Buscá alimentos por su código EAN en la base global OpenFoodFacts."
                 : "El reconocimiento de texto corre en tu dispositivo, sin conexión."}
             </DialogDescription>
           </div>
@@ -348,23 +440,34 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         {/* Stage 1: Choose Source (Camera, File Upload, or Sample) */}
         {stage === "choose" && (
           <div className="p-5">
-            {/* Mode: Ticket vs Label */}
-            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-surface-elevated p-1">
+            {/* Mode: Ticket vs Label vs Barcode */}
+            <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-surface-elevated p-1">
               <button
+                type="button"
                 onClick={() => setScanMode("ticket")}
-                className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-                  scanMode === "ticket" ? "bg-surface text-brand shadow-sm" : "text-content-muted"
+                className={`min-h-[44px] flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition ${
+                  scanMode === "ticket" ? "bg-surface text-brand shadow-sm font-bold" : "text-content-muted"
                 }`}
               >
-                <ReceiptText size={15} /> Ticket de compra
+                <ReceiptText size={14} /> Ticket
               </button>
               <button
+                type="button"
                 onClick={() => setScanMode("label")}
-                className={`min-h-[44px] flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-                  scanMode === "label" ? "bg-surface text-brand shadow-sm" : "text-content-muted"
+                className={`min-h-[44px] flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition ${
+                  scanMode === "label" ? "bg-surface text-brand shadow-sm font-bold" : "text-content-muted"
                 }`}
               >
-                <ScanLine size={15} /> Etiqueta / Vto
+                <ScanLine size={14} /> Etiqueta
+              </button>
+              <button
+                type="button"
+                onClick={() => setScanMode("barcode")}
+                className={`min-h-[44px] flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition ${
+                  scanMode === "barcode" ? "bg-surface text-brand shadow-sm font-bold" : "text-content-muted"
+                }`}
+              >
+                <ScanBarcode size={14} /> Código barras
               </button>
             </div>
 
@@ -460,12 +563,86 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
 
                     {/* Trigger Button */}
                     <div className="absolute bottom-3 left-0 right-0 flex justify-center px-4">
-                      <button
-                        onClick={captureAndScan}
-                        className="min-h-[44px] flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-xs font-bold text-white shadow-lg transition hover:bg-brand-hover active:scale-95"
-                      >
-                        <ScanLine size={16} /> Capturar y leer con OCR
-                      </button>
+                      {scanMode === "barcode" ? (
+                        <button
+                          type="button"
+                          onClick={handleScanBarcodeFromCamera}
+                          className="min-h-[44px] flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-xs font-bold text-white shadow-lg transition hover:bg-brand-hover active:scale-95"
+                        >
+                          <ScanBarcode size={16} /> Escanear código con cámara
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={captureAndScan}
+                          className="min-h-[44px] flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-xs font-bold text-white shadow-lg transition hover:bg-brand-hover active:scale-95"
+                        >
+                          <ScanLine size={16} /> Capturar y leer con OCR
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Direct Barcode Entry when in Barcode Mode */}
+                {scanMode === "barcode" && (
+                  <div className="mt-4 rounded-2xl border border-line bg-surface p-4 space-y-3">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-content-muted">
+                        Búsqueda directa EAN-13 / UPC
+                      </span>
+                      <div className="mt-1.5 flex gap-2">
+                        <input
+                          type="text"
+                          value={barcodeInput}
+                          onChange={(e) => setBarcodeInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleLookupBarcode();
+                          }}
+                          placeholder="Ej: 7790742330800 o pegar código..."
+                          className="flex-1 rounded-xl border border-line bg-surface-subtle px-3.5 py-2 text-xs text-content outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleLookupBarcode()}
+                          disabled={isSearchingBarcode}
+                          className="btn-3d inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white hover:bg-brand-hover disabled:opacity-50"
+                        >
+                          {isSearchingBarcode ? (
+                            <LoaderCircle size={14} className="animate-spin" />
+                          ) : (
+                            <Search size={14} />
+                          )}
+                          Buscar
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] font-bold text-content-muted">
+                        Probar con alimentos comunes:
+                      </span>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {[
+                          { name: "🥛 Leche Ilolay", code: "7790742330800" },
+                          { name: "🍪 Criollitas", code: "7790070411707" },
+                          { name: "🍚 Arroz Lucchetti", code: "7790387011400" },
+                          { name: "🍝 Fideos Matarazzo", code: "7790070318532" },
+                          { name: "🐟 Atún La Campagnola", code: "7790070509657" },
+                        ].map((sample) => (
+                          <button
+                            key={sample.code}
+                            type="button"
+                            onClick={() => {
+                              setBarcodeInput(sample.code);
+                              handleLookupBarcode(sample.code);
+                            }}
+                            className="rounded-lg border border-brand-border/60 bg-brand-subtle px-2.5 py-1 text-[11px] font-semibold text-brand-text hover:bg-brand/10 transition"
+                          >
+                            {sample.name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -560,7 +737,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
               <LoaderCircle size={38} className="animate-spin" strokeWidth={1.6} />
               <span className="absolute inset-0 animate-ping rounded-[24px] border border-brand-border opacity-30" />
             </div>
-            <p className="mt-5 font-serif text-2xl font-semibold text-content">Procesando compra...</p>
+            <p className="mt-5 font-display text-2xl font-bold tracking-tight text-content">Procesando compra...</p>
             <p className="mt-1 text-xs text-content-muted">{ocrProgress.status}</p>
 
             <div className="mt-6 h-2 w-56 overflow-hidden rounded-full bg-brand-subtle">
