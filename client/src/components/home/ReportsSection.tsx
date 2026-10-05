@@ -34,16 +34,16 @@ export interface ReportsSectionProps {
   onUndoConsumption: (recordId: number) => void;
 }
 
-// Colors referencing Tomorro palette directly
+// Crisp, high-contrast categorical palette for charts
 const PIE_COLORS = [
-  "#68ef3f", // Electric Sprout
-  "#26a200", // Deep Verdant
-  "#273f2b", // Moss Shadow
-  "#7e8371", // Lichen Sage
-  "#b7bda5", // Pale Fern
-  "#d97706", // Amber
-  "#dc2626", // Red
-  "#30322a", // Onyx Olive
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#f43f5e", // Rose
+  "#0ea5e9", // Sky Blue
+  "#8b5cf6", // Violet
+  "#14b8a6", // Teal
+  "#ec4899", // Pink
+  "#6366f1", // Indigo
 ];
 
 export function ReportsSection({
@@ -78,39 +78,39 @@ export function ReportsSection({
       <div className="tomorro-card-bone relative overflow-hidden p-5 sm:p-6 lg:p-7 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#5c6351] dark:text-[#b7bda5]">
-              <BarChart3 size={15} className="text-[#26a200] dark:text-[#68ef3f]" /> Estadísticas y Reportes
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-content-muted">
+              <BarChart3 size={15} className="text-brand" /> Estadísticas y Reportes
             </p>
-            <h2 className="mt-2 font-display text-2xl sm:text-[28px] font-bold tracking-tight text-[#122314] dark:text-white">
+            <h2 className="mt-2 font-display text-2xl sm:text-[28px] font-bold tracking-tight text-content-heading">
               Tu impacto en números y tendencias
             </h2>
-            <p className="mt-1 max-w-[560px] text-xs sm:text-sm leading-5 text-[#5c6351] dark:text-[#b7bda5]">
+            <p className="mt-1 max-w-[560px] text-xs sm:text-sm leading-5 text-content-muted">
               Monitoreá el desperdicio evitado, los pesos recuperados y descubrí qué categorías requieren mayor atención en tus compras.
             </p>
           </div>
-          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] px-4 py-3 text-right shadow-xs">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#5c6351] dark:text-[#b7bda5]">Acciones registradas</p>
-            <p className="mt-1 font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-[#68ef3f]">{impact.actions}</p>
-            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">este mes</p>
+          <div className="rounded-2xl bg-surface border border-line px-4 py-3 text-right shadow-xs">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-content-muted">Acciones registradas</p>
+            <p className="mt-1 font-display text-2xl font-bold tracking-tight text-brand">{impact.actions}</p>
+            <p className="text-xs text-content-muted">este mes</p>
           </div>
         </div>
 
         {/* 3 Metric Cards */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
-            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Comida salvada</p>
-            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{impact.kgSaved} kg</p>
-            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">estimado acumulado</p>
+          <div className="rounded-2xl bg-surface border border-line p-4 shadow-xs">
+            <p className="text-xs font-semibold text-content-muted">Comida salvada</p>
+            <p className="mt-1 font-display text-2xl font-bold text-brand">{impact.kgSaved} kg</p>
+            <p className="text-xs text-content-muted">estimado acumulado</p>
           </div>
-          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
-            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Valor recuperado</p>
-            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{formatMoney(impact.moneySaved)}</p>
-            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">estimado acumulado</p>
+          <div className="rounded-2xl bg-surface border border-line p-4 shadow-xs">
+            <p className="text-xs font-semibold text-content-muted">Valor recuperado</p>
+            <p className="mt-1 font-display text-2xl font-bold text-brand">{formatMoney(impact.moneySaved)}</p>
+            <p className="text-xs text-content-muted">estimado acumulado</p>
           </div>
-          <div className="rounded-2xl bg-white dark:bg-[#122314] border border-[#d9deca] dark:border-[#273f2b] p-4 shadow-xs">
-            <p className="text-xs font-semibold text-[#5c6351] dark:text-[#b7bda5]">Comidas posibles</p>
-            <p className="mt-1 font-display text-2xl font-bold text-[#122314] dark:text-[#68ef3f]">{impact.mealsSaved}</p>
-            <p className="text-xs text-[#5c6351] dark:text-[#b7bda5]">porciones aprovechadas</p>
+          <div className="rounded-2xl bg-surface border border-line p-4 shadow-xs">
+            <p className="text-xs font-semibold text-content-muted">Comidas posibles</p>
+            <p className="mt-1 font-display text-2xl font-bold text-brand">{impact.mealsSaved}</p>
+            <p className="text-xs text-content-muted">porciones aprovechadas</p>
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@ export function ReportsSection({
                   <XAxis dataKey="month" stroke="var(--content-muted)" fontSize={12} tickLine={false} />
                   <YAxis
                     yAxisId="left"
-                    stroke="var(--brand)"
+                    stroke="#10b981"
                     fontSize={12}
                     tickLine={false}
                     tickFormatter={(v) => `${v}kg`}
@@ -170,7 +170,7 @@ export function ReportsSection({
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    stroke="var(--status-soon-dot)"
+                    stroke="#f59e0b"
                     fontSize={12}
                     tickLine={false}
                     tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
@@ -182,6 +182,7 @@ export function ReportsSection({
                       borderRadius: "14px",
                       fontSize: "12px",
                       boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+                      color: "var(--content)",
                     }}
                     formatter={(value: any, name: any) => {
                       if (name === "Comida salvada") return [`${value} kg`, name];
@@ -194,14 +195,14 @@ export function ReportsSection({
                     yAxisId="left"
                     dataKey="kg"
                     name="Comida salvada"
-                    fill="var(--brand)"
+                    fill="#10b981"
                     radius={[6, 6, 0, 0]}
                   />
                   <Bar
                     yAxisId="right"
                     dataKey="pesos"
                     name="Valor ahorrado"
-                    fill="var(--status-soon-dot)"
+                    fill="#f59e0b"
                     radius={[6, 6, 0, 0]}
                   />
                 </BarChart>
@@ -262,6 +263,7 @@ export function ReportsSection({
                         borderColor: "var(--line)",
                         borderRadius: "14px",
                         fontSize: "12px",
+                        color: "var(--content)",
                       }}
                       formatter={(value: any, name: any) => [
                         `${value} producto(s)`,
@@ -345,7 +347,7 @@ export function ReportsSection({
                 <button
                   type="button"
                   onClick={() => onUndoConsumption(record.id)}
-                  className="mt-2 min-h-[44px] rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-brand-text hover:bg-surface"
+                  className="mt-2 min-h-[44px] rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-brand hover:bg-surface"
                 >
                   Deshacer desde acá
                 </button>
@@ -357,3 +359,5 @@ export function ReportsSection({
     </section>
   );
 }
+
+export default ReportsSection;

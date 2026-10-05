@@ -83,28 +83,28 @@ export function PantrySection({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-white">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-content-heading">
                 {pantryView === "calendar" ? "Próxima semana" : "Por vencer esta semana"}
               </h2>
               <span className="tomorro-badge-sprout text-xs">
                 {soonCount} por vencer
               </span>
             </div>
-            <p className="mt-1 text-xs text-[#5c6351] dark:text-[#b7bda5]">
+            <p className="mt-1 text-xs text-content-muted">
               {pantryView === "calendar"
                 ? "Planificá tus comidas viendo qué vence cada día."
                 : "Una mirada rápida para decidir qué consumir primero."}
             </p>
           </div>
           {storedProducts.length > 0 && (
-            <div className="flex items-center gap-1 rounded-full border border-[#d9deca] dark:border-[#273f2b] bg-white/80 dark:bg-[#122314] p-1">
+            <div className="flex items-center gap-1 rounded-full border border-line bg-surface-muted/80 p-1">
               <button
                 type="button"
                 onClick={() => setPantryView("list")}
                 className={`min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                   pantryView === "list"
-                    ? "bg-[#68ef3f] text-[#30322a]"
-                    : "text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-content-muted hover:text-content-heading"
                 }`}
               >
                 Lista
@@ -114,8 +114,8 @@ export function PantrySection({
                 onClick={() => setPantryView("calendar")}
                 className={`flex min-h-[38px] items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                   pantryView === "calendar"
-                    ? "bg-[#68ef3f] text-[#30322a]"
-                    : "text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-content-muted hover:text-content-heading"
                 }`}
               >
                 <CalendarDays size={13} /> Próxima semana
@@ -126,23 +126,23 @@ export function PantrySection({
 
         {storedProducts.length === 0 ? (
           <div className="py-12 text-center">
-            <PackageOpen className="mx-auto text-[#5c6351] dark:text-[#b7bda5]" size={38} />
-            <p className="mt-3 text-base font-bold text-[#122314] dark:text-white">Tu despensa está vacía</p>
-            <p className="mx-auto mt-1 max-w-sm text-xs text-[#5c6351] dark:text-[#b7bda5]">
+            <PackageOpen className="mx-auto text-content-muted" size={38} />
+            <p className="mt-3 text-base font-bold text-content-heading">Tu despensa está vacía</p>
+            <p className="mx-auto mt-1 max-w-sm text-xs text-content-muted">
               Escaneá un ticket de supermercado o agregá productos manualmente para empezar a controlar vencimientos.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="tomorro-btn-primary min-h-[44px] text-xs"
+                className="tomorro-btn-primary min-h-[44px] text-xs font-semibold"
               >
                 <ScanLine size={15} /> Escanear compra
               </button>
               <button
                 type="button"
                 onClick={onOpenAdd}
-                className="tomorro-btn-ghost min-h-[44px] text-xs !text-[#122314] dark:!text-white !border-[#30322a] dark:!border-white"
+                className="min-h-[44px] inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-xs font-semibold text-content hover:bg-surface-muted transition"
               >
                 <Plus size={15} /> Agregar manual
               </button>
@@ -150,7 +150,7 @@ export function PantrySection({
             <button
               type="button"
               onClick={onLoadDemoProducts}
-              className="mt-4 min-h-[44px] text-xs font-semibold text-[#273f2b] dark:text-[#68ef3f] hover:underline transition"
+              className="mt-4 min-h-[44px] text-xs font-semibold text-brand hover:underline transition"
             >
               Cargar datos de ejemplo
             </button>
@@ -159,16 +159,16 @@ export function PantrySection({
           <WeekCalendar products={products} />
         ) : (
           <>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#d9deca] dark:border-[#273f2b] pb-3.5">
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3.5">
               {/* Search bar inside 24px radius input */}
               <div className="relative flex-1 min-w-[200px]">
-                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5c6351]" />
+                <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-content-muted" />
                 <input
                   type="text"
                   placeholder="Buscar en despensa..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-[24px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] py-2 pl-9 pr-3.5 text-xs text-[#122314] dark:text-white outline-none focus:border-[#68ef3f] focus:ring-1 focus:ring-[#68ef3f]"
+                  className="w-full rounded-[24px] border border-line bg-surface py-2 pl-9 pr-3.5 text-xs text-content-heading outline-none focus:border-brand-focus focus:ring-1 focus:ring-brand-focus transition"
                 />
               </div>
 
@@ -179,8 +179,8 @@ export function PantrySection({
                   onClick={() => setFilter("all")}
                   className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                     filter === "all"
-                      ? "bg-[#122314] text-white dark:bg-[#68ef3f] dark:text-[#30322a]"
-                      : "text-[#5c6351] dark:text-[#b7bda5] hover:bg-white dark:hover:bg-[#1c331f]"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-content-muted hover:bg-surface-muted"
                   }`}
                 >
                   Todos ({products.length})
@@ -190,8 +190,8 @@ export function PantrySection({
                   onClick={() => setFilter("soon")}
                   className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                     filter === "soon"
-                      ? "bg-[#fdf5e6] text-[#7a4d0c] border border-[#edd9b4] dark:bg-[#2b2314] dark:text-[#f5cf7d]"
-                      : "text-[#5c6351] dark:text-[#b7bda5] hover:bg-white dark:hover:bg-[#1c331f]"
+                      ? "bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
+                      : "text-content-muted hover:bg-surface-muted"
                   }`}
                 >
                   Por vencer ({soonCount})
@@ -201,8 +201,8 @@ export function PantrySection({
                   onClick={() => setFilter("expired")}
                   className={`shrink-0 min-h-[38px] rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                     filter === "expired"
-                      ? "bg-[#fdf1ef] text-[#8e2b20] border border-[#f8c9c3] dark:bg-[#2e1816] dark:text-[#f59c90]"
-                      : "text-[#5c6351] dark:text-[#b7bda5] hover:bg-white dark:hover:bg-[#1c331f]"
+                      ? "bg-rose-50 text-rose-800 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
+                      : "text-content-muted hover:bg-surface-muted"
                   }`}
                 >
                   Vencidos ({expiredCount})
@@ -212,11 +212,11 @@ export function PantrySection({
               {/* Advanced Filters */}
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <div className="flex items-center gap-1">
-                  <SlidersHorizontal size={13} className="text-[#5c6351] dark:text-[#b7bda5]" />
+                  <SlidersHorizontal size={13} className="text-content-muted" />
                   <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="min-h-[38px] rounded-[20px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] px-3 py-1.5 text-xs font-semibold text-[#122314] dark:text-white outline-none focus:ring-1 focus:ring-[#68ef3f]"
+                    className="min-h-[38px] rounded-[20px] border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
                     aria-label="Filtrar por categoría"
                   >
                     <option value="all">Todas las categorías</option>
@@ -229,11 +229,11 @@ export function PantrySection({
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <ArrowUpDown size={13} className="text-[#5c6351] dark:text-[#b7bda5]" />
+                  <ArrowUpDown size={13} className="text-content-muted" />
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="min-h-[38px] rounded-[20px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] px-3 py-1.5 text-xs font-semibold text-[#122314] dark:text-white outline-none focus:ring-1 focus:ring-[#68ef3f]"
+                    className="min-h-[38px] rounded-[20px] border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-content outline-none focus:ring-1 focus:ring-brand-focus"
                     aria-label="Ordenar productos"
                   >
                     <option value="expiry-asc">Vencimiento: más próximo</option>
@@ -251,7 +251,7 @@ export function PantrySection({
                       setCategoryFilter("all");
                       setSortBy("expiry-asc");
                     }}
-                    className="min-h-[38px] text-xs font-semibold text-[#8e2b20] hover:underline"
+                    className="min-h-[38px] text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline"
                   >
                     Restablecer
                   </button>
@@ -259,7 +259,7 @@ export function PantrySection({
               </div>
             </div>
 
-            <div className="mt-2 divide-y divide-[#d9deca]/40 dark:divide-[#273f2b]">
+            <div className="mt-2 divide-y divide-line/40">
               {(showAllPantry ? filteredProducts : filteredProducts.slice(0, 5)).map((product) => (
                 <ProductRow
                   key={product.id}
@@ -272,7 +272,7 @@ export function PantrySection({
                 <button
                   type="button"
                   onClick={() => setShowAllPantry((prev) => !prev)}
-                  className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-[24px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] py-2.5 text-xs font-bold text-[#122314] dark:text-white transition hover:bg-[#e7f9dd] hover:text-[#1c3e21] dark:hover:bg-[#1c3520] dark:hover:text-[#68ef3f]"
+                  className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-[24px] border border-line bg-surface py-2.5 text-xs font-bold text-content transition hover:bg-brand-subtle hover:text-brand-text"
                 >
                   {showAllPantry
                     ? "Mostrar menos productos"
@@ -281,11 +281,11 @@ export function PantrySection({
               )}
               {filteredProducts.length === 0 && (
                 <div className="py-10 text-center">
-                  <PackageOpen className="mx-auto text-[#5c6351] dark:text-[#b7bda5]" size={30} />
-                  <p className="mt-2 text-sm font-semibold text-[#122314] dark:text-white">
+                  <PackageOpen className="mx-auto text-content-muted" size={30} />
+                  <p className="mt-2 text-sm font-semibold text-content-heading">
                     No encontramos alimentos con los filtros actuales
                   </p>
-                  <p className="mt-1 text-xs text-[#5c6351] dark:text-[#b7bda5]">
+                  <p className="mt-1 text-xs text-content-muted">
                     Probá cambiar el filtro de estado o tu término de búsqueda.
                   </p>
                 </div>
@@ -300,10 +300,10 @@ export function PantrySection({
         <div>
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-white">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-content-heading">
                 Estado general
               </h2>
-              <p className="mt-1 text-xs text-[#5c6351] dark:text-[#b7bda5]">
+              <p className="mt-1 text-xs text-content-muted">
                 {okPercent >= 80
                   ? "Excelente control de despensa."
                   : "Tenés alimentos que requieren consumo prioritario."}
@@ -314,7 +314,7 @@ export function PantrySection({
                 type="button"
                 onClick={onNavigateToReports}
                 aria-label="Ver reportes"
-                className="flex h-10 w-10 items-center justify-center rounded-full text-[#5c6351] hover:text-[#122314] dark:hover:text-white hover:bg-white dark:hover:bg-[#1c331f]"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-content-muted hover:text-content hover:bg-surface-muted transition"
               >
                 <MoreHorizontal size={17} />
               </button>
@@ -327,29 +327,29 @@ export function PantrySection({
               style={{
                 background:
                   totalTracked > 0
-                    ? `conic-gradient(#26a200 0 ${pOk}%, #d97706 ${pOk}% ${pSoon}%, #dc2626 ${pSoon}% 100%)`
-                    : "#26a200",
+                    ? `conic-gradient(#10b981 0 ${pOk}%, #f59e0b ${pOk}% ${pSoon}%, #f43f5e ${pSoon}% 100%)`
+                    : "#10b981",
               }}
             >
-              <div className="flex h-[92px] w-[92px] flex-col items-center justify-center rounded-full bg-white dark:bg-[#122314] border border-[#d9deca]/50 dark:border-[#273f2b]">
-                <p className="font-display text-[26px] font-extrabold tracking-tight text-[#122314] dark:text-white">
+              <div className="flex h-[92px] w-[92px] flex-col items-center justify-center rounded-full bg-surface border border-line/60 shadow-xs">
+                <p className="font-display text-[26px] font-extrabold tracking-tight text-content-heading">
                   {okPercent}%
                 </p>
-                <p className="text-[10px] uppercase font-bold text-[#5c6351] dark:text-[#b7bda5]">En fecha</p>
+                <p className="text-[10px] uppercase font-bold text-content-muted">En fecha</p>
               </div>
             </div>
 
             <div className="space-y-3">
               {[
-                ["En fecha", okCount, "bg-[#26a200] dark:bg-[#68ef3f]"],
-                ["Por vencer", soonCount, "bg-[#d97706]"],
-                ["Vencidos", expiredCount, "bg-[#dc2626]"],
+                ["En fecha", okCount, "bg-emerald-500"],
+                ["Por vencer", soonCount, "bg-amber-500"],
+                ["Vencidos", expiredCount, "bg-rose-500"],
               ].map(([label, count, dotClass]) => (
                 <div key={label as string} className="flex items-center gap-2.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
                   <div>
-                    <p className="text-xs font-bold text-[#122314] dark:text-white">{label}</p>
-                    <p className="text-[11px] text-[#5c6351] dark:text-[#b7bda5]">{count} alimentos</p>
+                    <p className="text-xs font-bold text-content-heading">{label}</p>
+                    <p className="text-[11px] text-content-muted">{count} alimentos</p>
                   </div>
                 </div>
               ))}
@@ -357,12 +357,12 @@ export function PantrySection({
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-[#e7f9dd]/80 dark:bg-[#1c3520] p-4 border border-[#b7bda5]/60 dark:border-[#273f2b]">
-          <div className="flex items-center gap-2 text-[#1c3e21] dark:text-[#68ef3f]">
+        <div className="mt-6 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 p-4 border border-emerald-200/60 dark:border-emerald-800/40">
+          <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
             <Sparkles size={15} />
             <p className="text-xs font-bold">Consejo de FreshTrack</p>
           </div>
-          <p className="mt-1 text-xs leading-5 text-[#30322a] dark:text-[#dcdfe3]">
+          <p className="mt-1 text-xs leading-5 text-emerald-900/80 dark:text-emerald-200/70">
             Consumí primero lo que está por vencer para evitar que expire. El radar te sugiere recetas ideales.
           </p>
         </div>

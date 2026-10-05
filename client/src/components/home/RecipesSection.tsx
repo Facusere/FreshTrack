@@ -129,15 +129,15 @@ export function RecipesSection({
     <section id="module-recipes" className="scroll-mt-24 mt-6">
       <div className="tomorro-card-bone relative overflow-hidden p-5 sm:p-6 lg:p-7 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
         {/* Navigation Tabs between "¿Qué puedo cocinar?" and "Aprovechar por vencer" */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9deca] dark:border-[#273f2b] pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveTab("whatCanICook")}
               className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                 activeTab === "whatCanICook"
-                  ? "bg-[#122314] text-white dark:bg-[#68ef3f] dark:text-[#30322a] shadow-xs"
-                  : "border border-[#d9deca] dark:border-[#273f2b] bg-white/80 dark:bg-[#122314] text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "border border-line bg-surface text-content-muted hover:text-content-heading hover:bg-surface-muted"
               }`}
             >
               <ChefHat size={16} /> ¿Qué puedo cocinar?
@@ -151,8 +151,8 @@ export function RecipesSection({
               onClick={() => setActiveTab("rescueExpiring")}
               className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
                 activeTab === "rescueExpiring"
-                  ? "bg-[#122314] text-white dark:bg-[#68ef3f] dark:text-[#30322a] shadow-xs"
-                  : "border border-[#d9deca] dark:border-[#273f2b] bg-white/80 dark:bg-[#122314] text-[#5c6351] dark:text-[#b7bda5] hover:text-[#122314]"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "border border-line bg-surface text-content-muted hover:text-content-heading hover:bg-surface-muted"
               }`}
             >
               <Hourglass size={15} /> Aprovechar por vencer
@@ -164,7 +164,7 @@ export function RecipesSection({
               type="button"
               disabled={onlineLoading}
               onClick={handleSearchOnline}
-              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] px-4 py-1.5 text-xs font-bold text-[#122314] dark:text-white transition hover:bg-[#e7f9dd] hover:text-[#1c3e21] dark:hover:bg-[#1c3520] dark:hover:text-[#68ef3f] disabled:opacity-50"
+              className="min-h-[40px] inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-1.5 text-xs font-bold text-content transition hover:bg-brand-subtle hover:text-brand-text disabled:opacity-50"
             >
               {onlineLoading ? (
                 <>
@@ -495,10 +495,10 @@ export function RecipesSection({
           <div className="mt-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-5">
               <div>
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#5c6351] dark:text-[#b7bda5]">
-                  <ChefHat size={15} className="text-[#26a200] dark:text-[#68ef3f]" /> Cocina de rescate
+                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-content-muted">
+                  <ChefHat size={15} className="text-brand" /> Cocina de rescate
                 </p>
-                <h3 className="mt-1 font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-white">
+                <h3 className="mt-1 font-display text-2xl font-bold tracking-tight text-content-heading">
                   Recetas con lo que vence primero.
                 </h3>
                 <p className="mt-1 text-xs text-content-muted">
@@ -572,10 +572,10 @@ export function RecipesSection({
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") onOpenRecipeDetail(recipe);
                   }}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#162b19] p-4 shadow-sm transition hover:border-[#68ef3f] hover:-translate-y-1"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[20px] border border-line bg-surface p-4 shadow-sm transition hover:border-brand-border hover:-translate-y-1 hover:shadow-md"
                 >
                   <div>
-                    <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-[#f2f5eb] dark:bg-[#122314]">
+                    <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-surface-muted">
                       <img
                         src={recipe.image || getRecipeFallbackImage(recipe.title, recipe.category)}
                         onError={(e) => {
@@ -590,8 +590,8 @@ export function RecipesSection({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                       {recipe.pantryMatchRatio && (
-                        <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-white/95 dark:bg-[#122314]/95 px-2.5 py-1 text-[11px] font-bold text-[#122314] dark:text-white shadow-sm backdrop-blur-md">
-                          <Sparkles size={12} className="text-[#26a200] dark:text-[#68ef3f]" />
+                        <span className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold text-content-heading shadow-sm backdrop-blur-md">
+                          <Sparkles size={12} className="text-brand" />
                           {recipe.pantryMatchRatio.matched} de {recipe.pantryMatchRatio.total} en despensa
                         </span>
                       )}
@@ -604,17 +604,17 @@ export function RecipesSection({
                     </div>
 
                     <div className="mt-3.5">
-                      <h3 className="line-clamp-1 font-display text-base font-bold text-[#122314] dark:text-white transition group-hover:text-[#26a200] dark:group-hover:text-[#68ef3f]">
+                      <h3 className="line-clamp-1 font-display text-base font-bold text-content-heading transition group-hover:text-brand">
                         {recipe.title}
                       </h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-[#5c6351] dark:text-[#b7bda5]">
+                      <p className="mt-1 line-clamp-2 text-xs text-content-muted">
                         Usa: {recipe.matchedIngredients.join(", ") || "Ingredientes sugeridos"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#d9deca]/60 dark:border-[#273f2b] pt-3">
-                    <span className="text-xs font-semibold text-[#122314] dark:text-white hover:underline">
+                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-line/60 pt-3">
+                    <span className="text-xs font-semibold text-content-heading hover:underline">
                       Ver receta
                     </span>
                     <button
@@ -623,7 +623,7 @@ export function RecipesSection({
                         event.stopPropagation();
                         onInitiateConsumption(recipe);
                       }}
-                      className="tomorro-btn-primary min-h-[36px] text-xs px-3.5 py-1.5"
+                      className="tomorro-btn-primary min-h-[36px] text-xs px-3.5 py-1.5 font-semibold"
                     >
                       <Check size={14} strokeWidth={2.6} /> Aproveché
                     </button>

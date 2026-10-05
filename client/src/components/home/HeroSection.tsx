@@ -37,97 +37,99 @@ export function HeroSection({
 
   return (
     <section id="module-summary" className="scroll-mt-24 space-y-4 w-full max-w-full overflow-hidden">
-      {/* Forest Depths Hero Canvas Stage */}
-      <div className="relative overflow-hidden rounded-[24px] sm:rounded-[28px] bg-[#122314] text-white border border-[#273f2b] px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-8 shadow-[0_20px_50px_rgba(0,0,0,0.28)]">
-        {/* Atmospheric Decorative Sprout Orb */}
+      {/* Modern Emerald Canvas Stage */}
+      <div className="relative overflow-hidden rounded-[26px] sm:rounded-[32px] bg-gradient-to-br from-[#0a150e] via-[#0f2217] to-[#07130b] text-white border border-emerald-900/40 px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-9 shadow-[0_24px_60px_-15px_rgba(16,185,129,0.22),0_12px_32px_rgba(0,0,0,0.35)]">
+        {/* Atmospheric Decorative Glow Orbs */}
         <div
           aria-hidden="true"
-          className="tomorro-orb absolute -right-24 -top-28 sm:-right-10 sm:-top-20"
+          className="tomorro-orb absolute -right-20 -top-24 sm:-right-8 sm:-top-16 opacity-70"
         />
         <div
           aria-hidden="true"
-          className="tomorro-orb absolute -left-36 -bottom-36 opacity-25"
+          className="tomorro-orb absolute -left-36 -bottom-36 opacity-30"
         />
 
-        <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          {/* Left Column: 70% Typography on Flat Forest Surface */}
+        <div className="relative z-10 grid gap-7 sm:gap-9 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          {/* Left Column: Typography & CTAs */}
           <div className="max-w-[560px] space-y-4 sm:space-y-5">
-            {/* Announcement Pill */}
+            {/* Announcement Pill with live status beacon */}
             <div className="inline-block max-w-full">
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="tomorro-announcement-pill max-w-full group cursor-pointer text-left text-xs sm:text-[13px]"
+                className="tomorro-announcement-pill max-w-full group cursor-pointer text-left text-xs sm:text-[13px] hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all"
               >
-                <span className="flex h-2 w-2 shrink-0 rounded-full bg-[#68ef3f] animate-pulse" />
+                <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
                 <span className="truncate">
                   Motor OCR inteligente ·{" "}
-                  <span className="text-[#68ef3f] font-semibold">escaneo sin conexión</span>
+                  <span className="text-emerald-300 font-semibold">escaneo sin conexión</span>
                 </span>
                 <ChevronRight
                   size={14}
-                  className="shrink-0 text-[#b7bda5] transition-transform duration-200 group-hover:translate-x-0.5"
+                  className="shrink-0 text-emerald-200 transition-transform duration-200 group-hover:translate-x-0.5"
                 />
               </button>
             </div>
 
-            {/* Display Headline with Accent Word (Ozik Style, tight 0.88 line-height) */}
-            <h1 className="font-display text-[32px] sm:text-[46px] lg:text-[54px] leading-[0.92] sm:leading-[0.88] tracking-[-0.018em] text-[#ffffff] font-extrabold break-words">
+            {/* Display Headline with Gradient Accent */}
+            <h1 className="font-display text-[32px] sm:text-[46px] lg:text-[54px] leading-[0.94] tracking-[-0.02em] text-white font-extrabold break-words">
               Que nada rico termine en la{" "}
-              <span className="text-[#68ef3f]">basura.</span>
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-green-300 bg-clip-text text-transparent">
+                basura.
+              </span>
             </h1>
 
-            {/* Body Paragraph with Pale Fern tone */}
-            <p className="text-xs sm:text-base leading-[1.55] text-[#b7bda5] max-w-[480px]">
+            {/* Body Paragraph */}
+            <p className="text-xs sm:text-base leading-[1.6] text-emerald-100/80 max-w-[480px]">
               FreshTrack digitaliza tus compras con{" "}
-              <span className="text-[#68ef3f] font-medium">Reconocimiento OCR</span>, estima
+              <span className="text-emerald-300 font-semibold">Reconocimiento OCR</span>, estima
               vencimientos y te avisa a tiempo. Menos desperdicio, más tranquilidad.
             </p>
 
-            {/* Dual CTAs — Filled Sprout & Ghost */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+            {/* Dual CTAs — Emerald Gradient & Frosted Ghost */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={onOpenScan}
-                className="tomorro-btn-primary min-h-[42px] text-xs sm:text-sm"
+                className="tomorro-btn-primary min-h-[44px] text-xs sm:text-sm font-semibold"
               >
-                <ScanLine size={16} strokeWidth={2.2} />
+                <ScanLine size={16} strokeWidth={2.4} />
                 <span>Escanear compra</span>
               </button>
               <button
                 type="button"
                 onClick={onOpenAdd}
-                className="tomorro-btn-ghost min-h-[42px] text-xs sm:text-sm hover:border-[#b7bda5]"
+                className="tomorro-btn-ghost min-h-[44px] text-xs sm:text-sm border-white/25 hover:border-emerald-400 hover:bg-white/10"
               >
-                <Plus size={15} strokeWidth={2} />
+                <Plus size={15} strokeWidth={2.2} />
                 <span>Agregar manual</span>
               </button>
             </div>
 
             {/* Micro Details */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs text-[#b7bda5]">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#273f2b] bg-[#162b19]/80 px-2.5 py-0.5 text-[#ffffff]">
-                <Sparkles size={12} className="text-[#68ef3f]" />
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-emerald-200/70">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-800/40 bg-emerald-950/60 px-3 py-1 text-white backdrop-blur-sm">
+                <Sparkles size={12} className="text-emerald-400" />
                 {catalogSize} alimentos regionales
               </span>
               <span>·</span>
-              <span className="text-[#b7bda5]">Vida útil abierto y cerrado</span>
+              <span className="text-emerald-200/80">Vida útil abierto y cerrado</span>
               <span>·</span>
-              <span className="flex items-center gap-1 text-[#b7bda5]">
-                <ShieldCheck size={12} className="text-[#68ef3f]" /> 100% privado
+              <span className="flex items-center gap-1 text-emerald-200/80">
+                <ShieldCheck size={13} className="text-emerald-400" /> 100% privado
               </span>
             </div>
           </div>
 
           {/* Right Column: Floating Product Mockup Card */}
           <div className="tomorro-mockup-stack relative flex items-center justify-center pt-2 lg:pt-0">
-            {/* Rear Ambient Card */}
+            {/* Rear Ambient Glow Layer */}
             <div
               aria-hidden="true"
-              className="hidden sm:block absolute -right-2 top-2 h-52 w-72 sm:w-80 -rotate-3 rounded-[20px] bg-[#1c331f] border border-[#273f2b]/80 opacity-40 blur-[1px] pointer-events-none"
+              className="hidden sm:block absolute -right-2 top-2 h-56 w-72 sm:w-84 -rotate-3 rounded-[24px] bg-emerald-900/25 border border-emerald-800/30 opacity-60 blur-[2px] pointer-events-none"
             />
 
-            {/* Front Card: Crisp White Interface Mockup with REAL Pantry Radar */}
+            {/* Front Card: Crisp Interface Mockup with REAL Pantry Radar */}
             <div
               role="button"
               tabIndex={0}
@@ -139,22 +141,25 @@ export function HeroSection({
                   onOpenScan();
                 }
               }}
-              className="tomorro-mockup-card relative z-20 w-full max-w-[400px] rotate-0 sm:-rotate-2 cursor-pointer p-4 sm:p-5 text-[#30322a]"
+              className="tomorro-mockup-card group relative z-20 w-full max-w-[400px] rotate-0 sm:-rotate-2 cursor-pointer p-4 sm:p-5 text-slate-800 dark:text-slate-100 bg-white/95 dark:bg-[#111a14]/95 backdrop-blur-md border border-white/70 dark:border-emerald-800/50 shadow-[0_24px_50px_rgba(0,0,0,0.35)]"
             >
               {/* Top card header */}
-              <div className="flex items-center justify-between border-b border-[#d9deca] pb-3">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-emerald-900/40 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e7f9dd] text-[#273f2b]">
-                    <ScanLine size={15} />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                    <ScanLine size={16} strokeWidth={2.2} />
                   </span>
                   <div>
-                    <p className="text-xs font-bold tracking-tight text-[#122314]">Radar de Despensa</p>
-                    <p className="text-[11px] text-[#5c6351]">
+                    <p className="text-xs font-bold tracking-tight text-slate-900 dark:text-white">Radar de Despensa</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       {lastScan ? `Último ticket: ${formatTimeAgo(lastScan.at, today)}` : "Estado en tiempo real"}
                     </p>
                   </div>
                 </div>
-                <span className="tomorro-tag-beacon">En Vivo</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                  En Vivo
+                </span>
               </div>
 
               {/* Real radar items */}
@@ -163,10 +168,10 @@ export function HeroSection({
                   radarProducts.map((p) => {
                     const badgeClass =
                       p.status === "expired"
-                        ? "bg-[#fdf1ef] text-[#8e2b20] border-[#f8c9c3]"
+                        ? "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50"
                         : p.status === "soon"
-                        ? "bg-[#fdf5e6] text-[#7a4d0c] border-[#edd9b4]"
-                        : "bg-[#e7f9dd] text-[#1c3e21] border-[#b7bda5]";
+                        ? "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50"
+                        : "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
                     const badgeText =
                       p.status === "expired"
                         ? "Vencido"
@@ -177,27 +182,27 @@ export function HeroSection({
                     return (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between rounded-xl bg-[#f2f5eb] p-2 border border-[#d9deca]/60"
+                        className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-[#16241b] p-2.5 border border-slate-100 dark:border-emerald-900/30 transition hover:bg-emerald-50/50 dark:hover:bg-[#1b2d22]"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-lg">{p.icon}</span>
+                          <span className="text-xl shrink-0">{p.icon}</span>
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-semibold text-[#122314]">{p.name}</p>
-                            <p className="text-[11px] text-[#5c6351]">
+                            <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{p.name}</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
                               {p.category} · {p.quantity}
                             </p>
                           </div>
                         </div>
-                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${badgeClass}`}>
+                        <span className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${badgeClass}`}>
                           {badgeText}
                         </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="rounded-xl bg-[#f8faf5] p-3 text-center border border-[#d9deca]/60">
-                    <p className="text-xs font-bold text-[#122314]">Tu despensa está lista</p>
-                    <p className="mt-0.5 text-[11px] text-[#5c6351]">
+                  <div className="rounded-xl bg-slate-50 dark:bg-[#16241b] p-3.5 text-center border border-dashed border-slate-200 dark:border-emerald-900/40">
+                    <p className="text-xs font-bold text-slate-800 dark:text-white">Tu despensa está lista</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                       Escaneá un ticket para cargar alimentos y activar el radar de vencimientos.
                     </p>
                   </div>
@@ -205,18 +210,18 @@ export function HeroSection({
               </div>
 
               {/* Bottom actionable footer */}
-              <div className="mt-3.5 flex items-center justify-between border-t border-[#d9deca]/50 pt-2.5">
+              <div className="mt-3.5 flex items-center justify-between border-t border-slate-100 dark:border-emerald-900/30 pt-2.5">
                 <div className="text-xs">
-                  <p className="font-bold text-[#122314]">
+                  <p className="font-bold text-slate-900 dark:text-white">
                     {products.length > 0
                       ? `${products.length} ${products.length === 1 ? "alimento activo" : "alimentos activos"}`
                       : "Listo para escanear"}
                   </p>
-                  <p className="text-[11px] text-[#5c6351]">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     {lastScan ? `${lastScan.count} en último escaneo` : "Cámara o imagen"}
                   </p>
                 </div>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#68ef3f] text-[#30322a] shadow-xs transition-transform group-hover:scale-105">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-transform duration-200 group-hover:scale-110">
                   <ArrowUpRight size={15} strokeWidth={2.4} />
                 </div>
               </div>

@@ -959,9 +959,9 @@ export default function Home() {
           </div>
         </div>
       )}
-      {/* Tomorro Floating Pill Navigation Bar */}
+      {/* Adaptive Floating Pill Navigation Bar */}
       <header className="sticky top-3 sm:top-5 z-40 w-full max-w-[1200px] mx-auto px-2.5 sm:px-4">
-        <div className="tomorro-pill-nav px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 text-white border border-[#273f2b] shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
+        <div className="tomorro-pill-nav px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
           {/* Brand Wordmark & Status Beacon Pill */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -969,10 +969,10 @@ export default function Home() {
               onClick={() => navigateToModule("Resumen")}
               className="flex items-center gap-2 text-left transition hover:opacity-90"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#68ef3f] text-[#30322a]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xs">
                 <Leaf size={15} strokeWidth={2.4} />
               </span>
-              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-white">freshtrack</span>
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-content-heading">freshtrack</span>
             </button>
             <span className="tomorro-tag-beacon hidden sm:inline-flex">
               v1.0 Activo
@@ -988,13 +988,15 @@ export default function Home() {
                 onClick={() => navigateToModule(label)}
                 className={`flex min-h-[38px] items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                   activeNav === label
-                    ? "bg-[#273f2b] text-white shadow-xs border border-[#38563d]"
-                    : "text-[#b7bda5] hover:text-white hover:bg-white/10"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-content-muted hover:text-content-heading hover:bg-surface-muted"
                 }`}
               >
                 <span>{label}</span>
                 {count && (
-                  <span className="rounded-full bg-[#68ef3f]/20 px-1.5 py-0.2 text-[10px] font-bold text-[#68ef3f]">
+                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                    activeNav === label ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                  }`}>
                     {count}
                   </span>
                 )}
@@ -1005,13 +1007,13 @@ export default function Home() {
           {/* Controls Right */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* Omnibar Search */}
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#273f2b] bg-[#162b19]/80 px-3 py-1.5 text-xs text-[#b7bda5] focus-within:border-[#68ef3f] focus-within:ring-1 focus-within:ring-[#68ef3f]">
-              <Search size={14} className="text-[#b7bda5]" />
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-line bg-surface/70 px-3 py-1.5 text-xs text-content-muted focus-within:border-brand-focus focus-within:ring-1 focus-within:ring-brand-focus transition">
+              <Search size={14} className="text-content-muted" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar en tu despensa"
-                className="w-[120px] md:w-[150px] bg-transparent text-xs text-white outline-none placeholder:text-[#5c6351]"
+                className="w-[120px] md:w-[150px] bg-transparent text-xs text-content outline-none placeholder:text-content-muted"
               />
             </div>
 
@@ -1019,7 +1021,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => promptPWAInstall()}
-                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-[#273f2b] bg-[#162b19]/80 px-3 py-1 text-xs font-semibold text-[#b7bda5] hover:text-white transition"
+                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-line bg-surface/80 px-3 py-1 text-xs font-semibold text-content hover:bg-surface-muted transition"
               >
                 <Smartphone size={13} /> App
               </button>
@@ -1031,12 +1033,12 @@ export default function Home() {
               aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-[#b7bda5] hover:text-white hover:border-[#b7bda5] transition"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content-muted hover:text-content hover:border-line-strong transition"
             >
               {theme === "dark" ? (
-                <Sun size={15} className="text-[#68ef3f]" />
+                <Sun size={15} className="text-amber-400" />
               ) : (
-                <Moon size={15} className="text-[#b7bda5]" />
+                <Moon size={15} className="text-slate-600" />
               )}
             </button>
 
@@ -1045,11 +1047,11 @@ export default function Home() {
               type="button"
               aria-label="Notificaciones"
               onClick={() => setNotificationModal(true)}
-              className="relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-[#b7bda5] hover:text-white hover:border-[#b7bda5] transition"
+              className="relative hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content-muted hover:text-content hover:border-line-strong transition"
             >
               <Bell size={15} />
               {notificationGroups.length > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#68ef3f]" />
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               )}
             </button>
 
@@ -1057,7 +1059,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setModal("scan")}
-              className="tomorro-btn-primary hidden sm:inline-flex min-h-[38px] text-xs px-3.5 sm:px-4"
+              className="tomorro-btn-primary hidden sm:inline-flex min-h-[38px] text-xs px-3.5 sm:px-4 font-semibold"
             >
               <ScanLine size={15} strokeWidth={2.4} />
               <span className="hidden sm:inline">Escanear compra</span>
@@ -1066,7 +1068,7 @@ export default function Home() {
             {/* Mobile Drawer Toggle */}
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#273f2b] bg-[#162b19]/80 text-white lg:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 text-content lg:hidden"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Menú principal"
             >
@@ -1079,24 +1081,24 @@ export default function Home() {
       {/* Mobile Drawer */}
       {mobileNav && (
         <div
-          className="fixed inset-0 z-50 bg-[#122314]/80 backdrop-blur-md lg:hidden"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileNav(false)}
         >
           <div
-            className="h-full w-[280px] bg-[#162b19] border-r border-[#273f2b] p-6 text-white"
+            className="h-full w-[290px] bg-surface border-r border-line p-6 text-content shadow-2xl transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#68ef3f] text-[#30322a]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
                   <Leaf size={15} strokeWidth={2.4} />
                 </span>
-                <p className="font-display text-lg font-bold text-white">freshtrack</p>
+                <p className="font-display text-lg font-bold text-content-heading">freshtrack</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileNav(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[#b7bda5] hover:text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-content-muted hover:text-content"
                 aria-label="Cerrar menú"
               >
                 <X size={17} />
@@ -1109,7 +1111,7 @@ export default function Home() {
                 setModal("scan");
                 setMobileNav(false);
               }}
-              className="tomorro-btn-primary mt-6 min-h-[44px] w-full text-xs"
+              className="tomorro-btn-primary mt-6 min-h-[44px] w-full text-xs font-semibold"
             >
               <ScanLine size={16} /> Escanear compra
             </button>
@@ -1125,8 +1127,8 @@ export default function Home() {
                   }}
                   className={`flex min-h-[42px] w-full items-center justify-between rounded-full px-4 py-2.5 text-left text-xs font-semibold transition ${
                     activeNav === label
-                      ? "bg-[#273f2b] text-white"
-                      : "text-[#b7bda5] hover:text-white"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "text-content-muted hover:text-content hover:bg-surface-muted"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -1134,7 +1136,9 @@ export default function Home() {
                     {label}
                   </span>
                   {count && (
-                    <span className="rounded-full bg-[#68ef3f]/20 px-2 py-0.5 text-[10px] font-bold text-[#68ef3f]">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      activeNav === label ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                    }`}>
                       {count}
                     </span>
                   )}
@@ -1142,17 +1146,17 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="mt-8 border-t border-[#273f2b] pt-4 space-y-2">
+            <div className="mt-8 border-t border-line pt-4 space-y-2">
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="flex min-h-[40px] w-full items-center justify-between rounded-full px-4 py-2 text-xs font-semibold text-[#b7bda5] hover:text-white"
+                className="flex min-h-[40px] w-full items-center justify-between rounded-full px-4 py-2 text-xs font-semibold text-content-muted hover:text-content hover:bg-surface-muted"
               >
                 <span className="flex items-center gap-3">
-                  {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                  {theme === "dark" ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-slate-600" />}
                   Modo {theme === "dark" ? "claro" : "oscuro"}
                 </span>
-                <span className="h-2 w-2 rounded-full bg-[#68ef3f]" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
               </button>
               <button
                 type="button"
@@ -1160,7 +1164,7 @@ export default function Home() {
                   setNotificationModal(true);
                   setMobileNav(false);
                 }}
-                className="flex min-h-[40px] w-full items-center gap-3 rounded-full px-4 py-2 text-xs font-semibold text-[#b7bda5] hover:text-white"
+                className="flex min-h-[40px] w-full items-center gap-3 rounded-full px-4 py-2 text-xs font-semibold text-content-muted hover:text-content hover:bg-surface-muted"
               >
                 <Bell size={15} /> Notificaciones
               </button>
@@ -1271,10 +1275,10 @@ export default function Home() {
               onUndoConsumption={undoConsumption}
             />
 
-            <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-[#5c6351] dark:text-[#b7bda5] sm:flex-row sm:items-center sm:justify-between border-t border-[#d9deca]/50 dark:border-[#273f2b]">
+            <footer className="flex flex-col gap-2 pb-6 pt-8 text-xs text-content-muted sm:flex-row sm:items-center sm:justify-between border-t border-line/60">
               <p>FreshTrack · Menos desperdicio, más tranquilidad.</p>
               <p className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#26a200] dark:bg-[#68ef3f]" /> Datos guardados localmente
+                <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-xs" /> Datos guardados localmente
               </p>
             </footer>
         </main>

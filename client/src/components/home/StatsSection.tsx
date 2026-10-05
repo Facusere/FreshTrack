@@ -12,26 +12,26 @@ export interface StatCardProps {
 
 export function StatCard({ label, value, note, icon, tone, badge }: StatCardProps) {
   return (
-    <div className="tomorro-card-bone group relative overflow-hidden p-4 sm:p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#b7bda5]">
+    <div className="tomorro-card-bone group relative overflow-hidden p-4 sm:p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5">
       <div className="flex items-start justify-between gap-2">
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${tone}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105 border ${tone}`}
         >
           {icon}
         </span>
         {badge && (
-          <span className="whitespace-nowrap rounded-full border border-[#b7bda5]/60 bg-white/80 dark:bg-[#122314] px-2.5 py-0.5 text-[11px] font-semibold text-[#5c6351] dark:text-[#b7bda5]">
+          <span className="whitespace-nowrap rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-content-muted">
             {badge}
           </span>
         )}
       </div>
-      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#5c6351] dark:text-[#b7bda5]">
+      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-content-muted">
         {label}
       </p>
-      <p className="mt-1 font-display text-2xl font-bold tracking-tight text-[#122314] dark:text-[#ffffff] sm:text-3xl">
+      <p className="mt-1 font-display text-2xl font-bold tracking-tight text-content-heading sm:text-3xl">
         {value}
       </p>
-      <p className="mt-0.5 text-xs text-[#5c6351] dark:text-[#b7bda5]">{note}</p>
+      <p className="mt-0.5 text-xs text-content-muted">{note}</p>
     </div>
   );
 }
@@ -59,32 +59,32 @@ export function StatsSection({
         label="En tu despensa"
         value={String(totalProducts)}
         note="alimentos inventariados"
-        icon={<PackageOpen size={19} />}
-        tone="bg-[#e7f9dd] text-[#1c3e21] dark:bg-[#1c3520] dark:text-[#68ef3f]"
+        icon={<PackageOpen size={20} />}
+        tone="bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40"
         badge="Stock"
       />
       <StatCard
         label="Por vencer"
         value={String(soonCount)}
         note={`en los próximos ${soonThresholdDays} días`}
-        icon={<Clock3 size={19} />}
-        tone="bg-[#fdf5e6] text-[#7a4d0c] dark:bg-[#2b2314] dark:text-[#f5cf7d]"
+        icon={<Clock3 size={20} />}
+        tone="bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40"
         badge="Prioridad"
       />
       <StatCard
         label="Ya vencidos"
         value={String(expiredCount)}
         note="requieren atención"
-        icon={<Zap size={19} />}
-        tone="bg-[#fdf1ef] text-[#8e2b20] dark:bg-[#2e1816] dark:text-[#f59c90]"
+        icon={<Zap size={20} />}
+        tone="bg-rose-50 text-rose-700 border-rose-200/60 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-900/40"
         badge="Alerta"
       />
       <StatCard
         label="Desperdicio evitado"
         value={formatMoney(moneySaved)}
         note={`${kgSaved} kg este mes`}
-        icon={<ArrowDownRight size={19} />}
-        tone="bg-[#68ef3f]/20 text-[#273f2b] dark:bg-[#68ef3f]/20 dark:text-[#68ef3f]"
+        icon={<ArrowDownRight size={20} />}
+        tone="bg-teal-50 text-teal-800 border-teal-200/60 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40"
         badge="Impacto"
       />
     </section>

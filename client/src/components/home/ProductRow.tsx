@@ -8,18 +8,18 @@ import { isFreshProduceCategory } from "@/lib/shelfLifeCatalog";
 const statusCopy: Record<ProductStatus, { label: string; color: string; dot: string }> = {
   ok: {
     label: "En fecha",
-    color: "text-[#1c3e21] bg-[#e7f9dd] border border-[#b7bda5] dark:text-[#68ef3f] dark:bg-[#1c3520] dark:border-[#273f2b]",
-    dot: "bg-[#26a200] dark:bg-[#68ef3f]",
+    color: "text-emerald-800 bg-emerald-50 border border-emerald-200 dark:text-emerald-300 dark:bg-emerald-950/60 dark:border-emerald-800/50",
+    dot: "bg-emerald-500",
   },
   soon: {
     label: "Por vencer",
-    color: "text-[#7a4d0c] bg-[#fdf5e6] border border-[#edd9b4] dark:text-[#f5cf7d] dark:bg-[#2b2314] dark:border-[#44351a]",
-    dot: "bg-[#d97706]",
+    color: "text-amber-800 bg-amber-50 border border-amber-200 dark:text-amber-300 dark:bg-amber-950/60 dark:border-amber-800/50",
+    dot: "bg-amber-500",
   },
   expired: {
     label: "Vencido",
-    color: "text-[#8e2b20] bg-[#fdf1ef] border border-[#f8c9c3] dark:text-[#f59c90] dark:bg-[#2e1816] dark:border-[#4a2420]",
-    dot: "bg-[#dc2626]",
+    color: "text-rose-800 bg-rose-50 border border-rose-200 dark:text-rose-300 dark:bg-rose-950/60 dark:border-rose-800/50",
+    dot: "bg-rose-500",
   },
 };
 
@@ -44,58 +44,58 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
   const isOpenUrgent = product.state === "abierto" && product.days <= 2 && product.days >= 0;
   const alertTone =
     product.status === "expired"
-      ? "border-l-4 border-l-[#dc2626] bg-[#fdf1ef]/40 dark:bg-[#2e1816]/30"
+      ? "border-l-4 border-l-rose-500 bg-rose-50/40 dark:bg-rose-950/20"
       : isOpenUrgent
-      ? "border-l-4 border-l-[#d97706] bg-[#fdf5e6]/40 dark:bg-[#2b2314]/30"
+      ? "border-l-4 border-l-amber-500 bg-amber-50/40 dark:bg-amber-950/20"
       : product.status === "soon"
-      ? "border-l-4 border-l-[#d97706] bg-[#fdf5e6]/40 dark:bg-[#2b2314]/30"
+      ? "border-l-4 border-l-amber-500 bg-amber-50/40 dark:bg-amber-950/20"
       : lowStock
-      ? "border-l-4 border-l-[#68ef3f] bg-[#e7f9dd]/30 dark:bg-[#1c3520]/20"
+      ? "border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20"
       : "";
 
   return (
     <div
-      className={`group grid grid-cols-[minmax(0,1fr)_100px_90px_auto] items-center gap-3 border-b border-[#d9deca]/60 dark:border-[#273f2b] py-3.5 pl-3 pr-2 transition-all duration-150 hover:bg-[#f2f5eb]/80 dark:hover:bg-[#1a331e] rounded-xl last:border-b-0 ${alertTone}`}
+      className={`group grid grid-cols-[minmax(0,1fr)_100px_90px_auto] items-center gap-3 border-b border-line/60 py-3.5 pl-3 pr-2 transition-all duration-150 hover:bg-emerald-50/40 dark:hover:bg-[#16241b] rounded-xl last:border-b-0 ${alertTone}`}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-[#122314] border border-[#d9deca]/60 dark:border-[#273f2b] text-xl">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface border border-line text-xl shadow-xs">
           {product.icon}
         </span>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="truncate text-xs sm:text-sm font-semibold text-[#122314] dark:text-white">
+            <p className="truncate text-xs sm:text-sm font-semibold text-content-heading">
               {product.name}
             </p>
             {product.state === "abierto" && (
               <span
-                className="inline-flex items-center gap-1 rounded-full border border-[#edd9b4] bg-[#fdf5e6] px-1.5 py-0.5 text-[10px] font-bold text-[#7a4d0c] dark:bg-[#2b2314] dark:text-[#f5cf7d] dark:border-[#44351a]"
+                className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/50"
                 title={product.openedAt ? `Abierto el ${product.openedAt}` : "Envase abierto"}
               >
                 <PackageOpen size={11} /> Abierto
               </span>
             )}
           </div>
-          <p className="mt-0.5 truncate text-[11px] text-[#5c6351] dark:text-[#b7bda5]">
+          <p className="mt-0.5 truncate text-[11px] text-content-muted">
             {product.quantity} · {product.category}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {isOpenUrgent && (
-              <span className="inline-flex rounded-full bg-[#f8e7c9] px-2 py-0.5 text-[10px] font-bold text-[#7a4d0c] dark:bg-[#3b301f] dark:text-[#f5cf7d]">
+              <span className="inline-flex rounded-full bg-amber-100 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
                 Consumir ya
               </span>
             )}
             {product.status === "soon" && !isOpenUrgent && (
-              <span className="inline-flex rounded-full bg-[#fdf5e6] border border-[#edd9b4] px-2 py-0.5 text-[10px] font-bold text-[#7a4d0c] dark:bg-[#2b2314] dark:text-[#f5cf7d] dark:border-[#44351a]">
+              <span className="inline-flex rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
                 Vence pronto
               </span>
             )}
             {product.status === "expired" && (
-              <span className="inline-flex rounded-full bg-[#fdf1ef] border border-[#f8c9c3] px-2 py-0.5 text-[10px] font-bold text-[#8e2b20] dark:bg-[#2e1816] dark:text-[#f59c90] dark:border-[#4a2420]">
+              <span className="inline-flex rounded-full bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800">
                 Revisar hoy
               </span>
             )}
             {product.status !== "expired" && lowStock && (
-              <span className="inline-flex rounded-full bg-[#e7f9dd] border border-[#b7bda5] px-2 py-0.5 text-[10px] font-bold text-[#1c3e21] dark:bg-[#1c3520] dark:text-[#68ef3f]">
+              <span className="inline-flex rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
                 Queda poco
               </span>
             )}
@@ -104,8 +104,8 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
       </div>
 
       <div className="text-left">
-        <p className="text-xs font-semibold text-[#122314] dark:text-white">{product.expiry}</p>
-        <p className="mt-0.5 text-[11px] text-[#5c6351] dark:text-[#b7bda5]">
+        <p className="text-xs font-semibold text-content-heading">{product.expiry}</p>
+        <p className="mt-0.5 text-[11px] text-content-muted">
           {formatRelativeDays(product.days)}
         </p>
       </div>
@@ -122,7 +122,7 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
               e.stopPropagation();
               onOpen(product);
             }}
-            className="flex h-8 items-center gap-1 rounded-full border border-[#d9deca] dark:border-[#273f2b] bg-white dark:bg-[#122314] px-2.5 text-[11px] font-bold text-[#122314] dark:text-white hover:bg-[#e7f9dd] hover:text-[#1c3e21] dark:hover:bg-[#1c3520] dark:hover:text-[#68ef3f] transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+            className="flex h-8 items-center gap-1 rounded-full border border-line bg-surface px-2.5 text-[11px] font-bold text-content hover:bg-brand-subtle hover:text-brand-text transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100"
           >
             <PackageOpen size={13} />
             <span className="hidden lg:inline">Abrir</span>
@@ -131,7 +131,7 @@ export function ProductRow({ product, onEdit, onOpen }: ProductRowProps) {
         <button
           aria-label={`Acciones para ${product.name}`}
           onClick={() => onEdit(product)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[#5c6351] hover:text-[#122314] dark:hover:text-white hover:bg-[#e7f9dd] dark:hover:bg-[#1c3520] opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-content-muted hover:text-content hover:bg-brand-subtle opacity-90 transition sm:opacity-0 sm:group-hover:opacity-100"
         >
           <MoreHorizontal size={16} />
         </button>
