@@ -226,4 +226,97 @@ test.describe("FreshTrack E2E & Accessibility Tests", () => {
     await page.getByRole("button", { name: "Cerrar modal de escaneo" }).click();
     await expect(page.getByRole("heading", { name: "Escaneo OCR inteligente" })).not.toBeVisible();
   });
+
+  test("abrir recetario -> marcar favorita -> agregar faltantes a la lista de compras -> verificar el ítem en compras", async ({
+    page,
+  }) => {
+    await page.goto(baseURL, { waitUntil: "networkidle" });
+
+    // 1. Abrir pestaña Recetario
+    const cookbookTab = page.getByRole("tab", { name: /Recetario/i });
+    await expect(cookbookTab).toBeVisible();
+    await cookbookTab.click();
+
+    // 2. Verificar que se muestra el catálogo de recetas
+    const searchInput = page.getByPlaceholder(/Buscar recetas por nombre o ingredientes/i);
+    await expect(searchInput).toBeVisible();
+
+    // 3. Marcar la primera receta como favorita
+    const favButton = page.getByRole("button", { name: "Agregar a favoritas" }).first();
+    await expect(favButton).toBeVisible();
+    await favButton.click();
+    await expect(page.getByRole("button", { name: "Quitar de favoritas" }).first()).toBeVisible();
+
+    // 4. Abrir detalle de la receta
+    const firstCard = page.getByTestId("recipe-card").first();
+    await firstCard.click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    // 5. Agregar faltantes a la lista de compras
+    const addMissingBtn = dialog.getByRole("button", { name: /Agregar lo que me falta a la lista/i });
+    if (await addMissingBtn.isVisible()) {
+      await addMissingBtn.click();
+      await expect(page.getByText(/Agregamos .* ingredientes a tu lista/i)).toBeVisible();
+    }
+
+    // 6. Cerrar modal de receta
+    await page.getByRole("button", { name: "Cerrar detalle de receta" }).click();
+    await expect(dialog).not.toBeVisible();
+
+    // 7. Navegar a Compras y verificar módulo
+    const shoppingNav = page.getByRole("link", { name: /Compras/i }).first();
+    if (await shoppingNav.isVisible()) {
+      await shoppingNav.click();
+    } else {
+      await page.locator("#module-shopping").scrollIntoViewIfNeeded();
+    }
+    await expect(page.locator("#module-shopping")).toBeVisible();
+  });
+
+  test("planificar dos recetas en el menú semanal -> generar lista semanal -> confirmar", async ({
+    page,
+  }) => {
+    await page.goto(baseURL, { waitUntil: "networkidle" });
+
+    // 1. Abrir pestaña Recetario
+    await page.getByRole("tab", { name: /Recetario/i }).click();
+
+    // 2. Cambiar a subvista Planificador semanal
+    const plannerButton = page.getByRole("button", { name: /Planificador semanal/i });
+    await expect(plannerButton).toBeVisible();
+    await plannerButton.click();
+
+    // 3. Asignar primera receta
+    const assignButtons = page.getByRole("button", { name: "Asignar" });
+    await expect(assignButtons.first()).toBeVisible();
+    await assignButtons.first().click();
+
+    await expect(page.getByRole("heading", { name: /Asignar receta/i })).toBeVisible();
+    await page.getByRole("button", { name: "Elegir" }).first().click();
+
+    // 4. Asignar segunda receta
+    await assignButtons.first().click();
+    await page.getByRole("button", { name: "Elegir" }).nth(1).click();
+
+    // 5. Generar lista de compras semanal
+    const generateBtn = page.getByRole("button", { name: /Generar lista de la semana/i });
+    await expect(generateBtn).toBeVisible();
+    await generateBtn.click();
+
+    // 6. Verificar modal de vista previa y confirmar
+    const previewDialog = page.getByRole("dialog");
+    await expect(previewDialog).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Lista de compras semanal/i })).toBeVisible();
+
+    const confirmBtn = page.getByRole("button", { name: /Agregar seleccionados a la lista/i });
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
+
+    // 7. Verificar toast de éxito
+    await expect(
+      page.getByText(/Agregamos .* ingredientes a tu lista de compras/i)
+    ).toBeVisible();
+  });
 });

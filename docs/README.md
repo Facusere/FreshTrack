@@ -17,14 +17,14 @@ Esta documentación técnica está redactada en español rioplatense (con voseo,
 | [05-funcionalidades/despensa.md](05-funcionalidades/despensa.md) | Gestión del inventario: altas, edición, filtros, calendario, ubicaciones y acciones por lote. | Desarrolladores, QA |
 | [05-funcionalidades/escaneo-ocr-y-codigo-de-barras.md](05-funcionalidades/escaneo-ocr-y-codigo-de-barras.md) | Digitalización de tickets, etiquetas y códigos de barras (Tesseract.js y BarcodeDetector). | Desarrolladores, Especialistas ML/Vision |
 | [05-funcionalidades/vida-util-y-fechas.md](05-funcionalidades/vida-util-y-fechas.md) | Catálogo de conservación (ANMAT/USDA), cálculo de envase abierto y fechas relativas. | Desarrolladores, Especialistas de Dominio |
-| [05-funcionalidades/recetas.md](05-funcionalidades/recetas.md) | Motor de recetas: recetario local offline y conexión TheMealDB priorizada por vencimiento. | Desarrolladores, Producto |
+| [05-funcionalidades/recetas.md](05-funcionalidades/recetas.md) | Recetas, recetario completo, favoritos, planificador semanal y lista de compras combinada. | Desarrolladores, Producto |
 | [05-funcionalidades/consumo-de-ingredientes.md](05-funcionalidades/consumo-de-ingredientes.md) | Deducción inteligente con FEFO, conversión de medidas culinarias y reversión histórica. | Desarrolladores, QA |
 | [05-funcionalidades/lista-de-compras.md](05-funcionalidades/lista-de-compras.md) | Lista inteligente: stock bajo, reposición frecuente, agrupación por pasillos y migración. | Desarrolladores, UX |
 | [05-funcionalidades/reportes-e-impacto.md](05-funcionalidades/reportes-e-impacto.md) | Métricas de impacto (kg, dinero, platos), tendencias mensuales y gráficos Recharts. | Desarrolladores, Producto |
 | [05-funcionalidades/notificaciones.md](05-funcionalidades/notificaciones.md) | Alertas push/locales, preferencias por categoría (1/3/7 días) y resumen semanal. | Desarrolladores |
 | [05-funcionalidades/backup-y-exportacion.md](05-funcionalidades/backup-y-exportacion.md) | Respaldo y restauración en JSON, y exportación de inventario en CSV con BOM UTF-8. | Desarrolladores, Soporte |
 | [06-modelo-de-datos-y-almacenamiento.md](06-modelo-de-datos-y-almacenamiento.md) | Claves de `localStorage`, interfaces TypeScript, validación estricta y migraciones v1/v2/v3. | Desarrolladores, Arquitectos |
-| [07-referencia-de-modulos-lib.md](07-referencia-de-modulos-lib.md) | Documentación técnica función por función de los 20 módulos dentro de `client/src/lib/`. | Desarrolladores |
+| [07-referencia-de-modulos-lib.md](07-referencia-de-modulos-lib.md) | Documentación técnica función por función de los 24 módulos dentro de `client/src/lib/`. | Desarrolladores |
 | [08-componentes-ui.md](08-componentes-ui.md) | Jerarquía de componentes desde `App.tsx`, modales, secciones del home y primitivas Radix. | Desarrolladores Frontend |
 | [09-api-y-servicios-externos.md](09-api-y-servicios-externos.md) | Contrato de `/api/translate`, integración TheMealDB, DeepL y Open Food Facts. | Desarrolladores Backend / Integraciones |
 | [10-pwa-y-offline.md](10-pwa-y-offline.md) | Configuración de Workbox, Service Worker, caché de modelos OCR e instalación en móviles. | Desarrolladores Frontend / PWA |

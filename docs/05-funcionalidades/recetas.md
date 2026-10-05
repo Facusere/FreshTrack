@@ -1,118 +1,164 @@
-# Funcionalidad: Recetas y Aprovechamiento Culinario
+# Funcionalidad: Recetas, Recetario y Planificador Semanal
 
-Este documento describe el motor de recetas de FreshTrack, su doble arquitectura de datos (recetario local offline y recetario en línea vía TheMealDB), la lógica de priorización por fecha de caducidad, los niveles de compatibilidad (*tiers*), el filtrado dietético y la traducción con preservación idiomática rioplatense.
+Este documento describe el módulo integral de recetas de FreshTrack: su doble arquitectura (recetario local offline y recetas en línea vía TheMealDB), el explorador completo de recetas regionales, el sistema de favoritos persistentes, el planificador semanal de comidas en horario local, el motor de matching con despensa y la generación agregada de lista de compras sin doble cómputo de stock.
 
 ---
 
 ## 1. Perspectiva del Usuario
 
-La sección de recetas permite transformar los alimentos en riesgo de descomposición en platos concretos. El usuario dispone de dos pestañas complementarias:
+El módulo de **Recetas** ofrece dos grandes áreas de trabajo accesibles mediante solapas superiores con persistencia de selección en la sesión (`freshtrack-recipes-main-tab` en `sessionStorage`):
 
-### Pestaña "¿Qué puedo cocinar?" (Motor Local Instantáneo)
-Evalúa en tiempo real y sin llamadas a servidores el inventario no vencido contra 131 recetas regionales (`client/src/data/localRecipes.json`). Clasifica los resultados en tres niveles de disponibilidad:
-- **"Podés hacer ahora" (Tier `ready`)**: Tenés el 100% de los ingredientes necesarios en tu despensa.
-- **"Te falta poco" (Tier `almost`)**: Tenés el 80% o más de los ingredientes. Podés agregar los faltantes a la lista de compras con un solo toque.
-- **"Necesitás comprar más" (Tier `more`)**: Tenés menos del 80% de los ingredientes requeridos.
+### Solapa "Para aprovechar" (Priorización por Vencimiento)
+Diseñada específicamente para evitar el desperdicio inmediato de alimentos. Se divide en dos sub-pestañas:
+1. **"¿Qué puedo cocinar?" (Motor Local Instantáneo)**: Evalúa el inventario no vencido contra las 131 recetas regionales (`client/src/data/localRecipes.json`) clasificándolas en:
+   - **"Podés hacer ahora" (Tier `ready`)**: 100% de ingredientes disponibles en despensa.
+   - **"Te falta poco" (Tier `almost`)**: 80% o más de ingredientes disponibles. Permite enviar faltantes a compras con un toque.
+   - **"Necesitás comprar más" (Tier `more`)**: Menos del 80% de ingredientes disponibles.
+2. **"Aprovechar por vencer" (Motor TheMealDB)**: Consulta ingredientes críticos que vencen en los próximos 7 días contra TheMealDB y traduce al español rioplatense protegiendo términos locales.
 
-Si el usuario desea más ideas, puede pulsar el botón *"Buscar más ideas en la red"* para consultar TheMealDB y cachear recetas online adicionales en esta vista.
-
-### Pestaña "Aprovechar por vencer" (Motor de Rescate TheMealDB)
-Identifica los alimentos más urgentes de la despensa (con estado `soon` o que vencen en los próximos 7 días) y consulta la base de TheMealDB. Las recetas obtenidas se traducen automáticamente al español rioplatense protegiendo la terminología culinaria local (ej. *pechuga de pollo*, *sartén*, *manteca*).
+### Solapa "Recetario" (Explorador, Favoritos y Planificador)
+Diseñada para la planificación culinaria integral, permitiendo descubrir preparaciones y organizar la semana:
+1. **Sub-vista "Explorar"**:
+   - Acceso al catálogo completo de las 131 recetas locales sin requerir que los ingredientes estén en la despensa.
+   - **Buscador en tiempo real**: Insensible a mayúsculas y acentos/diacríticos (busca tanto en el título como en los nombres de ingredientes).
+   - **Filtros por categoría**: Lista dinámica extraída del catálogo (ej. Pastas, Carnes, Ensaladas, Sopas, etc.).
+   - **Filtros dietarios rápidos**: Todas, Vegetarianas, Sin gluten y Rápidas (≤ 20 min).
+   - **Criterios de ordenamiento**: Nombre (A-Z), Mayor coincidencia con despensa y Favoritas primero.
+   - **Marcado de Favoritos**: Botón de estrella interactivo con persistencia local y atributo `aria-pressed`.
+   - **Paginación incremental**: Carga inicial de 12 recetas con botón accesible "Cargar más recetas".
+2. **Sub-vista "Menú semanal" (Planificador)**:
+   - Grilla semanal de 7 días (de **Lunes a Domingo**) calculada en hora local.
+   - Dos turnos por día: **Almuerzo** y **Cena**.
+   - Asignación, sustitución y desasignación de recetas por turno.
+   - **Detección preventiva de vencimientos**: Alerta al usuario si un ingrediente presente en la despensa vencerá *antes* del día programado para la comida.
+   - **Generador de lista de compras semanal**: Consolida los faltantes de todas las comidas planificadas, escala porciones, convierte unidades compatibles y descuenta el stock de despensa sin doble cómputo, presentando un diálogo de confirmación con checkboxes.
 
 ---
 
-## 2. Flujo de Búsqueda y Evaluación de Recetas
+## 2. Flujo y Arquitectura de Recetas
 
 ```mermaid
 flowchart TD
-    Start([Usuario entra a sección Recetas]) --> TabChoice{Pestaña activa}
+    Start([Usuario entra a sección Recetas]) --> MainTab{Solapa principal}
 
-    subgraph RecetarioLocal ["Pestaña: ¿Qué puedo cocinar?"]
-        TabChoice -->|Local| FilterPantryLocal[Filtra despensa activa: no vencidos]
-        FilterPantryLocal --> CheckCount{¿Hay al menos 3 productos?}
-        CheckCount -->|No| EmptyState[Muestra estado vacío C6:\nAgregá al menos 3 alimentos]
-        CheckCount -->|Sí| MatchAll[matchRecipeAgainstPantry sobre 131 recetas]
-        MatchAll --> TokenMatch[Coincidencia por tokens y sinónimos sin red]
-        TokenMatch --> GroupTiers[Agrupa en ready 100%, almost >=80% y more <80%]
-        GroupTiers --> RenderLocal[Renderiza tarjetas agrupadas]
+    subgraph Aprovechamiento ["Solapa: Para aprovechar"]
+        MainTab -->|Para aprovechar| RescueSubTab{Sub-pestaña}
+        RescueSubTab -->|Local| MatchPantry[matchRecipeAgainstPantry sobre despensa activa]
+        MatchPantry --> Tiers[ready 100%, almost >=80%, more <80%]
+        RescueSubTab -->|Online| FetchMealDB[TheMealDB por ingredientes urgentes + DeepL]
     end
 
-    subgraph RecetarioOnline ["Pestaña: Aprovechar por vencer"]
-        TabChoice -->|Online| FilterPantryOnline[Filtra productos con status soon o días <= 7]
-        FilterPantryOnline --> CheckUrgent{¿Hay productos por vencer?}
-        CheckUrgent -->|No| CalmPantry[Muestra aviso:\nTu despensa está tranquila]
-        CheckUrgent -->|Sí| Top3[Selecciona los 3 ingredientes más urgentes]
-        Top3 --> QueryCache{¿En caché de memoria?}
-        QueryCache -->|Sí| ShowCached[Retorna recetas cacheadas]
-        QueryCache -->|No| FetchTheMealDB[Consulta fetch a TheMealDB filter.php]
-        FetchTheMealDB --> SuccessFetch{¿Respondió correctamente?}
-        SuccessFetch -->|Error o Timeout 6s| LocalFallbacks[filterFallbackRecipes sobre 12 recetas estáticas]
-        SuccessFetch -->|Éxito| DedupeOnline[Deduplica por idMeal y ordena por coincidencias]
-        DedupeOnline --> RenderOnline[Renderiza tarjetas online]
+    subgraph RecetarioCompleto ["Solapa: Recetario"]
+        MainTab -->|Recetario| CookbookNav{Sub-vista}
+        CookbookNav -->|Explorar| FilterCatalog[Filtro de búsqueda, categorías y dietas]
+        FilterCatalog --> SortCatalog[Ordenamiento: A-Z / Despensa / Favoritos]
+        SortCatalog --> PaginateCards[Renderizado paginado de RecipeCard]
+        PaginateCards --> FavClick[Clic en Favorito: toggleFavorite]
+        
+        CookbookNav -->|Menú semanal| WeekGrid[Grilla 7 días: Lunes a Domingo]
+        WeekGrid --> AssignSlot[Asignar receta a Almuerzo o Cena]
+        WeekGrid --> WarnExpiry[Alerta: checkPlannedMealExpirations]
+        WeekGrid --> GenShop[Generar lista semanal: weeklyShopping]
     end
 
-    RenderLocal --> ClickRecipe[Clic en tarjeta de receta]
-    RenderOnline --> ClickRecipe
-    ClickRecipe --> DetailsModal[Abre diálogo de detalle de receta]
-    DetailsModal --> CheckI18n{¿Requiere traducción?}
-    CheckI18n -->|Sí| CallTranslate[POST /api/translate con DeepL]
-    CallTranslate --> ShowDetails[Muestra ingredientes, medidas escaladas e instrucciones]
+    PaginateCards --> ClickDetail[Ver Detalle de Receta]
+    ClickDetail --> DialogActions{Acciones en Detalle}
+    DialogActions --> Scale[Escalar porciones 1 a 12]
+    DialogActions --> QuickShop[Agregar faltantes a compras]
+    DialogActions --> PlanMeal[Planificar en menú semanal]
+    DialogActions --> CookNow[Cocinar ahora si está 100% lista]
 ```
 
 ---
 
-## 3. Filtrado Dietético y Atributos de Preparación
+## 3. Buscador, Categorías y Filtros (`client/src/lib/cookbook.ts`)
 
-El usuario puede filtrar las recetas exhibidas mediante 4 botones de selección:
-1. **Todas (`"all"`)**: Muestra todas las recetas coincidentes.
-2. **Vegetarianas (`"vegetarian"`)**: Descarta recetas cuyos ingredientes o títulos contengan términos cárnicos (`pollo`, `carne`, `beef`, `pork`, `bacon`, `pescado`, `atún`, etc.).
-3. **Sin gluten estimada (`"glutenFree"`)**: La función `isGlutenFreeEstimated()` analiza la lista de ingredientes buscando la presencia de harinas, fideos, pastas, pan, avena, trigo, centeno, cebada o derivados con gluten. Si ninguno está presente, clasifica la receta como apta con la advertencia de que se trata de una estimación algorítmica.
-4. **Rápidas (`"quick"`)**: Prioriza preparaciones veloces (ensaladas, tortillas, omelettes, salteados y sándwiches).
-
----
-
-## 4. Traducción Inteligente y Caché Multinivel
-
-Para las recetas originadas en TheMealDB (cuyo contenido base se encuentra en inglés británico o internacional), `client/src/lib/recipeApi.ts` implementa una estrategia de traducción en dos niveles:
-
-1. **Caché en `localStorage` (`freshtrack-recipe-i18n-v1`)**: Almacena de forma persistente las traducciones de títulos, instrucciones e ingredientes para cada `idMeal`. Si el usuario vuelve a ver la misma receta días después, no se consumen peticiones a la API.
-2. **Llamada segura a `/api/translate`**: Envía un arreglo de cadenas (`[title, instructions, ...ingredientNames]`) al backend.
-3. **Manejo de Fallos**: Si la API de DeepL no está configurada, falla por timeout (8 s) o se agota el cupo mensual, FreshTrack marca la receta con `isOriginalEnglish: true` y muestra el texto original con una insignia explicativa, sin romper la interfaz.
+- **Búsqueda Normalizada**: La función `normalizeSearchText(text)` remueve marcas diacríticas mediante `text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")` y convierte a minúsculas, permitiendo que términos como `"milanesa"`, `"limón"`, `"pure"` o `"brócoli"` coincidan sin importar cómo escriba el usuario.
+- **Categorías Dinámicas**: `getAvailableCategories(recipes)` analiza las categorías presentes en el catálogo y las ordena alfabéticamente.
+- **Filtros Dietéticos**:
+  - `vegetarian`: Descarta preparaciones con ingredientes cárnicos, pescados y derivados.
+  - `glutenFree`: Verifica la ausencia de trigo, avena, cebada, centeno, harinas comunes y fideos convencionales.
+  - `quick`: Identifica recetas cuyo tiempo estimado de preparación sea $\le 20$ minutos.
+- **Ordenamiento Multicriterio**:
+  - `"name-asc"`: Orden alfabético por título.
+  - `"match-desc"`: Ordena según el porcentaje de disponibilidad de ingredientes en la despensa actual.
+  - `"favorites-first"`: Ubica primero las recetas presentes en `freshtrack-favorite-recipes-v1`.
 
 ---
 
-## 5. Escalado de Porciones (`scaleMeasure`)
+## 4. Persistencia de Favoritos (`client/src/lib/favoriteRecipes.ts`)
 
-En el modal de detalle de receta de `Home.tsx`, el usuario puede ajustar la cantidad de comensales mediante botones de incremento y decremento (por defecto 1x, ajustable a 0.5x, 2x, 3x, etc.). La función `scaleMeasure(measure, factor)` utiliza una expresión regular para detectar los números dentro de frases complejas de ingredientes (ej. `"2 tazas"`, `"1/2 cucharada"`, `"250 g"`), multiplicando las cantidades numéricas de forma proporcional y redondeando a un decimal para evitar fracciones ilegibles.
-
----
-
-## 6. Imágenes de Respaldo Vectoriales (`getRecipeFallbackImage`)
-
-Cuando una receta en línea no dispone de fotografía o la imagen externa falla al cargar por restricciones de red o modo fuera de línea, la función `getRecipeFallbackImage(title, category)` genera al vuelo un gráfico vectorial SVG embebido como *data URI*:
-- Determina la categoría del plato (ensaladas $\rightarrow$ 🥗, pastas $\rightarrow$ 🍝, pollo $\rightarrow$ 🍗, postres $\rightarrow$ 🥣, etc.).
-- Construye un contenedor SVG con esquinas redondeadas y gradiente cálido, garantizando que nunca se muestren iconos rotos en la interfaz.
+- **Almacenamiento**: Persistido en `localStorage` bajo la clave `freshtrack-favorite-recipes-v1` como `string[]` de IDs.
+- **Operaciones**:
+  - `loadFavorites()`: Recupera la lista tolerando datos corruptos y retornando un arreglo vacío ante excepciones.
+  - `saveFavorites(ids)`: Guarda la lista con protección ante `QuotaExceededError`.
+  - `toggleFavorite(recipeId)`: Agrega o remueve el identificador y notifica al usuario con Sonner Toast y vibración háptica.
+  - `pruneFavoriteRecipes(validRecipeIds)`: Limpia de forma transparente identificadores huérfanos que ya no pertenezcan al catálogo.
 
 ---
 
-## 7. Casos Borde
+## 5. Planificador Semanal (`client/src/lib/mealPlan.ts`)
 
-- **Despensa con menos de 3 productos no vencidos**: En la pestaña "¿Qué puedo cocinar?", si la despensa activa tiene 0, 1 o 2 alimentos, `calculateLocalRecipeMatches` retorna `null` para activar el estado C6, invitando al usuario a registrar más alimentos en lugar de presentar matches vacíos o irrelevantes.
-- **Sin productos próximos a vencer**: En la pestaña "Aprovechar por vencer", si no hay alimentos que caduquen dentro de los próximos 7 días, el sistema no emite peticiones de red y despliega el mensaje de tranquilidad: *"No hay nada por vencer, tu despensa está tranquila"*.
-- **Conectividad interrumpida durante la búsqueda**: Si TheMealDB no responde tras 6 segundos, el sistema cancela la petición con `AbortController` y retorna las 12 recetas locales de respaldo (`fallbackRecipes`), mostrando un banner informativo en lugar de una pantalla de error.
+- **Cálculo Local de Semanas**: Utiliza `getMondayOfWeek(d)` y `getWeekDates(monday)` basados en la fecha local (`getFullYear()`, `getMonth()`, `getDate()`), garantizando que la semana siempre comience el lunes y evitando el error de salto de día ocasionado por conversiones UTC a las 21:00 hs en husos horarios como el de Argentina (UTC-3).
+- **Modelo de Datos `PlannedMeal`**:
+  ```typescript
+  export interface PlannedMeal {
+    id: string;              // Identificador único (ej. "2026-10-05-lunch")
+    date: string;            // Fecha ISO local YYYY-MM-DD
+    slot: "lunch" | "dinner";// Turno
+    recipeId: string;        // ID de la receta local
+    portions: number;        // Porciones configuradas (por defecto según receta)
+    createdAt: string;       // Timestamp ISO
+  }
+  ```
+- **Retención y Poda Automática**: Al cargar el plan (`loadMealPlan`), se descartan automáticamente las comidas planificadas con más de 30 días de antigüedad para proteger la cuota de `localStorage`, además de remover recetas que hayan sido eliminadas del catálogo.
+- **Detección Preventiva de Vencimientos**:
+  `checkPlannedMealExpirations(meal, pantryProducts)` compara la fecha planificada de la comida (`meal.date`) contra las fechas de vencimiento de los productos en la despensa que coinciden con los ingredientes de la receta. Si un ingrediente vence antes de que se cocine la comida, genera un aviso con el nombre del producto, días de diferencia y fecha límite.
 
 ---
 
-## 8. Pruebas que Cubren esta Funcionalidad
+## 6. Generador de Lista de Compras Semanal (`client/src/lib/weeklyShopping.ts`)
 
-- `client/src/tests/localRecipes.test.ts`: Pruebas del recetario local, cálculo estricto de tiers (`ready`, `almost`, `more`) y verificación de ejecución sin dependencias de red.
-- `client/src/tests/recipeApi.test.ts`: Pruebas de filtrado por productos por vencer, estimación sin gluten, caché local de traducciones y fallbacks offline.
-- `e2e/freshtrack.spec.ts`: Escenario E2E completo: carga de receta traducida, verificación de texto sin palabras en inglés rotas, y apertura del flujo de consumo.
+La generación de compras a partir de la semana planificada resuelve tres problemas complejos de inventario culinario:
+
+1. **Escalado Proporcional**:
+   Cada ingrediente se escala según las porciones configuradas para la comida (`scaleMeasure(measure, meal.portions / recipe.servings)`).
+2. **Consolidación de Unidades**:
+   Si dos recetas de la semana requieren harina (ej. una pide 300 g y otra 500 g), se unifican en 800 g usando las conversiones de `quantity.ts` (g/kg, ml/l, unidades). Si las unidades no son convertibles directamente (ej. "1 taza" y "200 g"), se preservan ambas líneas discriminadas para evitar pérdidas de información.
+3. **Deducción de Despensa sin Doble Cómputo**:
+   El generador consulta los productos activos no vencidos de la despensa y calcula el faltante real descontando el stock disponible paso a paso:
+   - Si la despensa tiene 500 g de harina y la semana requiere 800 g en total, el stock se consume una sola vez y la lista de compras solo solicita 300 g restantes.
+   - Los productos ya vencidos se excluyen del stock disponible para no asumir existencias no aptas para consumo.
+   - Las especias y condimentos sin cantidad numérica (`isNonNumericSpice`, como "sal a gusto" o "pimienta negra molida") se omiten automáticamente para no ensuciar la lista de compras con ítems ambiguos.
+4. **Previsualización con Checkboxes**:
+   Antes de escribir en `freshtrack-shopping-list-v1`, se presenta el diálogo modal con el listado de ingredientes faltantes pre-seleccionados, permitiendo al usuario desmarcar elementos que ya tenga en su hogar o prefiera no comprar.
+
+---
+
+## 7. Casos Borde y Resiliencia
+
+- **Receta con porciones fraccionadas**: El escalado de porciones redondea a valores razonables (un decimal) para evitar indicaciones como "0.3333333 gramos".
+- **Semana que cruza de mes o de año**: `getWeekDates` computa el avance día por día mediante `new Date(year, month, day + i)`, resolviendo naturalmente los cambios de mes y los años bisiestos.
+- **Acceso sin conexión total**: La totalidad de las 131 recetas, la búsqueda, los filtros, los favoritos y el planificador semanal funcionan de forma 100% offline, ya que se alimentan de archivos JSON locales y almacenamiento en el navegador.
+
+---
+
+## 8. Pruebas Automatizadas
+
+- `client/src/tests/cookbook.test.ts`: Búsqueda sin acentos, búsqueda en ingredientes, filtros dietarios y ordenamientos multicriterio.
+- `client/src/tests/favoriteRecipes.test.ts`: Guardado, toggle, poda de huérfanos y resiliencia ante errores de `localStorage`.
+- `client/src/tests/mealPlan.test.ts`: Inicio en lunes, cruces de mes/año, unicidad de turnos, poda a 30 días y detección de vencimientos previos.
+- `client/src/tests/weeklyShopping.test.ts`: Escalado de porciones, suma de unidades convertibles, balance de despensa sin doble descuento y exclusión de especias no numéricas.
+- `e2e/freshtrack.spec.ts`:
+  - Escenario 5: Abrir recetario $\rightarrow$ marcar favorita $\rightarrow$ agregar faltantes a compras $\rightarrow$ verificar ítem en compras.
+  - Escenario 6: Planificar dos recetas en el menú semanal $\rightarrow$ generar lista semanal $\rightarrow$ confirmar en diálogo.
 
 ---
 
 ## Enlaces Relacionados
 - [Funcionalidad: Consumo de Ingredientes](consumo-de-ingredientes.md)
-- [Funcionalidad: Despensa](despensa.md)
-- [API y Servicios Externos](../09-api-y-servicios-externos.md)
+- [Funcionalidad: Lista de Compras](lista-de-compras.md)
+- [Modelo de Datos y Almacenamiento](../06-modelo-de-datos-y-almacenamiento.md)
 - [Referencia de Módulos lib/](../07-referencia-de-modulos-lib.md)
+- [Componentes UI](../08-componentes-ui.md)
+

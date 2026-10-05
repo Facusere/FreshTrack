@@ -22,6 +22,18 @@ erDiagram
     STORED_PRODUCT }o--|| PRODUCT_CATEGORY : "pertenece a"
     SHOPPING_ITEM ||--o| LOCAL_RECIPE : "requerido para preparar"
 
+    PLANNED_MEAL }o--|| LOCAL_RECIPE : "asigna a turno"
+    FAVORITE_RECIPES ||--o{ LOCAL_RECIPE : "referencia favoritos de"
+
+    PLANNED_MEAL {
+        string id PK
+        string date
+        string slot
+        string recipeId FK
+        number portions
+        string createdAt
+    }
+
     STORED_PRODUCT {
         number id PK
         string name
@@ -95,6 +107,8 @@ FreshTrack almacena la totalidad de su estado en el `localStorage` del navegador
 | `freshtrack-consumption-history-v2` | `any[]` (JSON) | `client/src/lib/storage.ts` | **Clave legada**. Se elimina automáticamente al iniciar la app. | No |
 | `freshtrack-consumption-history-v1` | `any[]` (JSON) | `client/src/lib/storage.ts` | **Clave legada**. Se elimina automáticamente al iniciar la app. | No |
 | `freshtrack-shopping-list-v1` | `ShoppingItem[]` (JSON) | `client/src/lib/shoppingList.ts` | Ítems de la lista de compras con motivos, recetas asociadas y estado de compra. | **Sí** |
+| `freshtrack-favorite-recipes-v1` | `string[]` (JSON) | `client/src/lib/favoriteRecipes.ts` | Identificadores de recetas locales marcadas como favoritas. | **Sí** |
+| `freshtrack-meal-plan-v1` | `PlannedMeal[]` (JSON) | `client/src/lib/mealPlan.ts` | Comidas planificadas en la semana (fecha ISO local, turno, receta y comensales). | **Sí** |
 | `freshtrack-last-scan-v1` | `LastScanInfo` (JSON) | `client/src/lib/storage.ts` | Timestamp y cantidad de productos del último escaneo para la insignia de cabecera. | No |
 | `freshtrack-shelf-corrections-v1` | `Record<string, ShelfLifeCorrection>` | `client/src/lib/shelfLifeCatalog.ts` | Ajustes manuales del usuario sobre días de conservación cerrado y abierto. | No |
 | `freshtrack-date-learning-v1` | `DateLearningRule[]` (JSON) | `client/src/lib/dateRecognition.ts` | Reglas aprendidas de clasificación de fechas OCR por producto o categoría. | No |
@@ -105,6 +119,12 @@ FreshTrack almacena la totalidad de su estado en el `localStorage` del navegador
 | `freshtrack-notification-preferences-v1` | `NotificationPreferences` (JSON) | `client/src/lib/notificationRules.ts` | Preferencias de alertas, días de anticipación por categoría y resumen semanal. | No |
 | `freshtrack-last-notification-date` | `string` (YYYY-MM-DD) | `client/src/lib/pwaAndNotifications.ts` | Fecha del último aviso emitido para asegurar el límite de 1 notificación diaria. | No |
 | `theme` | `"light" \| "dark"` (string) | `client/src/contexts/ThemeContext.tsx` | Tema de interfaz activo persistido por el proveedor de contexto. | Parcial (`freshtrack-theme` en backup) |
+
+### Claves de Sesión (`sessionStorage`)
+
+| Clave de Sesión | Tipo de Dato | Módulo Responsable | Propósito |
+| :--- | :--- | :--- | :--- |
+| `freshtrack-recipes-main-tab` | `"rescue" \| "cookbook"` (string) | `client/src/components/home/RecipesSection.tsx` | Preserva la solapa activa del módulo de recetas durante la sesión activa del navegador. |
 
 ---
 
@@ -258,6 +278,18 @@ export type RecipeSuggestion = {
 };
 ```
 
+### `PlannedMeal` (`client/src/lib/mealPlan.ts`)
+```typescript
+export interface PlannedMeal {
+  id: string;              // Ej. "2026-10-05-lunch"
+  date: string;            // Fecha local ISO YYYY-MM-DD
+  slot: "lunch" | "dinner";// Turno
+  recipeId: string;        // ID de la receta en localRecipes.json
+  portions: number;        // Cantidad de comensales
+  createdAt: string;       // Timestamp ISO de creación
+}
+```
+
 ### `FreshTrackBackup` (`client/src/lib/backup.ts`)
 ```typescript
 export interface FreshTrackBackup {
@@ -266,6 +298,8 @@ export interface FreshTrackBackup {
   products: StoredProduct[];
   consumptionHistory: any[];
   shoppingList: any[];
+  favoriteRecipes?: string[];
+  mealPlan?: PlannedMeal[];
   theme?: string;
 }
 ```

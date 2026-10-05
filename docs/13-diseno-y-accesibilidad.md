@@ -63,9 +63,13 @@ FreshTrack está optimizado bajo el paradigma *mobile-first*:
 ## 6. Accesibilidad (WCAG 2.1 AA)
 
 La calidad de acceso se audita de forma continua:
-1. **Auditoría Cromática (`contrast.test.ts`)**: Calcula por software la luminancia relativa y ratio de contraste de cada token de color. Todas las combinaciones de texto y fondo cumplen con el estándar WCAG AA ($> 4.5:1$ en texto normal) y la mayoría supera el estándar AAA ($> 7:1$).
-2. **Auditoría de Árbol DOM con Axe-core (`freshtrack.spec.ts`)**: Las pruebas automatizadas analizan la página principal y los modales abiertos (`AddProductModal`, `ScanModal`), exigiendo **cero violaciones serias o críticas**.
-3. **Gestión de Foco y Teclado**: Los modales construidos con Radix UI atrapan el foco mientras están abiertos, devuelven el foco al elemento disparador al cerrarse y admiten cierre mediante tecla `Escape`.
+1. **Auditoría Cromática y Tokens Esmeralda (`contrast.test.ts`)**: Calcula por software la luminancia relativa y ratio de contraste de cada token de color. Para superar holgadamente el estándar WCAG AA ($> 4.5:1$ en texto normal), los tokens de marca y acento se ajustaron a `--color-emerald-600: #047857` y `--brand: #03543f`, eliminando fallos de contraste al renderizar texto blanco sobre botones y badges activos.
+2. **Auditoría de Árbol DOM con Axe-core (`freshtrack.spec.ts`)**: Las pruebas automatizadas analizan la página principal y los modales (`AddProductModal`, `ScanModal`, `RecipeDetailDialog`, `MealPlanner`), exigiendo **cero violaciones serias o críticas**.
+3. **Gestión de Foco, Teclado y Roles ARIA**:
+   - Los modales construidos con Radix UI atrapan el foco mientras están abiertos, devuelven el foco al elemento disparador al cerrarse y admiten cierre mediante tecla `Escape`.
+   - Las solapas de recetas implementan el patrón accesible de pestañas (`role="tablist"`, `role="tab"`, `aria-selected`, navegación por flechas).
+   - Los botones de favoritos utilizan `aria-pressed="true|false"` y `aria-label` descriptivos para comunicar su estado a lectores de pantalla.
+   - Los botones de cierre de modales cuentan con etiquetas unívocas (`aria-label="Cerrar detalle de receta"`) para evitar colisiones con primitivas internas de Radix.
 4. **Contingencia ante Errores (`ErrorBoundary.tsx`)**: Si un componente React arroja una excepción en tiempo de renderizado, la pantalla no se rompe; se exhibe una interfaz de contención con detalles técnicos y un botón de reinicio.
 
 ---

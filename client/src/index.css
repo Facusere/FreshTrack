@@ -16,6 +16,7 @@
   --color-emerald-vibrant: #10b981;
   --color-emerald-mint: #34d399;
   --color-emerald-wash: #ecfdf5;
+  --color-emerald-600: #047857;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -106,7 +107,7 @@
   --card-foreground: #09150d;
   --popover: #ffffff;
   --popover-foreground: #09150d;
-  --primary: #059669;
+  --primary: #03543f;
   --primary-foreground: #ffffff;
   --secondary: #e2ece4;
   --secondary-foreground: #0e1e13;
@@ -120,7 +121,7 @@
   --input: #ccd8cf;
   --ring: #10b981;
 
-  --chart-1: #059669;
+  --chart-1: #03543f;
   --chart-2: #d97706;
   --chart-3: #e11d48;
   --chart-4: #0284c7;
@@ -143,8 +144,8 @@
   --line-subtle: #dde6e0;
   --line-strong: #9fb3a3;
 
-  --brand: #059669;
-  --brand-hover: #047857;
+  --brand: #03543f;
+  --brand-hover: #023e2e;
   --brand-subtle: #e5f6eb;
   --brand-border: #7ee2a6;
   --brand-text: #034f34;

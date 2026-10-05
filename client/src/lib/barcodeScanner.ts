@@ -1,7 +1,6 @@
-import { ALL_CATEGORIES, ProductCategory } from "./categories";
+import { ProductCategory } from "./categories";
 import { estimateShelfLife } from "./shelfLifeCatalog";
 import { addDaysISO } from "./dates";
-import { StoredProduct } from "@/types/product";
 
 export interface ScannedBarcodeProduct {
   barcode: string;
@@ -58,19 +57,19 @@ function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): Produc
     return "Lácteos";
   }
   if (combined.includes("meat") || combined.includes("viande") || combined.includes("carne") || combined.includes("pollo") || combined.includes("beef") || combined.includes("pork") || combined.includes("charcuterie") || combined.includes("fiambre")) {
-    return "Carnes y fiambres";
+    return "Carnes";
   }
   if (combined.includes("fish") || combined.includes("poisson") || combined.includes("pescado") || combined.includes("marisco") || combined.includes("tuna") || combined.includes("atun")) {
     return "Pescados y mariscos";
   }
   if (combined.includes("fruit") || combined.includes("apple") || combined.includes("banana") || combined.includes("manzana") || combined.includes("fruta")) {
-    return "Frutas";
+    return "Frutas frescas";
   }
   if (combined.includes("vegetable") || combined.includes("legume") || combined.includes("verdura") || combined.includes("tomate") || combined.includes("salad")) {
-    return "Verduras";
+    return "Verduras frescas";
   }
   if (combined.includes("bread") || combined.includes("pain") || combined.includes("pan") || combined.includes("bakery") || combined.includes("pastry") || combined.includes("factura") || combined.includes("galletita")) {
-    return "Panadería y pastas";
+    return "Panadería";
   }
   if (combined.includes("beverage") || combined.includes("drink") || combined.includes("boisson") || combined.includes("jugo") || combined.includes("juice") || combined.includes("gaseosa") || combined.includes("soda") || combined.includes("agua")) {
     return "Bebidas";

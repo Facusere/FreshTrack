@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  BookOpen,
   Check,
   ChefHat,
   ChevronDown,
@@ -18,6 +19,8 @@ import {
 } from "lucide-react";
 import { RecipeSuggestion, getRecipeFallbackImage } from "@/lib/recipeApi";
 import { Product } from "@/types/product";
+import { ShoppingItem } from "@/lib/shoppingList";
+import { CookbookSection } from "./CookbookSection";
 import {
   calculateLocalRecipeMatches,
   fetchOnlineRecipesForPantry,
@@ -50,6 +53,9 @@ export interface RecipesSectionProps {
   ) => void;
   onOpenAdd?: () => void;
   onOpenScan?: () => void;
+  shoppingList?: ShoppingItem[];
+  setShoppingList?: React.Dispatch<React.SetStateAction<ShoppingItem[]>>;
+  onNavigateToShopping?: () => void;
 }
 
 export function RecipesSection({
@@ -70,8 +76,26 @@ export function RecipesSection({
   onAddMissingToShoppingList,
   onOpenAdd,
   onOpenScan,
+  shoppingList = [],
+  setShoppingList = () => {},
+  onNavigateToShopping,
 }: RecipesSectionProps) {
-  // Tabs: "¿Qué puedo cocinar?" (Instant local matching) vs "Aprovechar por vencer" (TheMealDB)
+  // Top-Level Tab: "Para aprovechar" (rescue) vs "Recetario" (cookbook)
+  const [mainTab, setMainTab] = useState<"rescue" | "cookbook">(() => {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      const saved = window.sessionStorage.getItem("freshtrack-recipes-main-tab");
+      if (saved === "cookbook" || saved === "rescue") return saved;
+    }
+    return "rescue";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      window.sessionStorage.setItem("freshtrack-recipes-main-tab", mainTab);
+    }
+  }, [mainTab]);
+
+  // Subtabs for "Para aprovechar": "¿Qué puedo cocinar?" vs "Aprovechar por vencer"
   const [activeTab, setActiveTab] = useState<"whatCanICook" | "rescueExpiring">("rescueExpiring");
 
   // Online recipes state for "¿Qué puedo cocinar?"
@@ -128,8 +152,60 @@ export function RecipesSection({
   return (
     <section id="module-recipes" className="scroll-mt-24 mt-6">
       <div className="tomorro-card-bone relative overflow-hidden p-5 sm:p-6 lg:p-7 shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
-        {/* Navigation Tabs between "¿Qué puedo cocinar?" and "Aprovechar por vencer" */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+        {/* Top-Level Accessible Tabs */}
+        <div
+          role="tablist"
+          aria-label="Pestañas del módulo recetas"
+          className="flex items-center gap-2 border-b border-line pb-4 mb-5"
+        >
+          <button
+            role="tab"
+            id="tab-rescue"
+            aria-controls="panel-rescue"
+            aria-selected={mainTab === "rescue"}
+            type="button"
+            onClick={() => setMainTab("rescue")}
+            className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
+              mainTab === "rescue"
+                ? "bg-brand text-white shadow-xs"
+                : "border border-line bg-surface text-content-muted hover:text-content-heading hover:bg-surface-muted"
+            }`}
+          >
+            <Hourglass size={15} /> Para aprovechar
+          </button>
+
+          <button
+            role="tab"
+            id="tab-cookbook"
+            aria-controls="panel-cookbook"
+            aria-selected={mainTab === "cookbook"}
+            type="button"
+            onClick={() => setMainTab("cookbook")}
+            className={`flex min-h-[42px] items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
+              mainTab === "cookbook"
+                ? "bg-brand text-white shadow-xs"
+                : "border border-line bg-surface text-content-muted hover:text-content-heading hover:bg-surface-muted"
+            }`}
+          >
+            <BookOpen size={15} /> Recetario
+          </button>
+        </div>
+
+        {mainTab === "cookbook" ? (
+          <div role="tabpanel" id="panel-cookbook" aria-labelledby="tab-cookbook">
+            <CookbookSection
+              pantryProducts={pantryProducts}
+              shoppingList={shoppingList}
+              setShoppingList={setShoppingList}
+              onAddMissingToShoppingList={onAddMissingToShoppingList}
+              onInitiateConsumption={onInitiateConsumption}
+              onNavigateToShopping={onNavigateToShopping}
+            />
+          </div>
+        ) : (
+          <div role="tabpanel" id="panel-rescue" aria-labelledby="tab-rescue">
+            {/* Navigation Tabs between "¿Qué puedo cocinar?" and "Aprovechar por vencer" */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -646,16 +722,18 @@ export function RecipesSection({
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-between border-t border-line/60 pt-4 text-xs text-content-muted">
-          <span>
-            {activeTab === "whatCanICook"
-              ? "Ideas preparadas para responder al instante según el inventario de tu hogar."
-              : "Sugerencias basadas en tus productos por vencer."}
-          </span>
-          <span className="flex items-center gap-1">
-            <Utensils size={13} /> FreshTrack Cocina
-          </span>
-        </div>
+            <div className="mt-6 flex items-center justify-between border-t border-line/60 pt-4 text-xs text-content-muted">
+              <span>
+                {activeTab === "whatCanICook"
+                  ? "Ideas preparadas para responder al instante según el inventario de tu hogar."
+                  : "Sugerencias basadas en tus productos por vencer."}
+              </span>
+              <span className="flex items-center gap-1">
+                <Utensils size={13} /> FreshTrack Cocina
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

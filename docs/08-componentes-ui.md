@@ -23,7 +23,11 @@ main.tsx
                 │   ├── PantrySection.tsx
                 │   │   ├── ProductRow.tsx (Lista de tarjetas de alimentos)
                 │   │   └── WeekCalendar.tsx (Visualización en calendario de 7 días)
-                │   ├── RecipesSection.tsx (Tabs "¿Qué puedo cocinar?" y "Por vencer")
+                │   ├── RecipesSection.tsx (Solapas "Para aprovechar" y "Recetario")
+                │   │   └── CookbookSection.tsx (Explorador de recetario y favoritos)
+                │   │       ├── RecipeCard.tsx (Tarjeta de receta con match y favoritos)
+                │   │       ├── RecipeDetailDialog.tsx (Detalle, porciones, compras y plan)
+                │   │       └── MealPlanner.tsx (Planificador semanal 7 días y compras semanales)
                 │   ├── ShoppingSection.tsx
                 │   │   └── ShoppingListModule.tsx (Gestor de compras y sugerencias)
                 │   ├── ReportsSection.tsx (Gráficos Recharts e historial)
@@ -93,8 +97,24 @@ main.tsx
 - **Responsabilidad**: Distribuye los alimentos que vencen en los próximos 7 días en columnas diarias de lunes a domingo, facilitando la planificación visual inmediata.
 
 ### `RecipesSection.tsx`
-- **Props**: `recipes`, `visibleRecipes`, `recipesLoading`, `recipesWarning`, `recipesInfo`, `recipesError`, `recipeFilter`, `setRecipeFilter`, `onOpenRecipeDetail`, `onInitiateConsumption`, `pantryProducts`, `onAddMissingToShoppingList`.
-- **Responsabilidad**: Administra las dos pestañas de cocina: "¿Qué puedo cocinar?" (cálculo local con `localRecipes.json` en tiers `ready`, `almost`, `more`) y "Aprovechar por vencer" (recetas externas TheMealDB). Incluye los filtros dietéticos y el botón de búsqueda online.
+- **Props**: `recipes`, `visibleRecipes`, `recipesLoading`, `recipesWarning`, `recipesInfo`, `recipesError`, `recipeFilter`, `setRecipeFilter`, `onOpenRecipeDetail`, `onInitiateConsumption`, `pantryProducts`, `onAddMissingToShoppingList`, `onNavigateToShopping`.
+- **Responsabilidad**: Contenedor principal del módulo de cocina. Renderiza las solapas accesibles superiores ("Para aprovechar" y "Recetario") persistiendo la pestaña activa en `sessionStorage` (`freshtrack-recipes-main-tab`). En "Para aprovechar" administra las sub-solapas de cocina inmediata y rescate con TheMealDB; en "Recetario" monta `CookbookSection`.
+
+### `CookbookSection.tsx`
+- **Props**: `pantryProducts`, `onAddMissingToShoppingList`, `onNavigateToShopping`, `onInitiateConsumption`.
+- **Responsabilidad**: Orquesta el explorador del catálogo de 131 recetas y el sub-módulo de menú semanal. Controla la sub-navegación ("Explorar" vs "Menú semanal"), la búsqueda textual tolerante, los filtros por categoría y dieta, el ordenamiento multicriterio y la paginación incremental.
+
+### `RecipeCard.tsx`
+- **Props**: `recipe`, `matchInfo`, `isFavorite`, `onToggleFavorite`, `onClick`.
+- **Responsabilidad**: Tarjeta interactiva de receta. Renderiza el botón accesible de favorito (`aria-pressed`, `aria-label`), la categoría, el tiempo estimado, las etiquetas dietarias y la insignia de disponibilidad de despensa (con semáforo porcentual). Admite interacción completa por teclado.
+
+### `RecipeDetailDialog.tsx`
+- **Props**: `recipe`, `isOpen`, `onClose`, `pantryProducts`, `isFavorite`, `onToggleFavorite`, `onAddMissingToShoppingList`, `onPlanMeal`, `onInitiateConsumption`.
+- **Responsabilidad**: Modal accesible de detalle de receta. Ofrece el selector de porciones dinámico (1 a 12 comensales), el listado discriminado de ingredientes (en despensa, faltantes y vencidos), la acción de enviar faltantes a compras, la asignación al planificador semanal y la opción de "Cocinar ahora" cuando todos los ingredientes están cubiertos.
+
+### `MealPlanner.tsx`
+- **Props**: `pantryProducts`, `onAddMissingToShoppingList`, `onNavigateToShopping`.
+- **Responsabilidad**: Vista del planificador semanal de comidas. Organiza la grilla de 7 días (Lunes a Domingo en hora local) con turnos de Almuerzo y Cena, diálogo selector de recetas por turno, alertas preventivas de ingredientes que vencerán antes de cocinar y diálogo modal de previsualización para generar la lista de compras semanal consolidada.
 
 ### `ShoppingSection.tsx`
 - **Props**: Envoltorio que conecta el estado global con `ShoppingListModule`.

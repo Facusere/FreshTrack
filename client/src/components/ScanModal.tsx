@@ -32,7 +32,6 @@ import { estimateShelfLife } from "@/lib/shelfLifeCatalog";
 import {
   fetchProductByBarcode,
   detectBarcodeFromImageSource,
-  isBarcodeDetectorSupported,
 } from "@/lib/barcodeScanner";
 import { playChimeSound, triggerHaptic } from "@/lib/feedback";
 import {

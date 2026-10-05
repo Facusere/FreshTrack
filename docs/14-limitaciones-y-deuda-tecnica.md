@@ -48,29 +48,29 @@ Este documento registra de forma rigurosa y verificada en el código fuente las 
 
 ---
 
-### 2. Copia de Seguridad Incompleta
+### 2. Copia de Seguridad Parcial (Omisión de Estadísticas y Reglas de Aprendizaje)
 - **Severidad**: **Media**
-- **Archivo Afectado**: `client/src/lib/backup.ts` (líneas 18-30).
+- **Archivo Afectado**: `client/src/lib/backup.ts` (líneas 18-35).
 - **Evidencia en el Código**:
-  `exportBackupJSON()` solo empaqueta `products`, `consumptionHistory` y `shoppingList`. Quedan completamente fuera del archivo de respaldo:
+  `exportBackupJSON()` empaqueta `products`, `consumptionHistory`, `shoppingList`, y ahora también `favoriteRecipes` y `mealPlan`. Sin embargo, continúan excluidos del archivo de respaldo:
   - `freshtrack-impact-stats-v1` (kilogramos, dinero y platos salvados).
   - `freshtrack-expired-history-v1` (registro de descartes pasados para los gráficos de torta).
   - `freshtrack-monthly-impact-history-v1` (series mensuales acumuladas).
   - `freshtrack-shelf-corrections-v1` (ajustes de vida útil personalizados del usuario).
   - `freshtrack-date-learning-v1` (reglas aprendidas de lectura de fechas OCR).
   - `freshtrack-notification-preferences-v1` (reglas de alertas por categoría).
-- **Impacto**: Si el usuario traslada su respaldo a otro teléfono o computadora, pierde todo su historial estadístico, sus personalizaciones de conservación y sus preferencias de notificación.
+- **Impacto**: Si el usuario traslada su respaldo a otro teléfono o computadora, conserva su despensa, compras, favoritos y menú semanal, pero pierde su historial estadístico y sus calibraciones de OCR y vida útil.
 - **Recomendación**: Ampliar la interfaz `FreshTrackBackup` para incluir estos campos opcionales en el archivo JSON.
 
 ---
 
-### 3. Restauración de Respaldo sin Validación Profunda
+### 3. Restauración de Respaldo: Validación de Productos vs Nuevos Módulos
 - **Severidad**: **Media**
-- **Archivo Afectado**: `client/src/lib/backup.ts` (líneas 74-110).
+- **Archivo Afectado**: `client/src/lib/backup.ts` (líneas 74-125).
 - **Evidencia en el Código**:
-  La función `restoreBackupJSON()` comprueba únicamente que `data.products` sea un arreglo (`Array.isArray(data.products)`), guardándolo inmediatamente con `saveJSON(PRODUCTS_STORAGE_KEY, data.products)`. No valida cada elemento con `isValidStoredProduct()`, no evalúa el número de versión `data.version`, y no restaura el tema visual.
-- **Impacto**: Si se importa un archivo JSON modificado manualmente o de una versión estructuralmente incompatible, pueden inyectarse productos sin fecha ISO o con campos corruptos que provoquen fallos en tiempo de ejecución.
-- **Recomendación**: Filtrar `data.products.filter(isValidStoredProduct)` antes de persistir y validar compatibilidad de `data.version === 1`.
+  La función `restoreBackupJSON()` ahora valida y sanitiza de forma estricta los nuevos campos (`data.favoriteRecipes` como arreglo de strings y `data.mealPlan` con guardas de `isValidPlannedMeal`). No obstante, en la colección principal de `data.products` aún comprueba únicamente que sea un arreglo (`Array.isArray(data.products)`), sin filtrar elemento por elemento con `isValidStoredProduct()`.
+- **Impacto**: Si se importa un archivo JSON manipulado externamente, podrían inyectarse alimentos con fechas no ISO o propiedades corruptas en la despensa.
+- **Recomendación**: Homogeneizar la validación aplicando `data.products.filter(isValidStoredProduct)` antes de persistir.
 
 ---
 

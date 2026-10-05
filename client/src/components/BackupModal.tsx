@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Download, FileSpreadsheet, FileText, HardDrive, RefreshCw, Upload, X } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, HardDrive, RefreshCw, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Product, StoredProduct } from "@/types/product";
 import { exportBackupJSON, exportInventoryCSV, restoreBackupJSON } from "@/lib/backup";

@@ -1,5 +1,7 @@
 import { PRODUCTS_STORAGE_KEY, CONSUMPTION_HISTORY_KEY, loadJSON, saveJSON } from "./storage";
 import { StoredProduct, Product } from "@/types/product";
+import { FAVORITE_RECIPES_STORAGE_KEY } from "./favoriteRecipes";
+import { MEAL_PLAN_STORAGE_KEY, PlannedMeal } from "./mealPlan";
 
 const SHOPPING_LIST_KEY = "freshtrack-shopping-list-v1";
 
@@ -9,25 +11,41 @@ export interface FreshTrackBackup {
   products: StoredProduct[];
   consumptionHistory: any[];
   shoppingList: any[];
+  favoriteRecipes?: string[];
+  mealPlan?: PlannedMeal[];
   theme?: string;
+}
+
+/**
+ * Construye el objeto completo de backup para exportar o validar.
+ */
+export function buildBackupObject(products: StoredProduct[]): FreshTrackBackup {
+  const history = loadJSON<any[]>(CONSUMPTION_HISTORY_KEY, []);
+  const shopping = loadJSON<any[]>(SHOPPING_LIST_KEY, []);
+  const favoriteRecipes = loadJSON<string[]>(FAVORITE_RECIPES_STORAGE_KEY, []);
+  const mealPlan = loadJSON<PlannedMeal[]>(MEAL_PLAN_STORAGE_KEY, []);
+  const theme =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("freshtrack-theme") || localStorage.getItem("theme") || "light"
+      : "light";
+
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    products,
+    consumptionHistory: history,
+    shoppingList: shopping,
+    favoriteRecipes,
+    mealPlan,
+    theme,
+  };
 }
 
 /**
  * Downloads a complete FreshTrack backup file as formatted JSON.
  */
 export function exportBackupJSON(products: StoredProduct[]): void {
-  const history = loadJSON<any[]>(CONSUMPTION_HISTORY_KEY, []);
-  const shopping = loadJSON<any[]>(SHOPPING_LIST_KEY, []);
-  const theme = typeof localStorage !== "undefined" ? localStorage.getItem("freshtrack-theme") || "light" : "light";
-
-  const backup: FreshTrackBackup = {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    products,
-    consumptionHistory: history,
-    shoppingList: shopping,
-    theme,
-  };
+  const backup = buildBackupObject(products);
 
   const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(backup, null, 2))}`;
   const downloadAnchor = document.createElement("a");
@@ -95,6 +113,26 @@ export function restoreBackupJSON(
     // Save shopping list if available
     if (Array.isArray(data.shoppingList)) {
       saveJSON(SHOPPING_LIST_KEY, data.shoppingList);
+    }
+
+    // Save favorite recipes if available and valid
+    if (Array.isArray(data.favoriteRecipes)) {
+      const validFavs = data.favoriteRecipes.filter((id: unknown) => typeof id === "string");
+      saveJSON(FAVORITE_RECIPES_STORAGE_KEY, validFavs);
+    }
+
+    // Save meal plan if available and valid
+    if (Array.isArray(data.mealPlan)) {
+      const validMeals = data.mealPlan.filter(
+        (m: any) =>
+          m &&
+          typeof m.id === "string" &&
+          typeof m.recipeId === "string" &&
+          typeof m.date === "string" &&
+          (m.slot === "almuerzo" || m.slot === "cena") &&
+          typeof m.portions === "number"
+      );
+      saveJSON(MEAL_PLAN_STORAGE_KEY, validMeals);
     }
 
     return {

@@ -1,20 +1,20 @@
 # Referencia de Módulos de Dominio (`client/src/lib/`)
 
-Este documento constituye la referencia técnica exhaustiva de los 20 módulos ubicados en `client/src/lib/`. Cada sección detalla el propósito del archivo, sus dependencias internas y externas, si sus funciones son puras o producen efectos colaterales (I/O, `localStorage`, red, Web Audio o manipulación de DOM), y la firma tipada de sus principales exportaciones.
+Este documento constituye la referencia técnica exhaustiva de los 24 módulos ubicados en `client/src/lib/`. Cada sección detalla el propósito del archivo, sus dependencias internas y externas, si sus funciones son puras o producen efectos colaterales (I/O, `localStorage`, red, Web Audio o manipulación de DOM), y la firma tipada de sus principales exportaciones.
 
 ---
 
 ## 1. `backup.ts`
 
 - **Propósito**: Gestión integral de exportación y restauración de copias de seguridad de datos en formato JSON y planillas de inventario en CSV.
-- **Dependencias**: `./storage`, `@/types/product`.
+- **Dependencias**: `./storage`, `@/types/product`, `./favoriteRecipes`, `./mealPlan`.
 - **Efectos Colaterales**: Manipulación del DOM (crea elementos `<a>` temporales para disparar descargas) y lectura/escritura en `localStorage`.
 
 ### Exportaciones Principales
-- `interface FreshTrackBackup`: Estructura del archivo de respaldo JSON (`version`, `exportedAt`, `products`, `consumptionHistory`, `shoppingList`, `theme`).
-- `function exportBackupJSON(products: StoredProduct[]): void`: Genera un Data URI JSON y descarga `FreshTrack-Backup-YYYY-MM-DD.json`. *(Efecto: DOM, descarga)*.
+- `interface FreshTrackBackup`: Estructura del archivo de respaldo JSON (`version`, `exportedAt`, `products`, `consumptionHistory`, `shoppingList`, `favoriteRecipes`, `mealPlan`, `theme`).
+- `function exportBackupJSON(products: StoredProduct[]): void`: Genera un Data URI JSON y descarga `FreshTrack-Backup-YYYY-MM-DD.json` incluyendo despensa, historial, compras, recetas favoritas y plan semanal. *(Efecto: DOM, descarga)*.
 - `function exportInventoryCSV(products: Product[]): void`: Exporta los alimentos a CSV con BOM UTF-8 (`\uFEFF`) y CRLF. *(Efecto: DOM, Blob, descarga)*.
-- `function restoreBackupJSON(jsonText: string): { success: boolean; message: string; count?: number }`: Valida y restaura productos, compras e historial. *(Efecto: localStorage)*.
+- `function restoreBackupJSON(jsonText: string): { success: boolean; message: string; count?: number }`: Valida y restaura productos, compras, historial, favoritos y plan semanal. *(Efecto: localStorage)*.
 
 ---
 
@@ -336,8 +336,79 @@ Este documento constituye la referencia técnica exhaustiva de los 20 módulos u
 
 ---
 
+## 21. `cookbook.ts`
+
+- **Propósito**: Motor de búsqueda, filtrado dietario, matching con despensa y ordenamiento para el explorador del recetario completo.
+- **Dependencias**: `@/data/localRecipes.json`, `./ingredientMatching`, `./recipeApi`, `@/types/product`.
+- **Efectos Colaterales**: Ninguno (módulo de funciones puras).
+
+### Exportaciones Principales
+- `type DietaryFilter = "all" | "vegetarian" | "glutenFree" | "quick"`: Criterios dietarios rápidos.
+- `type CookbookSortOption = "name-asc" | "match-desc" | "favorites-first"`: Estrategias de ordenamiento.
+- `interface RecipeMatchInfo`: Coincidencias de ingredientes calculadas (`matchedCount`, `totalCount`, `percentage`, `missingCount`).
+- `function normalizeSearchText(text: string): string`: Elimina marcas diacríticas y convierte a minúsculas para búsqueda tolerante. *(Pura)*.
+- `function isDietaryMatch(recipe: LocalRecipe, filter: DietaryFilter): boolean`: Clasifica preparaciones vegetarianas, sin gluten y rápidas. *(Pura)*.
+- `function getAvailableCategories(recipes: LocalRecipe[]): string[]`: Extrae y ordena el universo de categorías únicas del catálogo. *(Pura)*.
+- `function calculateCookbookMatch(recipe: LocalRecipe, pantryProducts: StoredProduct[]): RecipeMatchInfo`: Evalúa la despensa activa contra los ingredientes de la receta. *(Pura)*.
+- `function filterAndSortCookbook(params): LocalRecipe[]`: Filtra por texto, categoría y dieta, y ordena por A-Z, despensa o favoritos. *(Pura)*.
+
+---
+
+## 22. `favoriteRecipes.ts`
+
+- **Propósito**: Gestión del estado persistente de recetas locales favoritas con tolerancia a fallos y saneamiento de referencias huérfanas.
+- **Dependencias**: `./storage`.
+- **Efectos Colaterales**: Lectura y escritura en `localStorage` bajo la clave `freshtrack-favorite-recipes-v1`.
+
+### Exportaciones Principales
+- `const FAVORITES_STORAGE_KEY = "freshtrack-favorite-recipes-v1"`.
+- `function loadFavorites(): string[]`: Carga los IDs de favoritas devolviendo un arreglo vacío ante corrupción o datos inválidos. *(Efecto: localStorage)*.
+- `function saveFavorites(favorites: string[]): boolean`: Guarda los IDs en `localStorage` con control de cuota. *(Efecto: localStorage)*.
+- `function isFavorite(recipeId: string, favorites: string[]): boolean`: Comprueba si un ID está en la lista de favoritos. *(Pura)*.
+- `function toggleFavorite(recipeId: string, currentFavorites: string[]): string[]`: Alterna el estado de una receta. *(Pura)*.
+- `function pruneFavoriteRecipes(validRecipeIds: Set<string>): void`: Elimina de `localStorage` IDs de recetas que ya no existen en el catálogo. *(Efecto: localStorage)*.
+
+---
+
+## 23. `mealPlan.ts`
+
+- **Propósito**: Modelo y orquestación del planificador semanal de comidas en horario local, gestión de turnos diarios y alertas tempranas de vencimiento.
+- **Dependencias**: `./dates`, `./storage`, `./ingredientMatching`, `@/types/product`.
+- **Efectos Colaterales**: Lectura y escritura en `localStorage` (`freshtrack-meal-plan-v1`).
+
+### Exportaciones Principales
+- `const MEAL_PLAN_STORAGE_KEY = "freshtrack-meal-plan-v1"`.
+- `type MealSlot = "lunch" | "dinner"`: Turnos de comida por día.
+- `interface PlannedMeal`: Registro de comida (`id`, `date`, `slot`, `recipeId`, `portions`, `createdAt`).
+- `interface WeekDayInfo`: Estructura descriptiva del día (`date`, `dayNumber`, `dayName`, `isToday`, `isPast`).
+- `function getMondayOfWeek(d: Date): Date`: Calcula el lunes inicial en calendario local sin desfasaje UTC. *(Pura)*.
+- `function getWeekDates(monday: Date): WeekDayInfo[]`: Construye los 7 días (lunes a domingo) de la semana. *(Pura)*.
+- `function loadMealPlan(): PlannedMeal[]`: Recupera el plan aplicando poda automática de comidas pasadas (> 30 días). *(Efecto: localStorage)*.
+- `function saveMealPlan(plan: PlannedMeal[]): boolean`: Persiste el plan semanal en `localStorage`. *(Efecto: localStorage)*.
+- `function assignMealToSlot(plan, date, slot, recipeId, portions?): PlannedMeal[]`: Asigna o reemplaza una receta en el turno correspondiente. *(Pura)*.
+- `function removeMealPlanItem(plan, id): PlannedMeal[]`: Elimina una comida programada. *(Pura)*.
+- `function updateMealPortions(plan, id, portions): PlannedMeal[]`: Ajusta la cantidad de comensales para una comida planificada. *(Pura)*.
+- `function cleanOrphanMealPlanItems(validRecipeIds: Set<string>): void`: Poda comidas que apunten a recetas inexistentes. *(Efecto: localStorage)*.
+- `function checkPlannedMealExpirations(meal, pantryProducts): EarlyExpirationWarning[]`: Advierte si un ingrediente vencerá antes de la fecha fijada para cocinarlo. *(Pura)*.
+
+---
+
+## 24. `weeklyShopping.ts`
+
+- **Propósito**: Consolidación y balance de ingredientes para compras semanales: escalado por porciones, agrupación de unidades y deducción de despensa sin doble cómputo.
+- **Dependencias**: `@/data/localRecipes.json`, `./mealPlan`, `./quantity`, `./ingredientMatching`, `./shoppingList`, `@/types/product`.
+- **Efectos Colaterales**: Ninguno (módulo de funciones puras).
+
+### Exportaciones Principales
+- `interface WeeklyShoppingItem`: Ítem generado para compras con nombre, categoría, cantidad faltante, recetas de origen y flag de selección.
+- `function scaleMeasure(measure: string, factor: number): string`: Escala proporcionalmente números o fracciones dentro del texto de medida. *(Pura)*.
+- `function generateWeeklyShoppingList(plan, recipes, pantryProducts): WeeklyShoppingItem[]`: Genera los ítems de compra deduciendo el stock activo no vencido una sola vez y excluyendo condimentos no numéricos. *(Pura)*.
+
+---
+
 ## Enlaces Relacionados
 - [Arquitectura del Sistema](../02-arquitectura.md)
 - [Modelo de Datos y Almacenamiento](../06-modelo-de-datos-y-almacenamiento.md)
+- [Funcionalidad: Recetas y Planificador](../05-funcionalidades/recetas.md)
 - [Componentes de UI](../08-componentes-ui.md)
 - [Limitaciones y Deuda Técnica](../14-limitaciones-y-deuda-tecnica.md)

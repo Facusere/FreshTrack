@@ -5,6 +5,7 @@ import {
   BarChart3,
   Bell,
   CalendarDays,
+  Check,
   HardDrive,
   Home as HomeIcon,
   Leaf,
@@ -89,7 +90,7 @@ import {
   requestNotificationPermission,
   subscribeToInstallPrompt,
 } from "@/lib/pwaAndNotifications";
-import { loadShoppingList, saveShoppingList, ShoppingItem, addRecipeMissingToShoppingList } from "@/lib/shoppingList";
+import { loadShoppingList, saveShoppingList, ShoppingItem, addRecipeMissingToShoppingList, addOrMergeShoppingItem } from "@/lib/shoppingList";
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
 import { ALL_CATEGORIES } from "@/lib/categories";
@@ -771,10 +772,11 @@ export default function Home() {
     const record: ConsumptionRecord = {
       id: Date.now(),
       title: product.name,
+      ingredients: [product.name],
+      before: [product],
+      applied: [{ itemId: Number(product.id), deducted: "1 unidad" }],
+      delta: { kg: 0.35, money: 1200, meals: 1 },
       createdAt: todayISO(today),
-      category: product.category,
-      quantity: "1 unidad",
-      impact: { money: 1200, kg: 0.35 },
     };
     setConsumptionHistory((prev) => [...prev, record]);
 
@@ -827,10 +829,11 @@ export default function Home() {
     const newRecords: ConsumptionRecord[] = consumed.map((p) => ({
       id: Date.now() + Math.random(),
       title: p.name,
+      ingredients: [p.name],
+      before: [p],
+      applied: [{ itemId: Number(p.id), deducted: p.quantity }],
+      delta: { kg: 0.35, money: 1200, meals: 1 },
       createdAt: todayISO(today),
-      category: p.category,
-      quantity: p.quantity,
-      impact: { money: 1200, kg: 0.35 },
     }));
 
     setConsumptionHistory((prev) => [...prev, ...newRecords]);
@@ -846,12 +849,13 @@ export default function Home() {
     playChimeSound("pop");
     const items = products.filter((p) => selectedProductIds.includes(p.id));
     items.forEach((item) => {
-      addItem({
-        name: item.name,
-        quantity: item.quantity,
-        category: item.category,
-        priority: "medium",
-      });
+      setShoppingList((prev) =>
+        addOrMergeShoppingItem(prev, {
+          name: item.name,
+          quantity: item.quantity,
+          category: item.category,
+        })
+      );
     });
     toast.success(`Agregaste ${items.length} alimentos a la lista de compras`);
     setSelectedProductIds([]);
@@ -1535,6 +1539,9 @@ export default function Home() {
               }}
               onOpenAdd={() => setModal("add")}
               onOpenScan={() => setModal("scan")}
+              shoppingList={shoppingList}
+              setShoppingList={setShoppingList}
+              onNavigateToShopping={() => navigateToModule("Compras")}
             />
 
             <ShoppingSection
@@ -1686,12 +1693,13 @@ export default function Home() {
                             return;
                           }
                           missing.forEach((m) => {
-                            addItem({
-                              name: m.name,
-                              quantity: scaleMeasure(m.measure, recipePortions / 2) || "1 unidad",
-                              category: "Almacén seco",
-                              priority: "medium",
-                            });
+                            setShoppingList((prev) =>
+                              addOrMergeShoppingItem(prev, {
+                                name: m.name,
+                                quantity: scaleMeasure(m.measure, recipePortions / 2) || "1 unidad",
+                                category: "Almacén seco",
+                              })
+                            );
                           });
                           playChimeSound("pop");
                           toast.success(`Agregaste ${missing.length} faltantes a tu lista de compras`, {
@@ -1739,7 +1747,7 @@ export default function Home() {
         products={products}
         storedProducts={storedProducts}
         onRestoreSuccess={() => {
-          setStoredProducts(loadStoredProducts(today));
+          setStoredProducts(loadStoredProducts(today) ?? []);
           setConsumptionHistory(loadConsumptionHistory());
           setShoppingList(loadShoppingList());
         }}
