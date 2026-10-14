@@ -1,6 +1,7 @@
 import { ProductCategory } from "./categories";
 import { estimateShelfLife } from "./shelfLifeCatalog";
 import { addDaysISO } from "./dates";
+import { detectProductIcon, inferLocation } from "./productHelpers";
 
 export interface ScannedBarcodeProduct {
   barcode: string;
@@ -56,7 +57,10 @@ function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): Produc
   if (combined.includes("milk") || combined.includes("lait") || combined.includes("leche") || combined.includes("yogur") || combined.includes("cheese") || combined.includes("fromage") || combined.includes("queso") || combined.includes("dairy")) {
     return "Lácteos";
   }
-  if (combined.includes("meat") || combined.includes("viande") || combined.includes("carne") || combined.includes("pollo") || combined.includes("beef") || combined.includes("pork") || combined.includes("charcuterie") || combined.includes("fiambre")) {
+  if (combined.includes("charcuterie") || combined.includes("fiambre") || combined.includes("jamon") || combined.includes("salame") || combined.includes("salchicha")) {
+    return "Fiambres y embutidos";
+  }
+  if (combined.includes("meat") || combined.includes("viande") || combined.includes("carne") || combined.includes("pollo") || combined.includes("beef") || combined.includes("pork")) {
     return "Carnes";
   }
   if (combined.includes("fish") || combined.includes("poisson") || combined.includes("pescado") || combined.includes("marisco") || combined.includes("tuna") || combined.includes("atun")) {
@@ -71,6 +75,9 @@ function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): Produc
   if (combined.includes("bread") || combined.includes("pain") || combined.includes("pan") || combined.includes("bakery") || combined.includes("pastry") || combined.includes("factura") || combined.includes("galletita")) {
     return "Panadería";
   }
+  if (combined.includes("coffee") || combined.includes("cafe") || combined.includes("tea") || combined.includes("mate")) {
+    return "Café, té y desayuno";
+  }
   if (combined.includes("beverage") || combined.includes("drink") || combined.includes("boisson") || combined.includes("jugo") || combined.includes("juice") || combined.includes("gaseosa") || combined.includes("soda") || combined.includes("agua")) {
     return "Bebidas";
   }
@@ -78,46 +85,6 @@ function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): Produc
     return "Congelados";
   }
   return "Almacén seco";
-}
-
-function detectFoodIcon(name: string, category: string): string {
-  const n = name.toLowerCase();
-  if (n.includes("leche")) return "🥛";
-  if (n.includes("queso")) return "🧀";
-  if (n.includes("yogur")) return "🥣";
-  if (n.includes("arroz")) return "🍚";
-  if (n.includes("fideo") || n.includes("pasta")) return "🍝";
-  if (n.includes("pan") || n.includes("tostada")) return "🍞";
-  if (n.includes("galletita") || n.includes("cookie")) return "🍪";
-  if (n.includes("tomate")) return "🍅";
-  if (n.includes("huevo")) return "🥚";
-  if (n.includes("carne") || n.includes("bife")) return "🥩";
-  if (n.includes("pollo")) return "🍗";
-  if (n.includes("atun") || n.includes("pescado")) return "🐟";
-  if (n.includes("aceite")) return "🫒";
-  if (n.includes("cafe")) return "☕";
-  if (n.includes("te")) return "🍵";
-  if (n.includes("vino") || n.includes("cerveza")) return "🍷";
-  if (n.includes("helado")) return "🍦";
-
-  switch (category) {
-    case "Lácteos": return "🧀";
-    case "Carnes y fiambres": return "🥩";
-    case "Pescados y mariscos": return "🐟";
-    case "Frutas": return "🍎";
-    case "Verduras": return "🥬";
-    case "Panadería y pastas": return "🥖";
-    case "Congelados": return "🧊";
-    case "Bebidas": return "🧃";
-    default: return "📦";
-  }
-}
-
-function inferLocationByCat(category: string): string {
-  if (category === "Congelados") return "Freezer";
-  if (category === "Lácteos" || category === "Carnes y fiambres" || category === "Pescados y mariscos") return "Heladera";
-  if (category === "Verduras" || category === "Frutas") return "Cajón verduras";
-  return "Alacena";
 }
 
 /**
@@ -131,7 +98,7 @@ export async function fetchProductByBarcode(
 
   try {
     const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(cleanCode)}.json`;
-    const res = await fetch(url, { headers: { "User-Agent": "FreshTrackApp/1.0 (https://freshtrack.app)" } });
+    const res = await fetch(url);
     if (!res.ok) return null;
 
     const data = await res.json();
@@ -154,8 +121,8 @@ export async function fetchProductByBarcode(
     const shelfEst = estimateShelfLife(fullName, "cerrado", category);
     const estimatedDays = shelfEst?.days || (category === "Lácteos" ? 14 : category === "Almacén seco" ? 180 : 7);
     const expiryDate = addDaysISO(estimatedDays);
-    const icon = detectFoodIcon(fullName, category);
-    const location = inferLocationByCat(category);
+    const icon = detectProductIcon(fullName, category);
+    const location = inferLocation(category);
 
     return {
       barcode: cleanCode,
@@ -174,3 +141,4 @@ export async function fetchProductByBarcode(
     return null;
   }
 }
+

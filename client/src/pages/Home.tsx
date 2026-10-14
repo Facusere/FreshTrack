@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle,
   BarChart3,
   Bell,
-  CalendarDays,
   Check,
   HardDrive,
   Home as HomeIcon,
@@ -12,7 +10,6 @@ import {
   Menu,
   Moon,
   PackageOpen,
-  Pencil,
   ScanLine,
   Search,
   ShoppingCart,
@@ -25,32 +22,18 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { BackupModal } from "@/components/BackupModal";
 import { playChimeSound, triggerHaptic } from "@/lib/feedback";
-
-function scaleMeasure(measure: string, factor: number): string {
-  if (factor === 1 || !measure) return measure;
-  return measure.replace(/(\d+(?:[.,]\d+)?)/g, (match) => {
-    const num = parseFloat(match.replace(",", "."));
-    if (isNaN(num)) return match;
-    const scaled = Math.round(num * factor * 10) / 10;
-    return String(scaled);
-  });
-}
 import { DateLabel, getLearningRule, labelForDisplay, saveLearningCorrection } from "@/lib/dateRecognition";
 import {
-  estimateShelfLife,
   getCatalogSize,
   ShelfLifeState,
   saveShelfLifeCorrection,
   calculateOpenProduct,
-  isFreshProduceCategory,
-  FreshCondition,
 } from "@/lib/shelfLifeCatalog";
-import { buildWeeklySummary, defaultNotificationPreferences, groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
+import { groupNotifications, loadNotificationPreferences, NotificationPreferences, saveNotificationPreferences } from "@/lib/notificationRules";
 import {
   getRecipeDetails,
   RecipeSuggestion,
   searchRecipesByExpiring,
-  getRecipeFallbackImage,
   isGlutenFreeEstimated,
 } from "@/lib/recipeApi";
 import { ImpactStats, loadImpactStats, recordImpact, reverseImpact } from "@/lib/impactStats";
@@ -62,15 +45,18 @@ import {
   applyConsumptionPlan,
   undoConsumptionHistory,
 } from "@/lib/inventoryConsumption";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ConsumptionConfirmDialog } from "@/components/ConsumptionConfirmDialog";
 import { ScanModal } from "@/components/ScanModal";
+import { AddProductModal } from "@/components/AddProductModal";
+import { NotificationSettingsModal } from "@/components/NotificationSettingsModal";
+import { ProductDetailDialog } from "@/components/ProductDetailDialog";
+import { ProductOpenConfirmDialog } from "@/components/ProductOpenConfirmDialog";
+import { RecipeDetailModal } from "@/components/RecipeDetailModal";
+import {
+  buildDemoProducts,
+  detectProductIcon,
+  inferLocation,
+} from "@/lib/productHelpers";
 import {
   HeroSection,
   StatsSection,
@@ -79,7 +65,6 @@ import {
   ShoppingSection,
   RecipesSection,
   MobileBottomNav,
-  MiniStatus,
 } from "@/components/home";
 import { recordExpiredItem } from "@/lib/reportsData";
 import {
@@ -87,14 +72,12 @@ import {
   getNotificationPermission,
   notifyExpiringProducts,
   promptPWAInstall,
-  requestNotificationPermission,
   subscribeToInstallPrompt,
 } from "@/lib/pwaAndNotifications";
 import { loadShoppingList, saveShoppingList, ShoppingItem, addRecipeMissingToShoppingList, addOrMergeShoppingItem } from "@/lib/shoppingList";
 
 import { Product, StoredProduct, ProductStatus, deriveProduct } from "@/types/product";
-import { ALL_CATEGORIES } from "@/lib/categories";
-import { addDaysISO, daysUntil, formatRelativeDays, SOON_THRESHOLD_DAYS, todayISO, useToday } from "@/lib/dates";
+import { addDaysISO, SOON_THRESHOLD_DAYS, todayISO, useToday } from "@/lib/dates";
 import {
   loadStoredProducts,
   saveStoredProducts,
@@ -103,6 +86,8 @@ import {
   loadLastScan,
   LastScanInfo,
 } from "@/lib/storage";
+
+export { buildDemoProducts };
 
 type RecipeFilter = "all" | "vegetarian" | "glutenFree" | "quick";
 
@@ -118,554 +103,7 @@ function recipeMatchesFilter(recipe: RecipeSuggestion, filter: RecipeFilter) {
   return /(quick|salad|ensalada|omelette|tortilla|sandwich|wrap|pasta|salteado)/i.test(text);
 }
 
-export function buildDemoProducts(today: Date = new Date()): StoredProduct[] {
-  return [
-    { id: 1, name: "Yogur natural", category: "Lácteos", expiryDate: addDaysISO(3, today), quantity: "4 unidades", icon: "🥣", estimated: true, dateLabel: "vencimiento" },
-    { id: 2, name: "Espinaca fresca", category: "Verduras frescas", expiryDate: addDaysISO(4, today), quantity: "1 atado", icon: "🥬" },
-    { id: 3, name: "Pechuga de pollo", category: "Carnes", expiryDate: addDaysISO(6, today), quantity: "2 unidades", icon: "🍗" },
-    { id: 4, name: "Pan de molde", category: "Panadería", expiryDate: addDaysISO(9, today), quantity: "1 paquete", icon: "🍞" },
-    { id: 5, name: "Tomates cherry", category: "Verduras frescas", expiryDate: addDaysISO(1, today), quantity: "1 bandeja", icon: "🍅" },
-    { id: 6, name: "Leche entera", category: "Lácteos", expiryDate: addDaysISO(-1, today), quantity: "2 litros", icon: "🥛" },
-    { id: 7, name: "Pasta seca", category: "Almacén seco", expiryDate: addDaysISO(331, today), quantity: "2 paquetes", icon: "🍝" },
-  ];
-}
 
-function detectProductIcon(name: string, category: string): string {
-  const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const c = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (n.includes("leche") || n.includes("queso") || n.includes("crema") || n.includes("manteca")) return "🥛";
-  if (n.includes("yogur")) return "🥣";
-  if (n.includes("pollo") || n.includes("carne") || n.includes("asado") || n.includes("bife") || n.includes("milanesa")) return "🍗";
-  if (n.includes("pescado") || n.includes("merluza") || n.includes("atun") || n.includes("salmon")) return "🐟";
-  if (n.includes("pan") || n.includes("tostada") || n.includes("factura") || n.includes("medialuna") || n.includes("gallet")) return "🍞";
-  if (n.includes("tomate")) return "🍅";
-  if (n.includes("espinaca") || n.includes("acelga") || n.includes("lechuga") || n.includes("rucula")) return "🥬";
-  if (n.includes("manzana")) return "🍎";
-  if (n.includes("banana")) return "🍌";
-  if (n.includes("palta") || n.includes("aguacate")) return "🥑";
-  if (n.includes("papa") || n.includes("patata") || n.includes("pure")) return "🥔";
-  if (n.includes("huevo")) return "🥚";
-  if (n.includes("arroz")) return "🍚";
-  if (n.includes("pasta") || n.includes("fideo") || n.includes("ravioles") || n.includes("noquis")) return "🍝";
-  if (c.includes("bebida")) return "🧃";
-  if (c.includes("cafe") || c.includes("te") || c.includes("mate")) return "☕";
-  if (c.includes("fruta")) return "🍎";
-  if (c.includes("verdura")) return "🥬";
-  if (c.includes("carne")) return "🥩";
-  if (c.includes("enlatado")) return "🥫";
-  return "📦";
-}
-
-function inferLocation(category: string): string {
-  const cat = category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  if (cat.includes("lacteo") || cat.includes("fiambre") || cat.includes("carne") || cat.includes("pescado") || cat.includes("refrigerado")) {
-    return "Heladera";
-  }
-  if (cat.includes("verdura") || cat.includes("fruta")) {
-    return "Cajón verduras";
-  }
-  if (cat.includes("congelado")) {
-    return "Freezer";
-  }
-  return "Alacena";
-}
-
-function NotificationSettingsModal({
-  onClose,
-  products,
-  preferences,
-  onSave,
-}: {
-  onClose: () => void;
-  products: Product[];
-  preferences: NotificationPreferences;
-  onSave: (preferences: NotificationPreferences) => void;
-}) {
-  const [draft, setDraft] = useState(preferences);
-  const [permission, setPermission] = useState(getNotificationPermission());
-  const summary = buildWeeklySummary(products, draft);
-  const categories = Object.keys(defaultNotificationPreferences.categoryLeadDays);
-
-  const handleRequestPermission = async () => {
-    const res = await requestNotificationPermission();
-    setPermission(res);
-    if (res === "granted") {
-      toast.success("¡Notificaciones web habilitadas!", {
-        description: "FreshTrack te avisará en tu sistema cuando un alimento esté a 1 o 2 días de vencer.",
-      });
-    } else {
-      toast.error("Permiso no concedido en el navegador.");
-    }
-  };
-
-  const handleTestNotification = async () => {
-    const res = await notifyExpiringProducts(products, true);
-    if (res.sent) {
-      toast.success("Notificación emitida", {
-        description: res.message || "Se emitió la alerta al sistema.",
-      });
-    } else {
-      toast(res.message || "No se pudo emitir la alerta.", { icon: "🔔" });
-    }
-  };
-
-  return (
-    <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-[580px] p-5">
-        <DialogHeader>
-          <DialogTitle>Notificaciones y Alertas Push</DialogTitle>
-          <DialogDescription>Avisos automáticos a 1 o 2 días del vencimiento.</DialogDescription>
-        </DialogHeader>
-
-        {/* Browser Permission & Push Test banner */}
-        <div className="mt-2 rounded-2xl border border-brand-border bg-brand-subtle/50 p-4">
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-bold text-brand-text">Alertas en el sistema / celular</p>
-              <p className="text-xs text-content-muted">
-                {permission === "granted"
-                  ? "✓ Notificaciones del navegador autorizadas."
-                  : permission === "denied"
-                  ? "Notificaciones bloqueadas en el navegador."
-                  : "Habilitá avisos para recibir notificaciones cuando algo esté por vencer."}
-              </p>
-            </div>
-            {permission !== "granted" ? (
-              <button
-                type="button"
-                onClick={handleRequestPermission}
-                className="shrink-0 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-brand px-3.5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-focus"
-              >
-                <Bell size={14} /> Activar notificaciones
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleTestNotification}
-                className="shrink-0 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-brand-border bg-surface px-3.5 py-2.5 text-xs font-bold text-brand-text shadow-sm hover:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-brand-focus"
-              >
-                <Bell size={14} /> Probar aviso (1-2 días)
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-2 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={draft.enabled}
-            aria-label="Alertas agrupadas"
-            onClick={() => setDraft({ ...draft, enabled: !draft.enabled })}
-            className={`min-h-[44px] rounded-2xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-brand-focus ${
-              draft.enabled ? "border-brand-border bg-brand-subtle/50" : "border-line bg-surface-muted"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-brand-text">Alertas agrupadas</span>
-              <span className={`h-5 w-9 rounded-full p-0.5 transition ${draft.enabled ? "bg-status-ok-dot" : "bg-line-strong"}`}>
-                <span
-                  className={`block h-4 w-4 rounded-full bg-surface transition ${
-                    draft.enabled ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </span>
-            </div>
-            <p className="mt-1.5 text-xs leading-4 text-content-muted">
-              Agrupa productos que vencen el mismo día en un solo aviso.
-            </p>
-          </button>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={draft.weeklySummary}
-            aria-label="Resumen semanal"
-            onClick={() => setDraft({ ...draft, weeklySummary: !draft.weeklySummary })}
-            className={`min-h-[44px] rounded-2xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-brand-focus ${
-              draft.weeklySummary ? "border-brand-border bg-brand-subtle/50" : "border-line bg-surface-muted"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-brand-text">Resumen semanal</span>
-              <span className={`h-5 w-9 rounded-full p-0.5 transition ${draft.weeklySummary ? "bg-status-ok-dot" : "bg-line-strong"}`}>
-                <span
-                  className={`block h-4 w-4 rounded-full bg-surface transition ${
-                    draft.weeklySummary ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </span>
-            </div>
-            <p className="mt-1.5 text-xs leading-4 text-content-muted">
-              Recibí un solo resumen con lo que deberías planificar.
-            </p>
-          </button>
-        </div>
-
-        <div className="mt-2 rounded-2xl border border-line p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-brand-text">Anticipación por categoría</p>
-              <p className="mt-1 text-xs text-content-muted">Elegí cuándo avisarte antes del vencimiento.</p>
-            </div>
-            <CalendarDays size={18} className="text-brand" />
-          </div>
-          <div className="mt-3 divide-y divide-line-subtle">
-            {categories.slice(0, 8).map((category) => (
-              <div key={category} className="flex items-center justify-between gap-3 py-2.5">
-                <span className="text-xs font-semibold text-content-body">{category}</span>
-                <select
-                  value={draft.categoryLeadDays[category] || 3}
-                  onChange={(e) =>
-                    setDraft({
-                      ...draft,
-                      categoryLeadDays: {
-                        ...draft.categoryLeadDays,
-                        [category]: Number(e.target.value) as 1 | 3 | 7,
-                      },
-                    })
-                  }
-                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-bold text-brand-text outline-none focus:ring-2 focus:ring-brand-focus"
-                >
-                  <option value="1">1 día antes</option>
-                  <option value="3">3 días antes</option>
-                  <option value="7">7 días antes</option>
-                </select>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-xs text-content-muted">
-            Mostrando las categorías más frecuentes. Las demás usan 3 días por defecto.
-          </p>
-        </div>
-
-        <div className="mt-2 rounded-2xl bg-brand-subtle/50 p-4">
-          <div className="flex items-center gap-2 text-brand">
-            <Bell size={15} />
-            <p className="text-xs font-bold">Vista previa de tu resumen</p>
-          </div>
-          <p className="mt-1.5 text-xs font-semibold text-brand-text">{summary.title}</p>
-          <p className="mt-1 text-xs leading-4 text-content-muted">{summary.description}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {summary.groups.slice(0, 3).map((group) => (
-              <span key={group.dateKey} className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-brand-text border border-line">
-                {group.dateLabel} · {group.products.length}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-xl border border-line px-4 py-3 text-xs font-semibold text-content-muted hover:bg-surface-elevated"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              onSave(draft);
-              onClose();
-            }}
-            className="flex-1 min-h-[44px] rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white hover:bg-brand-hover"
-          >
-            Guardar preferencias
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-
-function AddProductModal({
-  onClose,
-  onAdd,
-  initialProduct,
-  onCorrection,
-  onSuggest,
-  today = new Date(),
-}: {
-  onClose: () => void;
-  onAdd: (product: StoredProduct) => void;
-  initialProduct?: Product;
-  onCorrection?: (product: Product, nextLabel: DateLabel, nextCategory: string, nextExpiryDate: string) => void;
-  onSuggest?: (productName: string, category: string, state: ShelfLifeState, days: number) => void;
-  today?: Date;
-}) {
-  const [name, setName] = useState(initialProduct?.name || "");
-  const [category, setCategory] = useState(initialProduct?.category || "Almacén seco");
-  const [location, setLocation] = useState(initialProduct?.location || inferLocation(initialProduct?.category || "Almacén seco"));
-  const [isCustomLocation, setIsCustomLocation] = useState(Boolean(initialProduct?.location));
-  const [quantity, setQuantity] = useState(initialProduct?.quantity || "1 unidad");
-  const [expiryDate, setExpiryDate] = useState(() => initialProduct?.expiryDate || addDaysISO(7, today));
-  const [isCustomExpiry, setIsCustomExpiry] = useState(false);
-  const [dateLabel, setDateLabel] = useState<DateLabel>(initialProduct?.dateLabel || "vencimiento");
-  const isProduce = isFreshProduceCategory(category);
-  const [freshCondition, setFreshCondition] = useState<FreshCondition>("fresco");
-  const [shelfState, setShelfState] = useState<ShelfLifeState>(initialProduct?.state || "cerrado");
-  const [shelfDays, setShelfDays] = useState(() => {
-    if (initialProduct?.expiryDate) {
-      return Math.max(1, daysUntil(initialProduct.expiryDate, today));
-    }
-    return estimateShelfLife(initialProduct?.name || "", "cerrado", initialProduct?.category)?.days || 7;
-  });
-  const isEditing = Boolean(initialProduct);
-
-  const shelfEstimate = useMemo(() => {
-    return name.trim()
-      ? estimateShelfLife(name, shelfState, category, isProduce ? freshCondition : undefined)
-      : undefined;
-  }, [name, shelfState, category, isProduce, freshCondition]);
-
-  const handleNameChange = (val: string) => {
-    setName(val);
-    const estimate = estimateShelfLife(val, shelfState, category, isProduce ? freshCondition : undefined);
-    if (estimate) {
-      setShelfDays(estimate.days);
-      if (!isCustomExpiry && !isEditing) {
-        setExpiryDate(addDaysISO(estimate.days, today));
-      }
-    }
-  };
-
-  const handleCategoryChange = (val: string) => {
-    setCategory(val);
-    if (!isCustomLocation) {
-      setLocation(inferLocation(val));
-    }
-    const produce = isFreshProduceCategory(val);
-    const estimate = estimateShelfLife(name, shelfState, val, produce ? freshCondition : undefined);
-    if (estimate) {
-      setShelfDays(estimate.days);
-      if (!isCustomExpiry && !isEditing) {
-        setExpiryDate(addDaysISO(estimate.days, today));
-      }
-    }
-  };
-
-  const handleFreshConditionChange = (val: FreshCondition) => {
-    setFreshCondition(val);
-    const estimate = estimateShelfLife(name, shelfState, category, val);
-    if (estimate) {
-      setShelfDays(estimate.days);
-      if (!isCustomExpiry && !isEditing) {
-        setExpiryDate(addDaysISO(estimate.days, today));
-      }
-    }
-  };
-
-  const handleShelfStateChange = (val: ShelfLifeState) => {
-    setShelfState(val);
-    const estimate = estimateShelfLife(name, val, category);
-    if (estimate) {
-      setShelfDays(estimate.days);
-      if (!isCustomExpiry && !isEditing) {
-        setExpiryDate(addDaysISO(estimate.days, today));
-      }
-    }
-  };
-
-  const handleShelfDaysChange = (days: number) => {
-    const validDays = Number(days) || 1;
-    setShelfDays(validDays);
-    setExpiryDate(addDaysISO(validDays, today));
-    setIsCustomExpiry(false);
-  };
-
-  const handleExpiryDateChange = (val: string) => {
-    setExpiryDate(val);
-    setIsCustomExpiry(true);
-    const diff = daysUntil(val, today);
-    setShelfDays(Math.max(1, diff));
-  };
-
-  const handleSave = () => {
-    if (!name.trim()) return;
-    if (initialProduct && onCorrection) {
-      onCorrection(initialProduct, dateLabel, category, expiryDate);
-    } else {
-      const finalState = isProduce ? "cerrado" : shelfState;
-      const openedAt = (!isProduce && shelfState === "abierto") ? todayISO(today) : undefined;
-      onAdd({
-        id: Date.now(),
-        name: name.trim(),
-        category,
-        expiryDate,
-        quantity: quantity.trim() || "1 unidad",
-        icon: detectProductIcon(name, category),
-        dateLabel,
-        location,
-        state: finalState,
-        openedAt,
-      });
-    }
-    onClose();
-  };
-
-  return (
-    <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-[480px] p-5">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Corregir producto" : "Agregar producto"}</DialogTitle>
-          <DialogDescription>Una carga rápida, sin vueltas.</DialogDescription>
-        </DialogHeader>
-        <div className="mt-4 space-y-3">
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Producto</span>
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Ej. Queso cremoso"
-              className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none transition placeholder:text-content-muted focus:border-brand-focus focus:ring-2 focus:ring-brand-subtle"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Categoría</span>
-              <select
-                value={category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full appearance-none rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-              >
-                {ALL_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Ubicación</span>
-              <select
-                value={location}
-                onChange={(e) => {
-                  setLocation(e.target.value);
-                  setIsCustomLocation(true);
-                }}
-                className="w-full appearance-none rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-              >
-                <option value="Heladera">❄️ Heladera</option>
-                <option value="Freezer">🧊 Freezer</option>
-                <option value="Alacena">🥫 Alacena</option>
-                <option value="Cajón verduras">🥬 Cajón verduras</option>
-              </select>
-            </label>
-          </div>
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Cantidad</span>
-            <input
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Ej. 2 unidades, 500g"
-              className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">Fecha de vencimiento</span>
-              <input
-                type="date"
-                value={expiryDate}
-                onChange={(e) => handleExpiryDateChange(e.target.value)}
-                className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.1em] text-content-muted">¿Qué tipo de fecha es?</span>
-              <select
-                value={dateLabel}
-                onChange={(e) => setDateLabel(e.target.value as DateLabel)}
-                className="w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-sm text-content-body outline-none focus:border-brand-focus"
-              >
-                <option value="vencimiento">Fecha de vencimiento</option>
-                <option value="elaboración">Fecha de elaboración</option>
-                <option value="consumo preferente">Consumo preferente</option>
-              </select>
-            </label>
-          </div>
-          <div className="rounded-2xl border border-line bg-brand-subtle/40 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-xs font-bold text-brand-text">Vida útil estimada</p>
-                <p className="mt-0.5 text-xs text-content-body font-medium">
-                  {shelfEstimate?.label || (
-                    isProduce
-                      ? (freshCondition === "pasado" ? "Calculado para producto maduro o ya pasado." : "Calculado para producto fresco recién comprado.")
-                      : (shelfState === "abierto" ? "Calculado para envase abierto." : "Calculado según guías de conservación.")
-                  )}
-                </p>
-              </div>
-              {isProduce ? (
-                <select
-                  aria-label="Condición del producto"
-                  value={freshCondition}
-                  onChange={(e) => handleFreshConditionChange(e.target.value as FreshCondition)}
-                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-semibold text-brand-text"
-                >
-                  <option value="fresco">Recién comprado</option>
-                  <option value="pasado">Ya un poco pasado</option>
-                </select>
-              ) : (
-                <select
-                  aria-label="Estado del envase"
-                  value={shelfState}
-                  onChange={(e) => handleShelfStateChange(e.target.value as ShelfLifeState)}
-                  className="rounded-lg border border-line bg-surface px-2 py-1.5 text-xs font-semibold text-brand-text"
-                >
-                  <option value="cerrado">Cerrado</option>
-                  <option value="abierto">Abierto</option>
-                </select>
-              )}
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <input
-                type="number"
-                min="1"
-                aria-label="Días estimados de vida útil"
-                value={shelfDays}
-                onChange={(e) => handleShelfDaysChange(Number(e.target.value))}
-                className="w-20 rounded-lg border border-line bg-surface px-2.5 py-2 text-sm font-semibold text-content-body outline-none focus:border-brand-focus"
-              />
-              <span className="text-xs text-content-body">días estimados</span>
-              <button
-                type="button"
-                onClick={() => onSuggest?.(name, category, shelfState, shelfDays)}
-                className="ml-auto min-h-[44px] rounded-lg bg-brand-subtle px-3 py-2 text-xs font-bold text-brand-text hover:bg-brand-border/40"
-              >
-                Recordar mi ajuste
-              </button>
-            </div>
-          </div>
-          {isEditing && (
-            <p className="rounded-xl bg-brand-subtle/50 px-3 py-2 text-xs leading-4 text-brand-text">
-              Tu corrección se guardará como regla para futuras lecturas de {name}.
-            </p>
-          )}
-        </div>
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-xl border border-line px-4 py-3 text-xs font-semibold text-content-body transition duration-150 hover:bg-surface-elevated focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98]"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            disabled={!name.trim()}
-            onClick={handleSave}
-            className="flex-1 min-h-[44px] rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white transition duration-150 hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-focus active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {isEditing ? "Guardar corrección" : "Guardar producto"}
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export default function Home() {
   const today = useToday();
@@ -878,6 +316,23 @@ export default function Home() {
       description: targetLocation === "Freezer" ? "Se extendió automáticamente el vencimiento estimado." : undefined,
     });
     setSelectedProductIds([]);
+  };
+
+  const handleMoveProductLocation = (product: Product, targetLocation: string) => {
+    playChimeSound("pop");
+    setStoredProducts((prev) =>
+      prev.map((p) => {
+        if (p.id !== product.id) return p;
+        let nextExpiry = p.expiryDate;
+        if (targetLocation === "Freezer" && p.location !== "Freezer") {
+          nextExpiry = addDaysISO(90, new Date(p.expiryDate));
+        }
+        return { ...p, location: targetLocation, expiryDate: nextExpiry };
+      })
+    );
+    toast.success(`Moviste "${product.name}" a ${targetLocation}`, {
+      description: targetLocation === "Freezer" ? "Se extendió automáticamente el vencimiento estimado." : undefined,
+    });
   };
 
   const handleBatchDelete = () => {
@@ -1120,13 +575,14 @@ export default function Home() {
     toast.success("Preferencias guardadas", { description: "FreshTrack va a agrupar tus avisos según estas reglas." });
   };
 
-  const removeSelected = () => {
-    if (!selectedProduct) return;
-    if (selectedProduct.status === "expired" || selectedProduct.days <= 0) {
-      recordExpiredItem(selectedProduct.name, selectedProduct.category);
+  const removeSelected = (target?: Product) => {
+    const prod = target || selectedProduct;
+    if (!prod) return;
+    if (prod.status === "expired" || prod.days <= 0) {
+      recordExpiredItem(prod.name, prod.category);
     }
-    setStoredProducts((current) => current.filter((product) => product.id !== selectedProduct.id));
-    toast(`${selectedProduct.name} eliminado`, { icon: <Trash2 size={15} /> });
+    setStoredProducts((current) => current.filter((product) => product.id !== prod.id));
+    toast(`${prod.name} eliminado`, { icon: <Trash2 size={15} /> });
     setSelectedProduct(null);
   };
 
@@ -1591,155 +1047,18 @@ export default function Home() {
           today={today}
         />
       )}
-      {recipeDetail && (
-        <Dialog open={Boolean(recipeDetail)} onOpenChange={(open) => { if (!open) setRecipeDetail(null); }}>
-          <DialogContent className="max-w-[620px] p-0 overflow-hidden" hideCloseButton>
-            <DialogHeader className="sr-only">
-              <DialogTitle>{recipeDetail.title}</DialogTitle>
-              <DialogDescription>{recipeDetail.category || "Detalle de receta"}</DialogDescription>
-            </DialogHeader>
-            <div className="relative h-40 overflow-hidden bg-surface-elevated">
-              <img
-                src={recipeDetail.image || getRecipeFallbackImage(recipeDetail.title, recipeDetail.category)}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(recipeDetail.title, recipeDetail.category);
-                }}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-content/90 via-content/40 to-transparent" />
-              <button
-                type="button"
-                aria-label="Cerrar receta"
-                onClick={() => setRecipeDetail(null)}
-                className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-surface/80 p-2 text-content backdrop-blur-sm hover:bg-surface"
-              >
-                <X size={17} />
-              </button>
-              <div className="absolute bottom-4 left-5 right-5">
-                <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                  {recipeDetail.isOriginalEnglish && (
-                    <span className="rounded-full bg-status-soon-bg px-2 py-0.5 text-xs font-bold text-status-soon-text border border-status-soon-border">
-                      Texto original en inglés
-                    </span>
-                  )}
-                  {(recipeDetail.isLocalFallback || recipeDetail.source === "FreshTrack") && (
-                    <span className="rounded-full bg-brand-subtle px-2 py-0.5 text-xs font-bold text-brand-text border border-brand-border">
-                      Ideas locales
-                    </span>
-                  )}
-                  {recipeDetail.isGlutenFreeEstimated && (
-                    <span className="rounded-full bg-brand-subtle px-2 py-0.5 text-xs font-bold text-brand-text border border-brand-border">
-                      Sin TACC (estimado)
-                    </span>
-                  )}
-                </div>
-                <p className="font-display text-2xl font-bold tracking-tight text-white">{recipeDetail.title}</p>
-                <p className="mt-1 text-xs text-brand-subtle">
-                  {recipeDetail.area || "Receta sugerida"}
-                  {recipeDetail.category ? ` · ${recipeDetail.category}` : ""}
-                </p>
-              </div>
-            </div>
-            {recipeDetailLoading ? (
-              <div className="p-6 text-center text-sm text-content-muted">Cargando ingredientes y pasos…</div>
-            ) : (
-              <div className="p-5 sm:p-6">
-                <div className="grid gap-5 sm:grid-cols-[0.8fr_1.2fr]">
-                  <div>
-                    <div className="flex items-center justify-between border-b border-line-subtle pb-2">
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Ingredientes</p>
-                      <div className="flex items-center gap-1.5 rounded-lg border border-line bg-surface-subtle px-2 py-0.5 text-xs">
-                        <span className="text-[11px] font-semibold text-content-muted">Porciones:</span>
-                        <button
-                          type="button"
-                          onClick={() => setRecipePortions((p) => Math.max(1, p - 1))}
-                          className="flex h-5 w-5 items-center justify-center rounded bg-surface hover:bg-surface-elevated font-bold text-content text-xs"
-                          title="Menos porciones"
-                        >
-                          -
-                        </button>
-                        <span className="font-bold text-brand min-w-[12px] text-center">{recipePortions}</span>
-                        <button
-                          type="button"
-                          onClick={() => setRecipePortions((p) => Math.min(12, p + 1))}
-                          className="flex h-5 w-5 items-center justify-center rounded bg-surface hover:bg-surface-elevated font-bold text-content text-xs"
-                          title="Más porciones"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      {(recipeDetail.ingredients || recipeDetail.matchedIngredients.map((name) => ({ name, measure: "a gusto" }))).map((ingredient) => (
-                        <div key={`${ingredient.name}-${ingredient.measure}`} className="flex items-start justify-between gap-3 border-b border-line-subtle pb-2 text-xs">
-                          <span className="font-semibold text-content-heading">{ingredient.name}</span>
-                          <span className="text-right text-content-muted">
-                            {scaleMeasure(ingredient.measure, recipePortions / 2)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {recipeDetail.ingredients && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const missing = recipeDetail.ingredients!.filter(
-                            (ing) => !recipeDetail.matchedIngredients.some((m) => m.toLowerCase().includes(ing.name.toLowerCase()) || ing.name.toLowerCase().includes(m.toLowerCase()))
-                          );
-                          if (missing.length === 0) {
-                            toast.info("¡Tenés todos los ingredientes en tu despensa!");
-                            return;
-                          }
-                          missing.forEach((m) => {
-                            setShoppingList((prev) =>
-                              addOrMergeShoppingItem(prev, {
-                                name: m.name,
-                                quantity: scaleMeasure(m.measure, recipePortions / 2) || "1 unidad",
-                                category: "Almacén seco",
-                              })
-                            );
-                          });
-                          playChimeSound("pop");
-                          toast.success(`Agregaste ${missing.length} faltantes a tu lista de compras`, {
-                            description: `Cantidades adaptadas para ${recipePortions} porciones.`,
-                          });
-                        }}
-                        className="mt-3.5 flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-xl border border-brand-border bg-brand-subtle px-3 py-1.5 text-xs font-bold text-brand-text hover:bg-surface transition"
-                      >
-                        <ShoppingCart size={13} /> Agregar faltantes a la lista de compras
-                      </button>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-content-muted">Paso a paso</p>
-                    <div className="mt-3 space-y-3">
-                      {(recipeDetail.instructions || "Prepará los ingredientes, cociná hasta que estén tiernos y serví caliente.").split(/\r?\n+/).filter(Boolean).map((step, index) => (
-                        <div key={`${index}-${step.slice(0, 8)}`} className="flex gap-3">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-subtle text-xs font-bold text-brand-text">{index + 1}</span>
-                          <p className="text-xs leading-5 text-content-body">{step}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  data-testid="consume-recipe"
-                  onClick={() => {
-                    initiateRecipeConsumption(recipeDetail);
-                    setRecipeDetail(null);
-                  }}
-                  className="mt-6 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-xs font-bold text-white hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand-focus"
-                >
-                  <Check size={15} /> Aproveché esta receta
-                </button>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+      <RecipeDetailModal
+        recipe={recipeDetail}
+        loading={recipeDetailLoading}
+        portions={recipePortions}
+        setPortions={setRecipePortions}
+        onClose={() => setRecipeDetail(null)}
+        onInitiateConsumption={(recipe) => {
+          initiateRecipeConsumption(recipe);
+          setRecipeDetail(null);
+        }}
+        setShoppingList={setShoppingList}
+      />
       {notificationModal && <NotificationSettingsModal onClose={() => setNotificationModal(false)} products={products} preferences={notificationPreferences} onSave={savePreferences} />}
       <BackupModal
         isOpen={backupModalOpen}
@@ -1750,6 +1069,8 @@ export default function Home() {
           setStoredProducts(loadStoredProducts(today) ?? []);
           setConsumptionHistory(loadConsumptionHistory());
           setShoppingList(loadShoppingList());
+          setImpact(loadImpactStats());
+          setNotificationPreferences(loadNotificationPreferences());
         }}
       />
       {consumptionPlanToConfirm && (
@@ -1761,156 +1082,39 @@ export default function Home() {
           onConfirm={handleConfirmConsumption}
         />
       )}
-      {selectedProduct && (
-        <Dialog open={Boolean(selectedProduct)} onOpenChange={(open) => { if (!open) setSelectedProduct(null); }}>
-          <DialogContent className="max-w-[370px] p-5">
-            <DialogHeader>
-              <DialogTitle>{selectedProduct.name}</DialogTitle>
-              <DialogDescription>{selectedProduct.category} · {selectedProduct.quantity}</DialogDescription>
-            </DialogHeader>
-            <div className="flex items-start gap-3 mt-2">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-elevated text-2xl">{selectedProduct.icon}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-content-muted">Almacenado en {selectedProduct.location || inferLocation(selectedProduct.category)}</p>
-              </div>
-            </div>
-            <div className="mt-4 rounded-2xl bg-surface-subtle p-3.5 border border-line">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-content-muted">{labelForDisplay(selectedProduct.dateLabel || "desconocida")}</span>
-                <MiniStatus status={selectedProduct.status} />
-              </div>
-              <p className="mt-2 text-lg font-semibold text-content-heading">{selectedProduct.expiry}</p>
-              <p className="mt-1 text-xs text-content-muted">{formatRelativeDays(selectedProduct.days)}</p>
-              {selectedProduct.corrected && <p className="mt-2 text-xs font-semibold text-brand-text">✓ Corrección aplicada a futuras detecciones</p>}
-            </div>
-            <div className="mt-4 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const prod = selectedProduct;
-                  setSelectedProduct(null);
-                  handleQuickConsume(prod);
-                }}
-                className="w-full min-h-[44px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
-              >
-                <Check size={15} strokeWidth={2.4} /> Consumir 1 unidad
-              </button>
-
-              {selectedProduct.location !== "Freezer" ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleBatchMoveLocation("Freezer");
-                    setSelectedProduct(null);
-                  }}
-                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-content hover:bg-surface-muted"
-                >
-                  🧊 Mover al Freezer (+90 días estimado)
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleBatchMoveLocation("Heladera");
-                    setSelectedProduct(null);
-                  }}
-                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-content hover:bg-surface-muted"
-                >
-                  ❄️ Pasar a Heladera
-                </button>
-              )}
-
-              {selectedProduct.state === "cerrado" && !isFreshProduceCategory(selectedProduct.category) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const prod = selectedProduct;
-                    setSelectedProduct(null);
-                    setProductToOpen(prod);
-                  }}
-                  className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-800 dark:text-amber-200 hover:bg-amber-500/20"
-                >
-                  <PackageOpen size={15} /> Marcar como abierto
-                </button>
-              )}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setEditingProduct(selectedProduct); setSelectedProduct(null); setModal("add"); }}
-                  className="flex-1 min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-line px-3 py-2 text-xs font-bold text-content-body hover:bg-surface-elevated"
-                >
-                  <Pencil size={14} /> Corregir
-                </button>
-                <button
-                  type="button"
-                  onClick={removeSelected}
-                  className="flex-1 min-h-[40px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-status-expired-bg border border-status-expired-border px-3 py-2 text-xs font-bold text-status-expired-text hover:opacity-90"
-                >
-                  <Trash2 size={14} /> Eliminar
-                </button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-      {productToOpen && (() => {
-        const calc = calculateOpenProduct(productToOpen, today);
-        return (
-          <Dialog open={Boolean(productToOpen)} onOpenChange={(open) => { if (!open) setProductToOpen(null); }}>
-            <DialogContent className="max-w-[400px] p-5">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <PackageOpen className="text-amber-600 dark:text-amber-400" size={20} />
-                  ¿Marcar como abierto?
-                </DialogTitle>
-                <DialogDescription className="text-xs">
-                  {productToOpen.name} · {productToOpen.category}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="mt-3 rounded-xl border border-line bg-surface-subtle p-3.5 space-y-2">
-                <p className="text-sm font-semibold text-content-heading">
-                  Al abrirlo, vence en{" "}
-                  <span className="text-amber-600 dark:text-amber-400 font-bold">
-                    {calc.newDays} {calc.newDays === 1 ? "día" : "días"}
-                  </span>{" "}
-                  en vez de {calc.previousDays} {calc.previousDays === 1 ? "día" : "días"}.
-                </p>
-                <p className="text-xs text-content-muted">
-                  Nueva fecha: <span className="font-semibold text-content-body">{calc.newExpiryDate}</span>
-                </p>
-
-                {calc.warningNotice && (
-                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200">
-                    <AlertTriangle size={15} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                    <span>{calc.warningNotice}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setProductToOpen(null)}
-                  className="flex-1 min-h-[44px] rounded-xl border border-line px-3 py-2.5 text-xs font-bold text-content-body hover:bg-surface-elevated"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleConfirmOpen(productToOpen);
-                    setProductToOpen(null);
-                  }}
-                  className="flex-1 min-h-[44px] rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white hover:bg-amber-700 shadow-xs"
-                >
-                  Confirmar y abrir
-                </button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        );
-      })()}
+      <ProductDetailDialog
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onQuickConsume={(prod) => {
+          setSelectedProduct(null);
+          handleQuickConsume(prod);
+        }}
+        onMoveLocation={(prod, targetLocation) => {
+          setSelectedProduct(null);
+          handleMoveProductLocation(prod, targetLocation);
+        }}
+        onMarkOpen={(prod) => {
+          setSelectedProduct(null);
+          setProductToOpen(prod);
+        }}
+        onEdit={(prod) => {
+          setSelectedProduct(null);
+          setEditingProduct(prod);
+          setModal("add");
+        }}
+        onDelete={(prod) => {
+          removeSelected(prod);
+        }}
+      />
+      <ProductOpenConfirmDialog
+        product={productToOpen}
+        today={today}
+        onClose={() => setProductToOpen(null)}
+        onConfirm={(prod) => {
+          handleConfirmOpen(prod);
+          setProductToOpen(null);
+        }}
+      />
     </div>
   );
 }

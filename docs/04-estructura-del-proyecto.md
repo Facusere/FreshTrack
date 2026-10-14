@@ -28,7 +28,6 @@ FreshTrack/
 ├── client/                      # Raíz del frontend PWA
 │   ├── index.html               # Plantilla HTML base, meta tags PWA y enlace a Google Fonts
 │   ├── public/                  # Activos estáticos servidos directamente en la raíz web
-│   │   ├── groceries.jpg        # Imagen decorativa de comestibles para el landing
 │   │   ├── icon.svg             # Isotipo vectorial de la aplicación (hoja FreshTrack)
 │   │   ├── manifest.json        # Manifiesto de PWA (nombre, colores, iconos, capturas)
 │   │   ├── icons/               # Iconos rasterizados de la PWA (192px, 512px, maskable)
@@ -41,9 +40,14 @@ FreshTrack/
 │       ├── index.css            # Estilos globales, directivas Tailwind v4 y tokens semánticos
 │       │
 │       ├── components/          # Componentes visuales y contenedores de la aplicación
+│       │   ├── AddProductModal.tsx # Modal de alta manual y edición de alimentos
 │       │   ├── BackupModal.tsx  # Modal de exportación (JSON/CSV) y restauración de inventario
 │       │   ├── ConsumptionConfirmDialog.tsx # Diálogo de confirmación interactivo de deducciones
 │       │   ├── ErrorBoundary.tsx # Captura de excepciones en tiempo de ejecución de React
+│       │   ├── NotificationSettingsModal.tsx # Modal de configuración de alertas por categoría
+│       │   ├── ProductDetailDialog.tsx # Diálogo de inspección y edición de producto
+│       │   ├── ProductOpenConfirmDialog.tsx # Confirmación y recálculo de vida útil al abrir
+│       │   ├── RecipeDetailModal.tsx # Diálogo de detalle de receta y deducción de despensa
 │       │   ├── ScanModal.tsx    # Modal integral de escaneo (cámara, subida, OCR y códigos)
 │       │   ├── ShoppingListModule.tsx # Módulo de lista de compras y sugerencias inteligentes
 │       │   │
@@ -69,8 +73,11 @@ FreshTrack/
 │       ├── contexts/            # Contextos de React para estado compartido
 │       │   └── ThemeContext.tsx # Proveedor de tema claro/oscuro con persistencia en localStorage
 │       │
-│       ├── data/                # Datos estáticos del dominio (NO documentado en README original)
+│       ├── data/                # Datos estáticos del dominio
 │       │   └── localRecipes.json # Catálogo curado de 131 recetas locales con ingredientes
+│       │
+│       ├── hooks/               # Custom hooks de ciclo de vida y utilidades de hardware
+│       │   └── useCameraStream.ts # Hook WebRTC para cámara de escaneo y cambio de facingMode
 │       │
 │       ├── lib/                 # Lógica de dominio, algoritmos, conversiones y almacenamiento
 │       │   ├── backup.ts        # Generación de archivos JSON/CSV y validación de restauración
@@ -78,6 +85,7 @@ FreshTrack/
 │       │   ├── categories.ts    # Las 15 categorías canónicas de productos alimenticios
 │       │   ├── dateRecognition.ts # Expresiones regulares de fechas y clasificación contextual
 │       │   ├── dates.ts         # Manipulación de fechas ISO, zonas horarias locales y formatos
+│       │   ├── productHelpers.ts # Funciones auxiliares de cálculo, iconos y semillas demo
 │       │   ├── feedback.ts      # Síntesis sonora con Web Audio API y vibración háptica
 │       │   ├── impactStats.ts   # Métricas de ahorro (kg, pesos, platos) y constantes de impacto
 │       │   ├── ingredientMatching.ts # Tokenización, normalización, sinónimos y descarte FEFO

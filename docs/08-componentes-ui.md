@@ -34,13 +34,14 @@ main.tsx
                 │   ├── MobileBottomNav.tsx (Barra fija inferior móvil con botón central)
                 │   │
                 │   └── Diálogos y Modales (Montaje condicional)
-                │       ├── AddProductModal (Alta manual y edición de alimentos)
-                │       ├── ScanModal.tsx (Cámara, OCR, código de barras y revisión)
-                │       ├── BackupModal.tsx (Exportación JSON/CSV y restauración)
-                │       ├── ConsumptionConfirmDialog.tsx (Confirmación de deducciones)
-                │       ├── Diálogo de Detalle de Producto
-                │       ├── Diálogo de Detalle de Receta
-                │       └── Diálogo de Preferencias de Notificaciones
+                │       ├── AddProductModal.tsx (Alta manual y edición de alimentos con inferencia de conservación)
+                │       ├── NotificationSettingsModal.tsx (Configuración de alertas de vencimiento por categoría)
+                │       ├── ProductDetailDialog.tsx (Detalle ampliado, edición rápida, congelado y consumo)
+                │       ├── ProductOpenConfirmDialog.tsx (Confirmación de apertura y recálculo dinámico de vida útil)
+                │       ├── RecipeDetailModal.tsx (Detalle de receta en Home y plan de consumo inmediato)
+                │       ├── ScanModal.tsx (Cámara WebRTC, OCR offline Tesseract, código de barras y revisión)
+                │       ├── BackupModal.tsx (Exportación JSON/CSV y restauración segura con validación de esquema)
+                │       └── ConsumptionConfirmDialog.tsx (Confirmación interactiva de deducciones de despensa)
                 │
                 └── Route "/404" & comodín ──> NotFound.tsx
 ```
@@ -127,6 +128,26 @@ main.tsx
 ---
 
 ## 4. Componentes y Modales Principales (`components/`)
+
+### `AddProductModal.tsx`
+- **Props**: `isOpen: boolean`, `onClose: () => void`, `editingProduct: Product | null`, `onSave: (product: StoredProduct) => void`.
+- **Responsabilidad**: Modal accesible para el alta manual y edición de alimentos. Integra inferencia predictiva de vida útil y ubicación según el nombre y categoría ingresados, selector de fecha con validación de calendario y retroalimentación háptica y sonora.
+
+### `NotificationSettingsModal.tsx`
+- **Props**: `products: Product[]`, `preferences: NotificationPreferences`, `onSave: (prefs: NotificationPreferences) => void`, `onClose: () => void`.
+- **Responsabilidad**: Configuración granular de notificaciones y recordatorios. Permite activar/desactivar alertas, configurar días de anticipación por categoría alimentaria (1, 3 o 7 días), resumen semanal y prueba de audio/campana.
+
+### `ProductDetailDialog.tsx`
+- **Props**: `product: Product | null`, `isOpen: boolean`, `onClose: () => void`, `onEdit: (product: Product) => void`, `onOpen: (product: Product) => void`, `onConsume: (product: Product) => void`, `onFreeze: (product: Product) => void`, `onDelete: (id: number) => void`.
+- **Responsabilidad**: Diálogo de inspección completa de un alimento. Expone metadatos detallados (categoría, ubicación, fecha de vencimiento, días restantes, estado abierto/cerrado), badges de conservación y accesos directos a todas las acciones de ciclo de vida.
+
+### `ProductOpenConfirmDialog.tsx`
+- **Props**: `product: Product | null`, `isOpen: boolean`, `onClose: () => void`, `onConfirm: () => void`.
+- **Responsabilidad**: Diálogo de confirmación interactivo al abrir un envase cerrado. Muestra el recálculo dinámico de días de conservación sugeridos por el catálogo para el estado abierto y ajusta la fecha de vencimiento resultante.
+
+### `RecipeDetailModal.tsx`
+- **Props**: `recipe: RecipeSuggestion | null`, `loading: boolean`, `onClose: () => void`, `onInitiateConsumption: (recipe: RecipeSuggestion) => void`, `pantryProducts: Product[]`.
+- **Responsabilidad**: Modal de previsualización de recetas desde la vista Home. Muestra imagen, ingredientes, instrucciones detalladas, disponibilidad en despensa y el botón para iniciar el flujo de deducción guiada de ingredientes.
 
 ### `ScanModal.tsx`
 - **Props**: `onClose: () => void`, `onComplete: (products: StoredProduct[]) => void`, `detectIconFn`.

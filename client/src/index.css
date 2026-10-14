@@ -348,11 +348,12 @@
     color: #ffffff;
   }
 
-  /* Primary Action Button — Fresh Emerald Gradient Pill */
-  .tomorro-btn-primary {
+  /* Primary Action Button — Fresh Emerald Gradient Pill (Unified) */
+  .tomorro-btn-primary,
+  .btn-3d-accent {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #ffffff;
-    font-family: "Inter", sans-serif;
+    font-family: inherit;
     font-weight: 600;
     border-radius: 28px;
     padding: 8px 20px;
@@ -364,13 +365,15 @@
     transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, filter 180ms ease;
   }
 
-  .tomorro-btn-primary:hover {
+  .tomorro-btn-primary:hover,
+  .btn-3d-accent:hover {
     filter: brightness(1.08);
     transform: translateY(-1.5px);
     box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.45);
   }
 
-  .tomorro-btn-primary:active {
+  .tomorro-btn-primary:active,
+  .btn-3d-accent:active {
     transform: translateY(1px) scale(0.98);
     box-shadow: 0 2px 8px 0 rgba(16, 185, 129, 0.25);
   }
@@ -526,29 +529,34 @@
     box-shadow: 0 28px 64px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(16, 185, 129, 0.16);
   }
 
-  /* Clean Elevated Card */
+  /* Clean Elevated Card (Unified design system card) */
+  .card-3d,
   .tomorro-card-bone {
     background-color: var(--surface);
     border: 1px solid var(--line);
     border-radius: 24px;
     box-shadow: 0 4px 20px -2px rgba(11, 23, 16, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-    transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), border-color 220ms ease, background-color 200ms ease, box-shadow 220ms ease;
   }
 
+  .card-3d:hover,
   .tomorro-card-bone:hover {
     border-color: var(--brand-border);
+    transform: translateY(-2px);
     box-shadow: 0 12px 32px -4px rgba(5, 150, 105, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
   }
 
+  .dark .card-3d,
   .dark .tomorro-card-bone {
     box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.45);
   }
 
+  .dark .card-3d:hover,
   .dark .tomorro-card-bone:hover {
     box-shadow: 0 14px 40px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.1);
   }
 
-  /* Legacy utility wrappers with modern spring feel */
+  /* Motion & Entrance utility wrappers */
   .animate-in {
     animation: enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -570,28 +578,7 @@
     animation-delay: -2.8s;
   }
 
-  .card-3d {
-    border-radius: 24px;
-    border: 1px solid var(--line);
-    background-color: var(--surface);
-    box-shadow: 0 4px 20px -2px rgba(11, 23, 16, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
-    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), border-color 220ms ease, box-shadow 220ms ease;
-  }
-
-  .card-3d:hover {
-    border-color: var(--brand-border);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px -4px rgba(5, 150, 105, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-  }
-
-  .dark .card-3d {
-    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.45);
-  }
-
-  .dark .card-3d:hover {
-    box-shadow: 0 14px 40px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.1);
-  }
-
+  /* Tactile interactive button base */
   .btn-3d {
     position: relative;
     border-radius: 28px;
@@ -604,26 +591,6 @@
   }
 
   .btn-3d:active {
-    transform: translateY(1px) scale(0.98);
-  }
-
-  .btn-3d-accent {
-    position: relative;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border-radius: 28px;
-    font-weight: 600;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), filter 160ms ease, box-shadow 160ms ease;
-  }
-
-  .btn-3d-accent:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1.5px);
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
-  }
-
-  .btn-3d-accent:active {
     transform: translateY(1px) scale(0.98);
   }
 

@@ -5,6 +5,7 @@ import { isQuantityLow, parseQuantity, formatQuantity } from "./quantity";
 import { normalizeText, matchIngredientTokens } from "./ingredientMatching";
 import { ALL_CATEGORIES } from "./categories";
 import { Product, StoredProduct } from "@/types/product";
+import { loadJSON, saveJSON } from "./storage";
 
 export type ShoppingItemReason = "frecuente" | "stock_bajo" | "manual" | "vencido" | "receta";
 
@@ -30,26 +31,14 @@ export type ConsumptionHistoryEntry = {
 
 export type PantryItemReference = Product;
 
-const SHOPPING_LIST_STORAGE_KEY = "freshtrack-shopping-list-v1";
+export const SHOPPING_LIST_STORAGE_KEY = "freshtrack-shopping-list-v1";
 
 export function loadShoppingList(): ShoppingItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(SHOPPING_LIST_STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as ShoppingItem[];
-  } catch {
-    return [];
-  }
+  return loadJSON<ShoppingItem[]>(SHOPPING_LIST_STORAGE_KEY, []);
 }
 
 export function saveShoppingList(items: ShoppingItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(SHOPPING_LIST_STORAGE_KEY, JSON.stringify(items));
-  } catch (e) {
-    console.error("Failed to save shopping list:", e);
-  }
+  saveJSON(SHOPPING_LIST_STORAGE_KEY, items);
 }
 
 /**

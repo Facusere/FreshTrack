@@ -80,9 +80,9 @@ export function HeroSection({
             </h1>
 
             {/* Body Paragraph */}
-            <p className="text-xs sm:text-base leading-[1.65] text-slate-700 dark:text-emerald-100/85 max-w-[500px] font-normal">
+            <p className="text-xs sm:text-base leading-[1.65] text-slate-800 dark:text-emerald-50 max-w-[500px] font-normal">
               FreshTrack digitaliza tus compras con{" "}
-              <strong className="text-emerald-800 dark:text-emerald-300 font-bold">Reconocimiento OCR</strong>, estima
+              <strong className="text-emerald-900 dark:text-emerald-300 font-bold">Reconocimiento OCR</strong>, estima
               vencimientos y te avisa a tiempo. Menos desperdicio, más tranquilidad.
             </p>
 
@@ -107,15 +107,15 @@ export function HeroSection({
             </div>
 
             {/* Micro Details */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-slate-600 dark:text-emerald-200/70 font-medium">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-white/80 dark:border-emerald-800/40 dark:bg-emerald-950/60 px-3 py-1 text-emerald-950 dark:text-white backdrop-blur-sm shadow-2xs font-semibold">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-slate-700 dark:text-emerald-100 font-medium">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/80 bg-white/90 dark:border-emerald-700/60 dark:bg-emerald-950/80 px-3 py-1 text-emerald-950 dark:text-emerald-100 backdrop-blur-sm shadow-2xs font-semibold">
                 <Sparkles size={12} className="text-emerald-600 dark:text-emerald-400" />
                 {catalogSize} alimentos regionales
               </span>
               <span>·</span>
-              <span className="text-slate-700 dark:text-emerald-200/80">Vida útil abierto y cerrado</span>
+              <span className="text-slate-800 dark:text-emerald-100">Vida útil abierto y cerrado</span>
               <span>·</span>
-              <span className="flex items-center gap-1 text-slate-700 dark:text-emerald-200/80">
+              <span className="flex items-center gap-1 text-slate-800 dark:text-emerald-100">
                 <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" /> 100% privado
               </span>
             </div>
@@ -151,7 +151,7 @@ export function HeroSection({
                   </span>
                   <div>
                     <p className="text-xs font-bold tracking-tight text-slate-900 dark:text-white">Radar de Despensa</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">
                       {lastScan ? `Último ticket: ${formatTimeAgo(lastScan.at, today)}` : "Estado en tiempo real"}
                     </p>
                   </div>
@@ -168,10 +168,10 @@ export function HeroSection({
                   radarProducts.map((p) => {
                     const badgeClass =
                       p.status === "expired"
-                        ? "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/50"
+                        ? "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-800/60"
                         : p.status === "soon"
-                        ? "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50"
-                        : "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
+                        ? "bg-amber-100 text-amber-950 border-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-800/60"
+                        : "bg-emerald-100 text-emerald-950 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-200 dark:border-emerald-800/60";
                     const badgeText =
                       p.status === "expired"
                         ? "Vencido"
@@ -188,7 +188,7 @@ export function HeroSection({
                           <span className="text-xl shrink-0">{p.icon}</span>
                           <div className="min-w-0">
                             <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">{p.name}</p>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300">
                               {p.category} · {p.quantity}
                             </p>
                           </div>
@@ -201,8 +201,8 @@ export function HeroSection({
                   })
                 ) : (
                   <div className="rounded-xl bg-slate-50 dark:bg-[#16241b] p-3.5 text-center border border-dashed border-slate-300 dark:border-emerald-900/40">
-                    <p className="text-xs font-bold text-slate-800 dark:text-white">Tu despensa está lista</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">Tu despensa está lista</p>
+                    <p className="mt-0.5 text-[11px] text-slate-600 dark:text-slate-300">
                       Escaneá un ticket para cargar alimentos y activar el radar de vencimientos.
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export function HeroSection({
                       ? `${products.length} ${products.length === 1 ? "alimento activo" : "alimentos activos"}`
                       : "Listo para escanear"}
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
                     {lastScan ? `${lastScan.count} en último escaneo` : "Cámara o imagen"}
                   </p>
                 </div>

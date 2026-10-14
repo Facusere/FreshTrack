@@ -15,6 +15,7 @@
 
 import { addDaysISO, daysUntil, todayISO } from "./dates";
 import type { StoredProduct } from "@/types/product";
+import { loadJSON, saveJSON } from "./storage";
 
 export type ShelfLifeState = "cerrado" | "abierto";
 export type ShelfLifeConfidence = "specific" | "user-correction" | "category-estimate";
@@ -701,15 +702,10 @@ export function getCategoryConservativeMinimum(category: string): { closedDays: 
 
 // Persistencia de ajustes del usuario
 export const CORRECTIONS_STORAGE_KEY = "freshtrack-shelf-corrections-v1";
+export const SHELF_LIFE_CORRECTIONS_KEY = CORRECTIONS_STORAGE_KEY;
 
 export function loadShelfLifeCorrections(): Record<string, ShelfLifeCorrection> {
-  if (typeof localStorage === "undefined") return {};
-  try {
-    const raw = localStorage.getItem(CORRECTIONS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
+  return loadJSON<Record<string, ShelfLifeCorrection>>(CORRECTIONS_STORAGE_KEY, {});
 }
 
 export function saveShelfLifeCorrection(
@@ -730,14 +726,7 @@ export function saveShelfLifeCorrection(
   };
 
   existing[norm] = correction;
-
-  if (typeof localStorage !== "undefined") {
-    try {
-      localStorage.setItem(CORRECTIONS_STORAGE_KEY, JSON.stringify(existing));
-    } catch (e) {
-      console.warn("No se pudo guardar la corrección de vida útil en localStorage", e);
-    }
-  }
+  saveJSON(CORRECTIONS_STORAGE_KEY, existing);
 
   return correction;
 }

@@ -117,7 +117,7 @@ export function BackupModal({
               <div>
                 <p className="text-xs font-bold text-content-heading">Copia completa (JSON)</p>
                 <p className="text-[11px] text-content-muted">
-                  Guarda inventario, historial de consumos y lista de compras.
+                  Guarda despensa, consumos, lista de compras, recetas, planificador y ajustes.
                 </p>
               </div>
             </div>

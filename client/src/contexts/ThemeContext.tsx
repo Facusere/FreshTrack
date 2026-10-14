@@ -22,9 +22,13 @@ export function ThemeProvider({
   switchable = true,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (switchable) {
-      const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
+    if (switchable && typeof localStorage !== "undefined") {
+      try {
+        const stored = localStorage.getItem("freshtrack-theme") || localStorage.getItem("theme");
+        return (stored as Theme) || defaultTheme;
+      } catch {
+        return defaultTheme;
+      }
     }
     return defaultTheme;
   });
@@ -37,8 +41,13 @@ export function ThemeProvider({
       root.classList.remove("dark");
     }
 
-    if (switchable) {
-      localStorage.setItem("theme", theme);
+    if (switchable && typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("freshtrack-theme", theme);
+        localStorage.setItem("theme", theme);
+      } catch (e) {
+        console.warn("No se pudo guardar la preferencia de tema:", e);
+      }
     }
   }, [theme, switchable]);
 

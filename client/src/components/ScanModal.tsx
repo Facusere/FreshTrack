@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCameraStream } from "@/hooks/useCameraStream";
 import { labelForDisplay } from "@/lib/dateRecognition";
 import {
   parseReceiptAndLabelText,
@@ -56,11 +57,15 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
   const [barcodeInput, setBarcodeInput] = useState("");
   const [isSearchingBarcode, setIsSearchingBarcode] = useState(false);
 
-  // Camera state
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [cameraFacingMode, setCameraFacingMode] = useState<"environment" | "user">("environment");
-  const [cameraError, setCameraError] = useState<string | null>(null);
+  // Camera stream hook
+  const {
+    videoRef,
+    canvasRef,
+    cameraError,
+    startCamera,
+    stopCameraStream,
+    toggleCameraFacing,
+  } = useCameraStream();
 
   // Upload state
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -75,21 +80,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
   // Results
   const [detectedProducts, setDetectedProducts] = useState<ScannedProductResult[]>([]);
 
-  // Stop camera tracks helper
-  const stopCameraStream = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      stopCameraStream();
-    };
-  }, []);
-
   const handleRequestClose = () => {
     if (stage === "scanning") {
       const confirmClose = window.confirm(
@@ -101,47 +91,6 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     onClose();
   };
 
-  // Start camera helper
-  const startCamera = async (facing: "environment" | "user" = cameraFacingMode) => {
-    stopCameraStream();
-    setCameraError(null);
-
-    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      setCameraError("La cámara no está disponible en este dispositivo o navegador.");
-      setInputMethod("upload");
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facing },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    } catch (err: any) {
-      console.warn("Camera access denied or unavailable:", err);
-      setCameraError(
-        err.name === "NotAllowedError" || err.name === "PermissionDeniedError"
-          ? "Acceso a la cámara denegado. Podés subir una foto o usar un ticket de prueba."
-          : "No se pudo iniciar la cámara en este dispositivo."
-      );
-    }
-  };
-
-  // Switch camera between environment (rear) and user (front)
-  const toggleCameraFacing = () => {
-    const nextFacing = cameraFacingMode === "environment" ? "user" : "environment";
-    setCameraFacingMode(nextFacing);
-    startCamera(nextFacing);
-  };
-
   // Initialize camera when entering camera tab
   useEffect(() => {
     if (stage === "choose" && inputMethod === "camera") {
@@ -149,8 +98,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     } else {
       stopCameraStream();
     }
-    return () => stopCameraStream();
-  }, [stage, inputMethod]);
+  }, [stage, inputMethod, startCamera, stopCameraStream]);
 
   // Capture frame from camera and run OCR
   const captureAndScan = async () => {

@@ -1,18 +1,39 @@
-import { PRODUCTS_STORAGE_KEY, CONSUMPTION_HISTORY_KEY, loadJSON, saveJSON } from "./storage";
+import {
+  PRODUCTS_STORAGE_KEY,
+  CONSUMPTION_HISTORY_KEY,
+  loadJSON,
+  saveJSON,
+  isValidStoredProduct,
+} from "./storage";
 import { StoredProduct, Product } from "@/types/product";
 import { FAVORITE_RECIPES_STORAGE_KEY } from "./favoriteRecipes";
 import { MEAL_PLAN_STORAGE_KEY, PlannedMeal } from "./mealPlan";
-
-const SHOPPING_LIST_KEY = "freshtrack-shopping-list-v1";
+import { SHOPPING_LIST_STORAGE_KEY, ShoppingItem } from "./shoppingList";
+import { IMPACT_STATS_STORAGE_KEY, ImpactStats } from "./impactStats";
+import { NOTIFICATION_PREFS_KEY, NotificationPreferences } from "./notificationRules";
+import { DATE_LEARNING_STORAGE_KEY, DateLearningRule } from "./dateRecognition";
+import { SHELF_LIFE_CORRECTIONS_KEY, ShelfLifeCorrection } from "./shelfLifeCatalog";
+import {
+  EXPIRED_HISTORY_KEY,
+  MONTHLY_IMPACT_HISTORY_KEY,
+  HistoricalExpiredItem,
+  MonthlyImpactPoint,
+} from "./reportsData";
 
 export interface FreshTrackBackup {
   version: number;
   exportedAt: string;
   products: StoredProduct[];
   consumptionHistory: any[];
-  shoppingList: any[];
+  shoppingList: ShoppingItem[];
   favoriteRecipes?: string[];
   mealPlan?: PlannedMeal[];
+  impactStats?: ImpactStats;
+  notificationPreferences?: NotificationPreferences;
+  dateLearningRules?: DateLearningRule[];
+  shelfLifeCorrections?: Record<string, ShelfLifeCorrection>;
+  expiredHistory?: HistoricalExpiredItem[];
+  monthlyImpactHistory?: MonthlyImpactPoint[];
   theme?: string;
 }
 
@@ -21,9 +42,30 @@ export interface FreshTrackBackup {
  */
 export function buildBackupObject(products: StoredProduct[]): FreshTrackBackup {
   const history = loadJSON<any[]>(CONSUMPTION_HISTORY_KEY, []);
-  const shopping = loadJSON<any[]>(SHOPPING_LIST_KEY, []);
+  const shopping = loadJSON<ShoppingItem[]>(SHOPPING_LIST_STORAGE_KEY, []);
   const favoriteRecipes = loadJSON<string[]>(FAVORITE_RECIPES_STORAGE_KEY, []);
   const mealPlan = loadJSON<PlannedMeal[]>(MEAL_PLAN_STORAGE_KEY, []);
+  const impactStats = loadJSON<ImpactStats | undefined>(IMPACT_STATS_STORAGE_KEY, undefined);
+  const notificationPreferences = loadJSON<NotificationPreferences | undefined>(
+    NOTIFICATION_PREFS_KEY,
+    undefined
+  );
+  const dateLearningRules = loadJSON<DateLearningRule[] | undefined>(
+    DATE_LEARNING_STORAGE_KEY,
+    undefined
+  );
+  const shelfLifeCorrections = loadJSON<Record<string, ShelfLifeCorrection> | undefined>(
+    SHELF_LIFE_CORRECTIONS_KEY,
+    undefined
+  );
+  const expiredHistory = loadJSON<HistoricalExpiredItem[] | undefined>(
+    EXPIRED_HISTORY_KEY,
+    undefined
+  );
+  const monthlyImpactHistory = loadJSON<MonthlyImpactPoint[] | undefined>(
+    MONTHLY_IMPACT_HISTORY_KEY,
+    undefined
+  );
   const theme =
     typeof localStorage !== "undefined"
       ? localStorage.getItem("freshtrack-theme") || localStorage.getItem("theme") || "light"
@@ -32,11 +74,21 @@ export function buildBackupObject(products: StoredProduct[]): FreshTrackBackup {
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
-    products,
+    products: products.filter(isValidStoredProduct),
     consumptionHistory: history,
     shoppingList: shopping,
-    favoriteRecipes,
-    mealPlan,
+    favoriteRecipes: favoriteRecipes.length > 0 ? favoriteRecipes : undefined,
+    mealPlan: mealPlan.length > 0 ? mealPlan : undefined,
+    impactStats,
+    notificationPreferences,
+    dateLearningRules: dateLearningRules && dateLearningRules.length > 0 ? dateLearningRules : undefined,
+    shelfLifeCorrections:
+      shelfLifeCorrections && Object.keys(shelfLifeCorrections).length > 0
+        ? shelfLifeCorrections
+        : undefined,
+    expiredHistory: expiredHistory && expiredHistory.length > 0 ? expiredHistory : undefined,
+    monthlyImpactHistory:
+      monthlyImpactHistory && monthlyImpactHistory.length > 0 ? monthlyImpactHistory : undefined,
     theme,
   };
 }
@@ -102,8 +154,17 @@ export function restoreBackupJSON(
       return { success: false, message: "El archivo no contiene una lista de alimentos válida." };
     }
 
+    // Filter and validate products
+    const validProducts = data.products.filter(isValidStoredProduct);
+    if (data.products.length > 0 && validProducts.length === 0) {
+      return {
+        success: false,
+        message: "Los alimentos contenidos en el archivo no cumplen con el formato requerido.",
+      };
+    }
+
     // Save restored products
-    saveJSON(PRODUCTS_STORAGE_KEY, data.products);
+    saveJSON(PRODUCTS_STORAGE_KEY, validProducts);
 
     // Save history if available
     if (Array.isArray(data.consumptionHistory)) {
@@ -112,7 +173,7 @@ export function restoreBackupJSON(
 
     // Save shopping list if available
     if (Array.isArray(data.shoppingList)) {
-      saveJSON(SHOPPING_LIST_KEY, data.shoppingList);
+      saveJSON(SHOPPING_LIST_STORAGE_KEY, data.shoppingList);
     }
 
     // Save favorite recipes if available and valid
@@ -135,10 +196,59 @@ export function restoreBackupJSON(
       saveJSON(MEAL_PLAN_STORAGE_KEY, validMeals);
     }
 
+    // Save impact stats if available
+    if (data.impactStats && typeof data.impactStats === "object") {
+      saveJSON(IMPACT_STATS_STORAGE_KEY, data.impactStats);
+    }
+
+    // Save notification preferences if available
+    if (data.notificationPreferences && typeof data.notificationPreferences === "object") {
+      saveJSON(NOTIFICATION_PREFS_KEY, data.notificationPreferences);
+    }
+
+    // Save date learning rules if available
+    if (Array.isArray(data.dateLearningRules)) {
+      saveJSON(DATE_LEARNING_STORAGE_KEY, data.dateLearningRules);
+    }
+
+    // Save shelf life corrections if available
+    if (data.shelfLifeCorrections && typeof data.shelfLifeCorrections === "object") {
+      saveJSON(SHELF_LIFE_CORRECTIONS_KEY, data.shelfLifeCorrections);
+    }
+
+    // Save expired history if available
+    if (Array.isArray(data.expiredHistory)) {
+      saveJSON(EXPIRED_HISTORY_KEY, data.expiredHistory);
+    }
+
+    // Save monthly impact history if available
+    if (Array.isArray(data.monthlyImpactHistory)) {
+      saveJSON(MONTHLY_IMPACT_HISTORY_KEY, data.monthlyImpactHistory);
+    }
+
+    // Restore theme preference
+    if (data.theme && (data.theme === "dark" || data.theme === "light")) {
+      try {
+        localStorage.setItem("freshtrack-theme", data.theme);
+        localStorage.setItem("theme", data.theme);
+        if (typeof document !== "undefined") {
+          document.documentElement.classList.toggle("dark", data.theme === "dark");
+        }
+      } catch {
+        // Ignored if storage or DOM is inaccessible
+      }
+    }
+
+    const discarded = data.products.length - validProducts.length;
+    const detailMsg =
+      discarded > 0
+        ? `Copia restaurada con éxito (${validProducts.length} válidos, ${discarded} descartados por formato inválido).`
+        : `Copia de seguridad restaurada con éxito (${validProducts.length} alimentos).`;
+
     return {
       success: true,
-      message: `Copia de seguridad restaurada con éxito (${data.products.length} alimentos).`,
-      count: data.products.length,
+      message: detailMsg,
+      count: validProducts.length,
     };
   } catch (err: any) {
     return {

@@ -1,4 +1,5 @@
 import { parseDateToISO, DateLabel, DateParseResult } from "./dates.js";
+import { loadJSON, saveJSON } from "./storage";
 export { parseDateToISO };
 export type { DateLabel, DateParseResult };
 
@@ -20,7 +21,8 @@ export type DateLearningRule = {
   updatedAt: string;
 };
 
-const STORAGE_KEY = "freshtrack-date-learning-v1";
+export const DATE_LEARNING_STORAGE_KEY = "freshtrack-date-learning-v1";
+const STORAGE_KEY = DATE_LEARNING_STORAGE_KEY;
 
 const labelKeywords: Record<Exclude<DateLabel, "desconocida">, string[]> = {
   vencimiento: ["vence", "vencimiento", "vto", "vto.", "exp", "exp.", "expiry", "use by", "caducidad", "fecha limite", "fecha límite"],
@@ -138,7 +140,7 @@ export function detectDateCandidates(ocrText: string, learning?: DateLearningRul
 }
 
 export function loadLearningRules(): DateLearningRule[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as DateLearningRule[]; } catch { return []; }
+  return loadJSON<DateLearningRule[]>(STORAGE_KEY, []);
 }
 
 export function saveLearningCorrection(input: Omit<DateLearningRule, "corrections" | "updatedAt">) {
@@ -147,7 +149,7 @@ export function saveLearningCorrection(input: Omit<DateLearningRule, "correction
   const index = rules.findIndex((rule) => normalize(rule.productKey) === key);
   const next: DateLearningRule = index >= 0 ? { ...rules[index], ...input, corrections: rules[index].corrections + 1, updatedAt: new Date().toISOString() } : { ...input, corrections: 1, updatedAt: new Date().toISOString() };
   if (index >= 0) rules[index] = next; else rules.push(next);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rules));
+  saveJSON(STORAGE_KEY, rules);
   return next;
 }
 

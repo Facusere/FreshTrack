@@ -1,5 +1,6 @@
 import { formatExpiryDisplay } from "./dates";
 import { Product } from "@/types/product";
+import { loadJSON, saveJSON } from "./storage";
 
 export type AlertLeadDays = 1 | 3 | 7;
 
@@ -17,7 +18,8 @@ export type NotificationGroup = {
   title: string;
 };
 
-const PREFS_KEY = "freshtrack-notification-preferences-v1";
+export const NOTIFICATION_PREFS_KEY = "freshtrack-notification-preferences-v1";
+const PREFS_KEY = NOTIFICATION_PREFS_KEY;
 
 export const defaultNotificationPreferences: NotificationPreferences = {
   enabled: true,
@@ -43,14 +45,19 @@ export const defaultNotificationPreferences: NotificationPreferences = {
 };
 
 export function loadNotificationPreferences(): NotificationPreferences {
-  try {
-    const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || "null") as Partial<NotificationPreferences> | null;
-    return { ...defaultNotificationPreferences, ...saved, categoryLeadDays: { ...defaultNotificationPreferences.categoryLeadDays, ...(saved?.categoryLeadDays || {}) } };
-  } catch { return defaultNotificationPreferences; }
+  const saved = loadJSON<Partial<NotificationPreferences> | null>(PREFS_KEY, null);
+  return {
+    ...defaultNotificationPreferences,
+    ...saved,
+    categoryLeadDays: {
+      ...defaultNotificationPreferences.categoryLeadDays,
+      ...(saved?.categoryLeadDays || {}),
+    },
+  };
 }
 
-export function saveNotificationPreferences(preferences: NotificationPreferences) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify(preferences));
+export function saveNotificationPreferences(preferences: NotificationPreferences): boolean {
+  return saveJSON(PREFS_KEY, preferences);
 }
 
 export function groupNotifications(
