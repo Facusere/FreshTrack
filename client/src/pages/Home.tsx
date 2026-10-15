@@ -48,6 +48,7 @@ import {
 import { ConsumptionConfirmDialog } from "@/components/ConsumptionConfirmDialog";
 import { ScanModal } from "@/components/ScanModal";
 import { AddProductModal } from "@/components/AddProductModal";
+import { InstallAppModal } from "@/components/InstallAppModal";
 import { NotificationSettingsModal } from "@/components/NotificationSettingsModal";
 import { ProductDetailDialog } from "@/components/ProductDetailDialog";
 import { ProductOpenConfirmDialog } from "@/components/ProductOpenConfirmDialog";
@@ -151,6 +152,7 @@ export default function Home() {
 
   // PWA install state
   const [canInstallPWA, setCanInstallPWA] = useState(false);
+  const [installModalOpen, setInstallModalOpen] = useState(false);
   useEffect(() => {
     return subscribeToInstallPrompt(setCanInstallPWA);
   }, []);
@@ -708,17 +710,21 @@ export default function Home() {
               </div>
             </div>
 
-            {canInstallPWA && (
-              <button
-                type="button"
-                onClick={() => promptPWAInstall()}
-                title="Instalar aplicación en tu dispositivo"
-                className="hidden sm:inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] px-3 py-1 text-xs font-semibold text-content hover:bg-surface-muted hover:border-emerald-500/40 transition shadow-xs"
-              >
-                <Smartphone size={13} className="text-emerald-500" />
-                <span>App</span>
-              </button>
-            )}
+            {/* Store Style Install Button (Android, iOS, Windows, Linux) */}
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic();
+                setInstallModalOpen(true);
+              }}
+              title="Descargar o instalar FreshTrack (Android, iOS, Windows, Linux)"
+              aria-label="Descargar o instalar app FreshTrack"
+              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 sm:px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition shadow-xs cursor-pointer"
+            >
+              <Smartphone size={13} className="text-emerald-500" />
+              <span className="hidden sm:inline">Instalar App</span>
+              <span className="sm:hidden">App</span>
+            </button>
 
             {/* Dark Mode Switcher */}
             <button
@@ -866,6 +872,23 @@ export default function Home() {
             <div className="mt-8 border-t border-line pt-4 space-y-2">
               <button
                 type="button"
+                onClick={() => {
+                  triggerHaptic();
+                  setInstallModalOpen(true);
+                  setMobileNav(false);
+                }}
+                className="flex min-h-[40px] w-full items-center justify-between rounded-full px-4 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-500/20 transition cursor-pointer"
+              >
+                <span className="flex items-center gap-3">
+                  <Smartphone size={15} className="text-emerald-500" />
+                  <span>Descargar / Instalar App</span>
+                </span>
+                <span className="rounded-full bg-emerald-200/70 dark:bg-emerald-800/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-200">
+                  Android • iOS • PC
+                </span>
+              </button>
+              <button
+                type="button"
                 onClick={toggleTheme}
                 className="flex min-h-[40px] w-full items-center justify-between rounded-full px-4 py-2 text-xs font-semibold text-content-muted hover:text-content hover:bg-surface-muted"
               >
@@ -905,6 +928,7 @@ export default function Home() {
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
+              onOpenInstall={() => setInstallModalOpen(true)}
               lastScan={lastScan}
               today={today}
               catalogSize={getCatalogSize()}
@@ -1072,6 +1096,12 @@ export default function Home() {
           setImpact(loadImpactStats());
           setNotificationPreferences(loadNotificationPreferences());
         }}
+      />
+      <InstallAppModal
+        isOpen={installModalOpen}
+        onClose={() => setInstallModalOpen(false)}
+        canInstall={canInstallPWA}
+        onInstall={promptPWAInstall}
       />
       {consumptionPlanToConfirm && (
         <ConsumptionConfirmDialog

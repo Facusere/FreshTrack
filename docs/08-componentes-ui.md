@@ -41,6 +41,7 @@ main.tsx
                 │       ├── RecipeDetailModal.tsx (Detalle de receta en Home y plan de consumo inmediato)
                 │       ├── ScanModal.tsx (Cámara WebRTC, OCR offline Tesseract, código de barras y revisión)
                 │       ├── BackupModal.tsx (Exportación JSON/CSV y restauración segura con validación de esquema)
+                │       ├── InstallAppModal.tsx (Tienda oficial PWA: Android, iOS, Windows y Linux con detección de SO)
                 │       └── ConsumptionConfirmDialog.tsx (Confirmación interactiva de deducciones de despensa)
                 │
                 └── Route "/404" & comodín ──> NotFound.tsx
@@ -164,6 +165,10 @@ main.tsx
 ### `BackupModal.tsx`
 - **Props**: `isOpen`, `onClose`, `products`, `storedProducts`, `onRestoreSuccess`.
 - **Responsabilidad**: Interfaz para descargar el archivo JSON de copia de seguridad, exportar el inventario en formato CSV para hojas de cálculo o cargar un archivo `.json` para restaurar los datos.
+
+### `InstallAppModal.tsx`
+- **Props**: `isOpen: boolean`, `onClose: () => void`, `canInstall?: boolean`, `onInstall?: () => Promise<boolean>`.
+- **Responsabilidad**: Modal interactivo de descarga e instalación con estética de App Store / Google Play Store. Detecta automáticamente el sistema operativo del usuario (`detectUserPlatform`), ofrece un formato celular optimizado para Android (Play Store en 1 toque) e iOS (Safari Share sheet a pantalla completa), y guías de ventana nativa para Windows y Linux con lanzadores de escritorio. Incluye botón para copiar el enlace para probar en el teléfono.
 
 ### `ErrorBoundary.tsx`
 - **Props**: `children: ReactNode`.

@@ -65,13 +65,20 @@ VitePWA({
 
 ---
 
-## 3. Instalación de la PWA en el Dispositivo
+## 3. Instalación de la PWA Multiplataforma (`InstallAppModal`)
 
-El ciclo de instalación está encapsulado en `client/src/lib/pwaAndNotifications.ts`:
-1. **Captura del evento**: `setupPWAInstallListeners()` escucha el evento `beforeinstallprompt` en `window`, previniendo el diálogo por defecto del navegador (`e.preventDefault()`) y guardando la referencia en `deferredInstallPrompt`.
-2. **Suscripción de la UI**: La cabecera en `HeroSection.tsx` se suscribe con `subscribeToInstallPrompt()`. Si el navegador determina que la app es instalable, se despliega el botón *"Instalar app en tu pantalla"*.
-3. **Disparo interactivo**: Al tocar el botón, `promptPWAInstall()` invoca `deferredInstallPrompt.prompt()` y espera la decisión del usuario (`userChoice.outcome === "accepted"`).
-4. **Detección de modo instalado**: `isStandaloneMode()` evalúa `matchMedia("(display-mode: standalone)").matches` y `navigator.standalone` en iOS para ocultar los botones de instalación si la app ya corre instalada.
+FreshTrack provee un diálogo de instalación interactivo con estética de tienda oficial (App Store / Google Play Store) soportando **Android, iOS, Windows y Linux**:
+
+1. **Detección Automática de Sistema Operativo**: Mediante `detectUserPlatform()` en `client/src/lib/pwaAndNotifications.ts`, se detecta si el usuario navega desde `android`, `ios`, `windows`, `linux` o `macos`, preseleccionando automáticamente la pestaña adecuada.
+2. **Formato Adaptado para Dispositivos Móviles (Android & iOS)**:
+   - **Superpoderes Móviles**: Muestra un bloque visual destacado con las ventajas de la experiencia celular (Cámara & OCR en vivo, 100% Offline para el súper, Notificaciones Push y Modo Pantalla Completa sin barras).
+   - **Android (Google Play Experience)**: Disparo nativo de instalación en 1 toque mediante `promptPWAInstall()` cuando el navegador lo soporta, más una guía en 3 pasos para Google Chrome, Brave o Samsung Internet (`⋮` > "Instalar aplicación").
+   - **iOS (Apple App Store Experience)**: Dado que Safari en iOS no dispara el evento `beforeinstallprompt`, la aplicación proporciona una guía visual específica con el botón Compartir (`⎋`), "Agregar a pantalla de inicio" (`[+]`) y confirmación "Agregar", explicando el funcionamiento como Web Clip a pantalla completa con gestos nativos de 120Hz y feedback háptico.
+3. **Formato de Escritorio (Windows & Linux)**:
+   - **Windows**: Instalación como app de ventana independiente sin pestañas del navegador, anclable a la barra de tareas y al Menú Inicio, con atajo desde el ícono `[⊕]` en la barra de direcciones de Edge o Chrome.
+   - **Linux**: Integración mediante lanzador `.desktop` en entornos gráficos GNOME, KDE Plasma, XFCE y lanzadores rápidos (Rofi/Wofi), con consumo mínimo de memoria (< 50 MB de RAM).
+4. **Compañero Móvil**: Incluye un botón para copiar el enlace directo (`navigator.clipboard.writeText`) para que usuarios navegando desde PC puedan enviarse rápidamente la app a su celular.
+5. **Detección de Modo Instalado**: `isStandaloneMode()` evalúa `matchMedia("(display-mode: standalone)").matches`, `navigator.standalone` en iOS y referencias de WebView para confirmar si la app ya está corriendo como aplicación nativa.
 
 ---
 

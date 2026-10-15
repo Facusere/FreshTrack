@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowUpRight, ChevronRight, Plus, ScanLine, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Download, Plus, ScanLine, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
 import { formatTimeAgo } from "@/lib/dates";
 import { LastScanInfo } from "@/lib/storage";
 import { Product } from "@/types/product";
@@ -7,6 +7,7 @@ import { Product } from "@/types/product";
 export interface HeroSectionProps {
   onOpenScan: () => void;
   onOpenAdd: () => void;
+  onOpenInstall?: () => void;
   lastScan: LastScanInfo | null;
   today: Date;
   catalogSize: number;
@@ -16,6 +17,7 @@ export interface HeroSectionProps {
 export function HeroSection({
   onOpenScan,
   onOpenAdd,
+  onOpenInstall,
   lastScan,
   today,
   catalogSize,
@@ -104,6 +106,20 @@ export function HeroSection({
                 <Plus size={15} strokeWidth={2.4} />
                 <span>Agregar manual</span>
               </button>
+              {onOpenInstall && (
+                <button
+                  type="button"
+                  onClick={onOpenInstall}
+                  className="min-h-[44px] inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-white/80 dark:bg-emerald-950/60 hover:bg-white dark:hover:bg-emerald-900/60 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-200 transition shadow-2xs group cursor-pointer"
+                  title="Descargar o instalar app para Android, iOS, Windows y Linux"
+                >
+                  <Smartphone size={15} className="text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span>Instalar App</span>
+                  <span className="hidden sm:inline text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/80 px-1.5 py-0.5 rounded-full">
+                    Multiplataforma
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Micro Details */}

@@ -46,11 +46,30 @@ export async function promptPWAInstall(): Promise<boolean> {
   }
 }
 
+export type DetectedPlatform = "android" | "ios" | "windows" | "linux" | "macos" | "other";
+
+export function detectUserPlatform(): DetectedPlatform {
+  if (typeof window === "undefined" || !navigator) return "other";
+  const ua = navigator.userAgent || "";
+  const platform = (navigator as any).userAgentData?.platform || navigator.platform || "";
+
+  if (/android/i.test(ua)) return "android";
+  if (/iPad|iPhone|iPod/.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+    return "ios";
+  }
+  if (/Win/i.test(platform) || /windows/i.test(ua)) return "windows";
+  if (/Linux/i.test(platform) || /linux/i.test(ua)) return "linux";
+  if (/Mac/i.test(platform) || /macintosh/i.test(ua)) return "macos";
+
+  return "other";
+}
+
 export function isStandaloneMode(): boolean {
   if (typeof window === "undefined") return false;
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as any).standalone === true ||
+    (typeof document !== "undefined" && document.referrer.includes("android-app://"))
   );
 }
 
