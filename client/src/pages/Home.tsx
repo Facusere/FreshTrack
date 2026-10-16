@@ -928,7 +928,6 @@ export default function Home() {
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}
-              onOpenInstall={() => setInstallModalOpen(true)}
               lastScan={lastScan}
               today={today}
               catalogSize={getCatalogSize()}

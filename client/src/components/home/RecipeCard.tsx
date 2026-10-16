@@ -1,7 +1,8 @@
-import React from "react";
-import { Check, Heart, ShoppingCart, Sparkles, Utensils } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Camera, Check, Heart, ShoppingCart, Sparkles, Utensils } from "lucide-react";
 import { LocalRecipe, RecipeMatchResult } from "@/lib/localRecipesMatching";
 import { getRecipeFallbackImage } from "@/lib/recipeApi";
+import { loadCustomRecipePhotos, RECIPE_PHOTO_CHANGED_EVENT } from "@/lib/recipeCustomImages";
 
 export interface RecipeCardProps {
   recipe: LocalRecipe;
@@ -28,6 +29,23 @@ export function RecipeCard({
   const missingCount = matchResult?.missingIngredients.length ?? 0;
   const isReady = matchResult?.tier === "ready";
   const isAlmost = matchResult?.tier === "almost";
+
+  const [customPhoto, setCustomPhoto] = useState<string | null>(() => {
+    const photos = loadCustomRecipePhotos();
+    return photos[recipe.id] || null;
+  });
+
+  useEffect(() => {
+    const handlePhotoChanged = (e: any) => {
+      if (e.detail?.recipeId === recipe.id) {
+        setCustomPhoto(e.detail.photoDataUrl || null);
+      }
+    };
+    window.addEventListener(RECIPE_PHOTO_CHANGED_EVENT, handlePhotoChanged);
+    return () => window.removeEventListener(RECIPE_PHOTO_CHANGED_EVENT, handlePhotoChanged);
+  }, [recipe.id]);
+
+  const displayImage = customPhoto || recipe.image || getRecipeFallbackImage(recipe.name, recipe.category);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -61,7 +79,7 @@ export function RecipeCard({
         {/* Image & Badges */}
         <div className="relative h-36 w-full overflow-hidden rounded-xl bg-surface-muted">
           <img
-            src={recipe.image || getRecipeFallbackImage(recipe.name, recipe.category)}
+            src={displayImage}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(
                 recipe.name,
@@ -73,6 +91,16 @@ export function RecipeCard({
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+          {/* Insignia de recuerdo: Si tiene foto propia subida */}
+          {customPhoto && (
+            <span
+              title="Tenés guardada una foto de cuando cocinaste esta receta"
+              className="absolute top-2.5 left-2.5 flex items-center gap-1 rounded-full bg-emerald-600/90 text-white px-2 py-0.5 text-[10px] font-bold backdrop-blur-md shadow-xs border border-white/20"
+            >
+              <Camera size={10} /> Mi plato
+            </span>
+          )}
 
           {/* Favorite button */}
           <button

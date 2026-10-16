@@ -51,7 +51,7 @@ export async function detectBarcodeFromImageSource(
   return null;
 }
 
-function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): ProductCategory {
+export function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): ProductCategory {
   const combined = (tags.join(" ") + " " + genericName).toLowerCase();
 
   if (combined.includes("milk") || combined.includes("lait") || combined.includes("leche") || combined.includes("yogur") || combined.includes("cheese") || combined.includes("fromage") || combined.includes("queso") || combined.includes("dairy")) {
@@ -72,8 +72,14 @@ function mapOpenFoodFactsCategory(tags: string[] = [], genericName = ""): Produc
   if (combined.includes("vegetable") || combined.includes("legume") || combined.includes("verdura") || combined.includes("tomate") || combined.includes("salad")) {
     return "Verduras frescas";
   }
-  if (combined.includes("bread") || combined.includes("pain") || combined.includes("pan") || combined.includes("bakery") || combined.includes("pastry") || combined.includes("factura") || combined.includes("galletita")) {
+  if (combined.includes("biscuit") || combined.includes("cookie") || combined.includes("galletita") || combined.includes("snack") || combined.includes("chip") || combined.includes("cracker")) {
+    return "Snacks y galletitas";
+  }
+  if (combined.includes("bread") || combined.includes("pain") || combined.includes("pan") || combined.includes("bakery") || combined.includes("pastry") || combined.includes("factura")) {
     return "Panadería";
+  }
+  if (combined.includes("canned") || combined.includes("conserve") || combined.includes("enlatado") || combined.includes("conserva")) {
+    return "Enlatados y conservas";
   }
   if (combined.includes("coffee") || combined.includes("cafe") || combined.includes("tea") || combined.includes("mate")) {
     return "Café, té y desayuno";

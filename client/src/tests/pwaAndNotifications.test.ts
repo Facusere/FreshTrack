@@ -7,6 +7,10 @@ describe("pwaAndNotifications - Detección de plataformas multi-SO y Standalone"
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    (global as any).window = {
+      matchMedia: vi.fn().mockReturnValue({ matches: false }),
+      navigator: originalNavigator,
+    };
   });
 
   afterEach(() => {
@@ -15,6 +19,11 @@ describe("pwaAndNotifications - Detección de plataformas multi-SO y Standalone"
       configurable: true,
       writable: true,
     });
+    if (originalWindow !== undefined) {
+      (global as any).window = originalWindow;
+    } else {
+      delete (global as any).window;
+    }
   });
 
   it("detecta Android correctamente a través de userAgent", () => {

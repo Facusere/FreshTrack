@@ -248,6 +248,38 @@ export function parseReceiptAndLabelText(
     }
   }
 
+  // Fallback: If no catalog products were matched, but candidate text lines and/or dates exist
+  if (results.length === 0 && lines.length > 0) {
+    const nonBoilerplateLines = lines.filter(
+      (l) =>
+        !BOILERPLATE_REGEX.test(l) &&
+        !dateCandidates.some((d) => l.includes(d.value)) &&
+        /[a-zA-ZáéíóúÁÉÍÓÚ]{3,}/.test(l)
+    );
+    const targetDate = explicitExpiry || dateCandidates[0];
+    if (nonBoilerplateLines.length > 0 || targetDate) {
+      const rawName = nonBoilerplateLines[0] || "Producto escaneado";
+      const { quantity, cleanName } = extractQuantityFromTicketLine(rawName);
+      const name = cleanName || rawName;
+      const expiryDate = targetDate?.iso || addDaysISO(7, today);
+      const isEstimated = !targetDate?.iso;
+      const dateLabel: DateLabel = targetDate?.label || "vencimiento";
+      const icon = detectIconFn(name, "Almacén seco");
+
+      results.push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        name,
+        category: "Almacén seco",
+        expiryDate,
+        quantity: quantity || "1 unidad",
+        icon,
+        estimated: isEstimated,
+        dateLabel,
+        confidence: isEstimated ? 65 : 90,
+      });
+    }
+  }
+
   return results;
 }
 

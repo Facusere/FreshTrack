@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AlertTriangle,
   Calendar,
+  Camera,
   Check,
   Heart,
   Plus,
   Minus,
+  RotateCcw,
   ShoppingCart,
+  Sparkles,
   X,
 } from "lucide-react";
 import {
@@ -25,6 +28,14 @@ import { findBestMatchingItem } from "@/lib/ingredientMatching";
 import { daysUntil, todayISO, addDaysISO } from "@/lib/dates";
 import { MealSlot } from "@/lib/mealPlan";
 import { toast } from "sonner";
+import { playChimeSound, triggerHaptic } from "@/lib/feedback";
+import {
+  loadCustomRecipePhotos,
+  saveCustomRecipePhoto,
+  removeCustomRecipePhoto,
+  compressRecipeImage,
+  RECIPE_PHOTO_CHANGED_EVENT,
+} from "@/lib/recipeCustomImages";
 
 export interface RecipeDetailDialogProps {
   recipe: LocalRecipe | null;
@@ -64,6 +75,63 @@ export function RecipeDetailDialog({
   const [showPlannerPicker, setShowPlannerPicker] = useState(false);
   const [planDate, setPlanDate] = useState<string>(() => todayISO());
   const [planSlot, setPlanSlot] = useState<MealSlot>("almuerzo");
+
+  // Custom photo memory state
+  const [customPhoto, setCustomPhoto] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (recipe) {
+      const photos = loadCustomRecipePhotos();
+      setCustomPhoto(photos[recipe.id] || null);
+    }
+  }, [recipe?.id]);
+
+  useEffect(() => {
+    const handlePhotoChanged = (e: any) => {
+      if (recipe && e.detail?.recipeId === recipe.id) {
+        setCustomPhoto(e.detail.photoDataUrl || null);
+      }
+    };
+    window.addEventListener(RECIPE_PHOTO_CHANGED_EVENT, handlePhotoChanged);
+    return () => window.removeEventListener(RECIPE_PHOTO_CHANGED_EVENT, handlePhotoChanged);
+  }, [recipe?.id]);
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !recipe) return;
+
+    try {
+      setIsUploadingPhoto(true);
+      triggerHaptic();
+      const compressed = await compressRecipeImage(file, 1000, 0.82);
+      saveCustomRecipePhoto(recipe.id, compressed);
+      setCustomPhoto(compressed);
+      playChimeSound("success");
+      toast.success("¡Foto de tu plato guardada!", {
+        description: `Guardamos el recuerdo de tu preparación para “${recipe.name}”.`,
+      });
+    } catch (err) {
+      console.error("Error saving recipe photo:", err);
+      toast.error("No se pudo guardar la foto del plato.");
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = "";
+    }
+  };
+
+  const handleRemovePhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!recipe) return;
+    removeCustomRecipePhoto(recipe.id);
+    setCustomPhoto(null);
+    playChimeSound("pop");
+    triggerHaptic();
+    toast.info("Foto original restablecida", {
+      description: "Se volvió a la foto de portada predeterminada del recetario.",
+    });
+  };
 
   if (!recipe) return null;
 
@@ -140,15 +208,25 @@ export function RecipeDetailDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto max-w-[620px] p-0 border border-line bg-surface rounded-[24px]">
+        {/* Input oculto para subir foto del plato preparado */}
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoSelect}
+          className="hidden"
+          aria-hidden="true"
+        />
+
         <DialogHeader className="sr-only">
           <DialogTitle>{recipe.name}</DialogTitle>
           <DialogDescription>{recipe.category}</DialogDescription>
         </DialogHeader>
 
-        {/* Header Image */}
-        <div className="relative h-48 sm:h-56 w-full bg-surface-muted overflow-hidden">
+        {/* Header Image con botones de personalización */}
+        <div className="relative h-52 sm:h-64 w-full bg-surface-muted overflow-hidden">
           <img
-            src={recipe.image || getRecipeFallbackImage(recipe.name, recipe.category)}
+            src={customPhoto || recipe.image || getRecipeFallbackImage(recipe.name, recipe.category)}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = getRecipeFallbackImage(
                 recipe.name,
@@ -156,19 +234,29 @@ export function RecipeDetailDialog({
               );
             }}
             alt={recipe.name}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-all duration-300"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
 
-          {/* Top Actions */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          {/* Insignia superior izquierda: Si tiene foto propia */}
+          <div className="absolute top-3.5 left-4 flex items-center gap-2 z-10">
+            {customPhoto && (
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-600/95 text-white text-[11px] font-bold px-3 py-1 backdrop-blur-md shadow-md border border-white/30 animate-in fade-in duration-300">
+                <Sparkles size={13} className="text-emerald-200" />
+                <span>Tu recuerdo de cocina</span>
+              </div>
+            )}
+          </div>
+
+          {/* Top Actions: Favorito y Cerrar */}
+          <div className="absolute top-3.5 right-4 flex items-center gap-2 z-10">
             <button
               type="button"
               role="button"
               aria-pressed={isFavorite}
               aria-label={isFavorite ? "Quitar de favoritas" : "Agregar a favoritas"}
               onClick={() => onToggleFavorite?.(recipe.id)}
-              className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition ${
+              className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-md transition cursor-pointer ${
                 isFavorite
                   ? "bg-rose-500 text-white shadow-md ring-2 ring-white/50"
                   : "bg-surface/80 text-content-body hover:bg-surface hover:text-rose-500"
@@ -185,19 +273,48 @@ export function RecipeDetailDialog({
               type="button"
               aria-label="Cerrar detalle de receta"
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/80 text-content-body backdrop-blur-md hover:bg-surface"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/80 text-content-body backdrop-blur-md hover:bg-surface cursor-pointer"
             >
               <X size={17} />
             </button>
           </div>
 
-          <div className="absolute bottom-4 left-5 right-5 text-white">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-subtle">
-              {recipe.category}
-            </span>
-            <h3 className="mt-1 font-display text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
-              {recipe.name}
-            </h3>
+          {/* Pie de foto: Título, categoría y botón para subir/cambiar foto */}
+          <div className="absolute bottom-4 left-5 right-5 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-white z-10">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                {recipe.category}
+              </span>
+              <h3 className="mt-0.5 font-display text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
+                {recipe.name}
+              </h3>
+            </div>
+
+            {/* Acciones de foto de recuerdo */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                disabled={isUploadingPhoto}
+                onClick={() => photoInputRef.current?.click()}
+                className="inline-flex min-h-[34px] items-center gap-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 backdrop-blur-md border border-white/30 shadow-xs transition cursor-pointer active:scale-95 disabled:opacity-50"
+                title="Subí una foto de cuando cocinaste este plato para guardarla como recuerdo"
+              >
+                <Camera size={13} />
+                <span>{customPhoto ? "Cambiar mi foto" : "Subir mi foto"}</span>
+              </button>
+
+              {customPhoto && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-full bg-black/40 hover:bg-rose-900/60 text-white/90 hover:text-white backdrop-blur-md border border-white/20 shadow-xs transition cursor-pointer"
+                  title="Restaurar foto de portada original"
+                  aria-label="Restaurar foto original"
+                >
+                  <RotateCcw size={13} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

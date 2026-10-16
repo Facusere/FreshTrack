@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ArrowUpRight, ChevronRight, Download, Plus, ScanLine, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
+import { ArrowUpRight, Plus, ScanLine, ShieldCheck, Sparkles } from "lucide-react";
 import { formatTimeAgo } from "@/lib/dates";
 import { LastScanInfo } from "@/lib/storage";
 import { Product } from "@/types/product";
@@ -17,7 +17,6 @@ export interface HeroSectionProps {
 export function HeroSection({
   onOpenScan,
   onOpenAdd,
-  onOpenInstall,
   lastScan,
   today,
   catalogSize,
@@ -54,25 +53,6 @@ export function HeroSection({
         <div className="relative z-10 grid gap-7 sm:gap-9 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           {/* Left Column: Typography & CTAs */}
           <div className="max-w-[560px] space-y-4 sm:space-y-5">
-            {/* Announcement Pill with live status beacon */}
-            <div className="inline-block max-w-full">
-              <button
-                type="button"
-                onClick={onOpenScan}
-                className="tomorro-announcement-pill max-w-full group cursor-pointer text-left text-xs sm:text-[13px] hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all"
-              >
-                <span className="flex h-2 w-2 shrink-0 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                <span className="truncate">
-                  Motor OCR inteligente ·{" "}
-                  <span className="text-emerald-700 dark:text-emerald-300 font-bold">escaneo sin conexión</span>
-                </span>
-                <ChevronRight
-                  size={14}
-                  className="shrink-0 text-emerald-600 dark:text-emerald-200 transition-transform duration-200 group-hover:translate-x-0.5"
-                />
-              </button>
-            </div>
-
             {/* Display Headline with Gradient Accent */}
             <h1 className="font-display text-[32px] sm:text-[44px] lg:text-[52px] leading-[1.12] tracking-tight text-slate-900 dark:text-white font-extrabold break-words">
               Que nada rico termine en la{" "}
@@ -106,20 +86,6 @@ export function HeroSection({
                 <Plus size={15} strokeWidth={2.4} />
                 <span>Agregar manual</span>
               </button>
-              {onOpenInstall && (
-                <button
-                  type="button"
-                  onClick={onOpenInstall}
-                  className="min-h-[44px] inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-white/80 dark:bg-emerald-950/60 hover:bg-white dark:hover:bg-emerald-900/60 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-200 transition shadow-2xs group cursor-pointer"
-                  title="Descargar o instalar app para Android, iOS, Windows y Linux"
-                >
-                  <Smartphone size={15} className="text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-                  <span>Instalar App</span>
-                  <span className="hidden sm:inline text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/80 px-1.5 py-0.5 rounded-full">
-                    Multiplataforma
-                  </span>
-                </button>
-              )}
             </div>
 
             {/* Micro Details */}

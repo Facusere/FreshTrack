@@ -140,9 +140,55 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     reader.readAsDataURL(file);
   };
 
-  // Process uploaded image with OCR
+  // Process uploaded image with OCR or Barcode
   const processUploadedImage = async () => {
     if (!selectedImagePreview) return;
+
+    if (scanMode === "barcode") {
+      setStage("scanning");
+      setOcrProgress({ status: "Buscando código de barras en la imagen...", progress: 30 });
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error("Error al procesar la imagen"));
+          img.src = selectedImagePreview;
+        });
+
+        let detectedCode = await detectBarcodeFromImageSource(img);
+
+        // Fallback: Si no lo detecta la API nativa de códigos, leer dígitos con OCR
+        if (!detectedCode) {
+          setOcrProgress({ status: "Identificando dígitos del código con OCR...", progress: 65 });
+          try {
+            const { text } = await performBrowserOCR(selectedImagePreview, (info) => setOcrProgress(info));
+            const digitsMatch = text.match(/\b(779\d{10}|\d{13}|\d{12}|\d{8})\b/);
+            if (digitsMatch) {
+              detectedCode = digitsMatch[1];
+            }
+          } catch {
+            // Continuar con manejo de no detección
+          }
+        }
+
+        if (detectedCode) {
+          handleLookupBarcode(detectedCode);
+        } else {
+          setStage("choose");
+          toast("No se detectó un código de barras en la imagen", {
+            description: "Asegurate de que los números o barras sean legibles, o ingresá el código abajo.",
+            icon: "🔍",
+          });
+        }
+      } catch (err: any) {
+        console.error("Barcode upload processing failed:", err);
+        toast.error("Error al procesar la imagen del código");
+        setStage("choose");
+      }
+      return;
+    }
+
     setStage("scanning");
     setOcrProgress({ status: "Iniciando análisis OCR...", progress: 5 });
 
@@ -158,6 +204,7 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
 
   // Process sample ticket
   const runSampleTicket = (sampleText: string) => {
+    setScanMode("ticket");
     setStage("scanning");
     setOcrProgress({ status: "Leyendo ticket de prueba...", progress: 60 });
     setTimeout(() => {
@@ -201,10 +248,28 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
         });
         setStage("results");
       } else {
-        toast.error("Código no encontrado", {
-          description: "No se encontró en Open Food Facts. Podés ingresarlo manualmente.",
+        const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+        playChimeSound("pop");
+        toast(isOffline ? "Sin conexión a OpenFoodFacts" : "Código no registrado en OpenFoodFacts", {
+          description: isOffline
+            ? "Sin internet no podemos consultar la base global, pero podés ingresar el nombre."
+            : "No encontramos el producto en la base de datos. Podés guardarlo asignándole un nombre.",
+          icon: "📦",
         });
-        setStage("choose");
+        setDetectedProducts([
+          {
+            id: Date.now(),
+            name: `Producto (${code})`,
+            category: "Almacén seco",
+            expiryDate: addDaysISO(14),
+            quantity: "1 unidad",
+            icon: "📦",
+            estimated: true,
+            dateLabel: "vencimiento",
+            confidence: 70,
+          },
+        ]);
+        setStage("results");
       }
     } catch {
       toast.error("Error al consultar el código");
@@ -225,10 +290,27 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const detectedCode = await detectBarcodeFromImageSource(canvas);
+    let detectedCode = await detectBarcodeFromImageSource(canvas);
+
+    // Fallback: Si no hay soporte de BarcodeDetector o no lo capturó, probar OCR numérico
+    if (!detectedCode) {
+      try {
+        setStage("scanning");
+        setOcrProgress({ status: "Detectando dígitos del código de barras...", progress: 45 });
+        const { text } = await performBrowserOCR(canvas, (info) => setOcrProgress(info));
+        const digitsMatch = text.match(/\b(779\d{10}|\d{13}|\d{12}|\d{8})\b/);
+        if (digitsMatch) {
+          detectedCode = digitsMatch[1];
+        }
+      } catch {
+        // Fallback OCR no encontró dígitos
+      }
+    }
+
     if (detectedCode) {
       handleLookupBarcode(detectedCode);
     } else {
+      setStage("choose");
       toast("No se detectó un código en el recuadro", {
         description: "Probá acercando más el código de barras o escribí los dígitos abajo.",
         icon: "🔍",
@@ -488,7 +570,11 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-between p-4">
                       <div className="flex w-full items-center justify-between">
                         <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                          {scanMode === "ticket" ? "Alineá el ticket en el centro" : "Enfocá la fecha de vencimiento"}
+                          {scanMode === "ticket"
+                            ? "Alineá el ticket en el centro"
+                            : scanMode === "barcode"
+                            ? "Enfocá el código de barras"
+                            : "Enfocá la fecha de vencimiento"}
                         </span>
                         <button
                           type="button"
@@ -501,7 +587,11 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         </button>
                       </div>
 
-                      <div className="h-36 w-64 rounded-xl border-2 border-dashed border-accent-lime/80 bg-accent-lime/5" />
+                      <div
+                        className={`rounded-xl border-2 border-dashed border-accent-lime/80 bg-accent-lime/5 transition-all ${
+                          scanMode === "barcode" ? "h-28 w-64" : "h-36 w-64"
+                        }`}
+                      />
 
                       <span className="rounded-full bg-black/50 px-2 py-0.5 text-xs text-white">
                         MediaDevices API activa
@@ -625,7 +715,15 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                         onClick={processUploadedImage}
                         className="min-h-[44px] inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-brand-hover"
                       >
-                        <ScanLine size={14} /> Procesar con Tesseract OCR
+                        {scanMode === "barcode" ? (
+                          <>
+                            <ScanBarcode size={14} /> Escanear código de barras
+                          </>
+                        ) : (
+                          <>
+                            <ScanLine size={14} /> Procesar con Tesseract OCR
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -637,11 +735,51 @@ export function ScanModal({ onClose, onComplete, detectIconFn }: ScanModalProps)
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-subtle text-brand">
                       <Upload size={24} strokeWidth={1.8} />
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-brand">Subí una foto de tu ticket o envase</p>
+                    <p className="mt-3 text-sm font-semibold text-brand">
+                      {scanMode === "barcode"
+                        ? "Subí una foto del código de barras o envase"
+                        : "Subí una foto de tu ticket o envase"}
+                    </p>
                     <p className="mt-1 text-xs text-content-muted">Hacé clic para seleccionar archivo JPG, PNG o WEBP</p>
                     <span className="mt-3 inline-block rounded-full bg-surface px-3 py-1 text-xs font-bold text-brand shadow-sm border border-line">
                       Seleccionar imagen
                     </span>
+                  </div>
+                )}
+
+                {/* Direct Barcode Entry when in Barcode Mode and Upload Tab */}
+                {scanMode === "barcode" && (
+                  <div className="mt-4 rounded-2xl border border-line bg-surface p-4 space-y-3">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-content-muted">
+                        O ingresá directamente los números del código
+                      </span>
+                      <div className="mt-1.5 flex gap-2">
+                        <input
+                          type="text"
+                          value={barcodeInput}
+                          onChange={(e) => setBarcodeInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleLookupBarcode();
+                          }}
+                          placeholder="Ej: 7790742330800..."
+                          className="flex-1 rounded-xl border border-line bg-surface-subtle px-3.5 py-2 text-xs text-content outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleLookupBarcode()}
+                          disabled={isSearchingBarcode}
+                          className="btn-3d inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-xs font-bold text-white hover:bg-brand-hover disabled:opacity-50"
+                        >
+                          {isSearchingBarcode ? (
+                            <LoaderCircle size={14} className="animate-spin" />
+                          ) : (
+                            <Search size={14} />
+                          )}
+                          Buscar
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

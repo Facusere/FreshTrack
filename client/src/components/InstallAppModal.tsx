@@ -6,17 +6,12 @@ import {
   CheckCircle2,
   Copy,
   Download,
-  ExternalLink,
-  Info,
-  Laptop,
-  Monitor,
   Share2,
   ShieldCheck,
   Smartphone,
   Sparkles,
   Terminal,
   WifiOff,
-  X,
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -159,11 +154,6 @@ export function InstallAppModal({
 
             {/* Store Badges Row */}
             <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-center gap-2 text-white">
-              <div className="flex-1">
-                <p className="text-xs font-black sm:text-sm text-amber-300">4.9 ★★★★★</p>
-                <p className="text-[10px] text-emerald-200/80 font-medium">1.2k opiniones</p>
-              </div>
-              <div className="h-6 w-px bg-white/20" />
               <div className="flex-1">
                 <p className="text-xs font-black sm:text-sm text-emerald-200">100% Offline</p>
                 <p className="text-[10px] text-emerald-200/80 font-medium">Sin datos móviles</p>
