@@ -686,4 +686,27 @@
   .group.grid> :nth-child(3) {
     display: none;
   }
+
+  /* Prevent automatic viewport zoom on iOS Safari when tapping inputs */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile & PWA App Polish across all platforms (Android, iOS, Windows, Linux) */
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Standalone installed PWA refinements */
+@media (display-mode: standalone) {
+  header,
+  nav {
+    user-select: none;
+    -webkit-user-select: none;
+  }
 }

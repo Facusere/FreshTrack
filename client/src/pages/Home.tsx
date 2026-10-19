@@ -71,6 +71,7 @@ import { recordExpiredItem } from "@/lib/reportsData";
 import {
   clearNotificationDailyLimit,
   getNotificationPermission,
+  isStandaloneMode,
   notifyExpiringProducts,
   promptPWAInstall,
   subscribeToInstallPrompt,
@@ -153,7 +154,9 @@ export default function Home() {
   // PWA install state
   const [canInstallPWA, setCanInstallPWA] = useState(false);
   const [installModalOpen, setInstallModalOpen] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   useEffect(() => {
+    setIsStandalone(isStandaloneMode());
     return subscribeToInstallPrompt(setCanInstallPWA);
   }, []);
 
@@ -623,7 +626,7 @@ export default function Home() {
         </div>
       )}
       {/* Pinned Fixed Top Navigation Bar - Always visible on scroll without disappearing */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#070e0a]/95 backdrop-blur-xl border-b border-emerald-950/10 dark:border-emerald-800/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] transition-all">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#070e0a]/95 backdrop-blur-xl border-b border-emerald-950/10 dark:border-emerald-800/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] pt-[env(safe-area-inset-top,0px)] transition-all">
         <div className="w-full max-w-[1280px] mx-auto px-3 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-2.5 sm:gap-4">
           {/* Brand Wordmark & Subtle Live Indicator */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
@@ -711,20 +714,30 @@ export default function Home() {
             </div>
 
             {/* Store Style Install Button (Android, iOS, Windows, Linux) */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic();
-                setInstallModalOpen(true);
-              }}
-              title="Descargar o instalar FreshTrack (Android, iOS, Windows, Linux)"
-              aria-label="Descargar o instalar app FreshTrack"
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 sm:px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition shadow-xs cursor-pointer"
-            >
-              <Smartphone size={13} className="text-emerald-500" />
-              <span className="hidden sm:inline">Instalar App</span>
-              <span className="sm:hidden">App</span>
-            </button>
+            {!isStandalone ? (
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic();
+                  setInstallModalOpen(true);
+                }}
+                title="Descargar o instalar FreshTrack (Android, iOS, Windows, Linux)"
+                aria-label="Descargar o instalar app FreshTrack"
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 sm:px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 transition shadow-xs cursor-pointer"
+              >
+                <Smartphone size={13} className="text-emerald-500" />
+                <span className="hidden sm:inline">Instalar App</span>
+                <span className="sm:hidden">App</span>
+              </button>
+            ) : (
+              <span
+                title="FreshTrack instalada y activa en este dispositivo"
+                className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 text-[11px] font-bold"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                App Activa
+              </span>
+            )}
 
             {/* Dark Mode Switcher */}
             <button
@@ -757,26 +770,25 @@ export default function Home() {
               )}
             </button>
 
-            {/* Backup & Export Modal Button */}
+            {/* Backup & Export Modal Button (Available in Mobile Drawer on small screens) */}
             <button
               type="button"
               aria-label="Copia de seguridad y exportar"
               title="Copia de seguridad y exportar"
               onClick={() => setBackupModalOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content-muted hover:text-content hover:border-emerald-500/40 hover:bg-surface-muted transition shadow-xs"
+              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/80 dark:bg-[#0c1610] text-content-muted hover:text-content hover:border-emerald-500/40 hover:bg-surface-muted transition shadow-xs"
             >
               <HardDrive size={15} />
             </button>
 
-            {/* Primary CTA pill */}
+            {/* Primary CTA pill (Desktop & Tablet only; mobile uses prominent floating center scan button) */}
             <button
               type="button"
               onClick={() => setModal("scan")}
-              className="tomorro-btn-primary min-h-[38px] text-xs px-3 sm:px-4 font-semibold shadow-xs hover:shadow-md transition-all shrink-0"
+              className="hidden sm:inline-flex tomorro-btn-primary min-h-[38px] text-xs px-3 sm:px-4 font-semibold shadow-xs hover:shadow-md transition-all shrink-0"
             >
               <ScanLine size={15} strokeWidth={2.4} />
-              <span className="hidden sm:inline">Escanear compra</span>
-              <span className="sm:hidden">Escanear</span>
+              <span>Escanear compra</span>
             </button>
 
             {/* Mobile Drawer Toggle */}
@@ -799,7 +811,7 @@ export default function Home() {
           onClick={() => setMobileNav(false)}
         >
           <div
-            className="h-full w-[290px] bg-surface border-r border-line p-6 text-content shadow-2xl transition-all"
+            className="h-full w-[290px] bg-surface border-r border-line p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] text-content shadow-2xl transition-all overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -881,10 +893,10 @@ export default function Home() {
               >
                 <span className="flex items-center gap-3">
                   <Smartphone size={15} className="text-emerald-500" />
-                  <span>Descargar / Instalar App</span>
+                  <span>{isStandalone ? "Info de App Instalada" : "Descargar / Instalar App"}</span>
                 </span>
                 <span className="rounded-full bg-emerald-200/70 dark:bg-emerald-800/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-200">
-                  Android • iOS • PC
+                  {isStandalone ? "Activo ✓" : "Android • iOS • PC"}
                 </span>
               </button>
               <button
@@ -924,7 +936,7 @@ export default function Home() {
       )}
 
       {/* Centered Max-Width 1200px Page Layout */}
-      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 pt-20 sm:pt-24 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-24 md:pb-12 overflow-x-hidden">
+      <main id="main-content" className="w-full max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-8 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:pt-[calc(5.5rem+env(safe-area-inset-top,0px))] py-4 sm:py-6 space-y-6 sm:space-y-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-12 overflow-x-hidden">
             <HeroSection
               onOpenScan={() => setModal("scan")}
               onOpenAdd={() => setModal("add")}

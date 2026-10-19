@@ -207,7 +207,10 @@ export function RecipeDetailDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto max-w-[620px] p-0 border border-line bg-surface rounded-[24px]">
+      <DialogContent
+        hideCloseButton
+        className="max-h-[90vh] overflow-y-auto max-w-[620px] p-0 border border-line bg-surface rounded-[24px]"
+      >
         {/* Input oculto para subir foto del plato preparado */}
         <input
           ref={photoInputRef}

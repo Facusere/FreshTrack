@@ -9,6 +9,7 @@ import { LocalRecipe } from "../lib/localRecipesMatching";
 import { PlannedMeal } from "../lib/mealPlan";
 import { Product } from "@/types/product";
 import { ShoppingItem } from "../lib/shoppingList";
+import { addDaysISO } from "../lib/dates";
 
 const MOCK_RECIPES: LocalRecipe[] = [
   {
@@ -90,7 +91,7 @@ describe("weeklyShopping - Generación y agregación de compras semanal", () => 
         id: 1,
         name: "Carne picada",
         category: "Carnes",
-        expiryDate: "2026-10-15",
+        expiryDate: addDaysISO(10),
         quantity: "200 g",
         icon: "🥩",
         days: 10,
@@ -145,7 +146,7 @@ describe("weeklyShopping - Generación y agregación de compras semanal", () => 
         id: 1,
         name: "Carne picada",
         category: "Carnes",
-        expiryDate: "2026-10-20",
+        expiryDate: addDaysISO(15),
         quantity: "600 g",
         icon: "🥩",
         days: 15,
